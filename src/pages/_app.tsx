@@ -36,7 +36,7 @@ function MyApp({ Component, pageProps, router }: AppProps) {
                 <meta name="theme-color" content="#000000" />
                 <meta
                     name="keywords"
-                    content="berry, Marco Beretta, Marcco, Berrt, web developer, github, typescript, Berry13"
+                    content="berry, Marco Beretta, Marcco, Berrt, web developer, github, typescript, Berry-13"
                 />
                 <meta name="description" content="Marco Beretta" />
                 <meta name="author" content="Marco Beretta" />
