@@ -1,6 +1,5 @@
 import "../globals.css";
 import type { AppProps } from "next/app";
-import Spotify from "../components/Spotify";
 import Head from "next/head";
 import Nav from "../components/Nav";
 import Footer from "../components/Footer";
@@ -51,7 +50,6 @@ function MyApp({ Component, pageProps, router }: AppProps) {
                     </AnimatePresence>
                     <Footer />
                 </div>
-                <Spotify />
             </div>
         </>
     );

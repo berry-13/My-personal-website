@@ -89,7 +89,7 @@ const Nav = () => {
                     />
                     <LinkButton
                         title="Twitter"
-                        href={"https://twitter.com/berry130008"}
+                        href={"https://twitter.com/berry13000"}
                         icon={
                             <SiTwitter className="w-6 h-6 cursor-pointer hover:fill-white fill-gray-400 transition-colors" />
                         }

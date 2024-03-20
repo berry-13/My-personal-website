@@ -6,15 +6,21 @@ import {
     SiTypescript,
     SiJavascript,
     SiReact,
-    SiPython,
     SiCloudflare,
     SiUnrealengine,
-    SiRust,
     SiArduino,
     SiRaspberrypi,
     SiBlender,
     SiNginx,
     SiPytorch,
+    SiMongodb,
+    SiOpenai,
+    SiFirebase,
+    SiDiscord,
+    SiKalilinux,
+    SiLinux,
+    SiGnubash,
+    SiGooglecloud,
 } from "react-icons/si";
 import { TechItem } from "../components/TechItem";
 import RepoItem from "../components/RepoItem";
@@ -34,18 +40,32 @@ const Index = ({ topRepos, libreRepo }: AppProps) => {
             transition={{ ease: "easeOut", duration: 0.15 }}
             className="mt-24 w-full mb-32"
         >
-            <h1 className="mt-36 font-bold text-4xl md:text-5xl mb-4">Hello, I'm Berry! 👋</h1>
+            <h1 className="mt-36 font-bold text-4xl md:text-5xl mb-4">Hey, I'm Berry! 👋</h1>
             <p className="text-gray-800 dark:text-gray-300 leading-6 tracking-wide mb-12">
-                I'm a self-taught 15-year-old full-stack developer from Italy. I'm currently working on a project called
-                LibreChat (https://github.com/danny-avila/LibreChat).
+                I'm a self-taught 15-year-old full-stack developer from Italy. I'm currently working on a project called{" "}
+                <a
+                    href="https://github.com/danny-avila/LibreChat"
+                    rel="noreferrer"
+                    className="font-semibold text-violet-500 hover:underline"
+                >
+                    LibreChat
+                </a>
+                .
             </p>
 
             <h2 className="font-medium text-3xl mb-4">What I Do 💭</h2>
             <p className="text-gray-800 dark:text-gray-300 leading-6 font-light tracking-wide mb-12">
-                In my free time, I enjoy creating open-source projects on GitHub (https://github.com/berry-13), so I can
-                learn from others and share what I know. Currently, I'm working on LibreChat, a project that immediately
-                caught my attention. LibreChat allows the integration of multiple AI models and enhances original client
-                features like conversation and message search, prompt templates, and plugins.
+                In my free time, I enjoy creating open-source projects on{" "}
+                <a
+                    href="https://github.com/berry-13"
+                    rel="noreferrer"
+                    className="font-semibold text-violet-500 hover:underline"
+                >
+                    GitHub
+                </a>
+                , so I can learn from others and share what I know. Currently, I'm working on LibreChat, a project that
+                immediately caught my attention. LibreChat allows the integration of multiple AI models and enhances
+                original client features like conversation and message search, prompt templates, and plugins.
             </p>
 
             <h2 className="font-medium text-3xl mb-4">AI 🤖</h2>
@@ -58,15 +78,21 @@ const Index = ({ topRepos, libreRepo }: AppProps) => {
                 <TechItem icon={SiJavascript} name="JavaScript" />
                 <TechItem icon={SiReact} name="React.js" />
                 <TechItem icon={SiVisualstudiocode} name="VSCode" />
-                <TechItem icon={SiDocker} name="Docker" />
-                <TechItem icon={SiGit} name="Git" />
-                <TechItem icon={SiPython} name="Python" />
+                <TechItem icon={SiOpenai} name="OpenAI" />
+                <TechItem icon={SiUnrealengine} name="Unreal Engine" /> 
                 <TechItem icon={SiCloudflare} name="Cloudflare" />
-                <TechItem icon={SiUnrealengine} name="Unreal Engine" />
-                <TechItem icon={SiRust} name="Rust" />
+                <TechItem icon={SiMongodb} name="MongoDB" /> 
+                <TechItem icon={SiFirebase} name="Firebase" />
+                <TechItem icon={SiDocker} name="Docker" />
+                <TechItem icon={SiDiscord} name="Discord" />
                 <TechItem icon={SiArduino} name="Arduino" />
                 <TechItem icon={SiRaspberrypi} name="Raspberry Pi" />
+                <TechItem icon={SiKalilinux} name="Kali Linux" />
+                <TechItem icon={SiLinux} name="Linux" />
+                <TechItem icon={SiGnubash} name="Bash" />
                 <TechItem icon={SiBlender} name="Blender" />
+                <TechItem icon={SiGooglecloud} name="Google Cloud" />
+                <TechItem icon={SiGit} name="Git" />
                 <TechItem icon={SiNginx} name="Nginx" />
                 <TechItem icon={SiPytorch} name="PyTorch" />
             </div>
@@ -80,7 +106,7 @@ const Index = ({ topRepos, libreRepo }: AppProps) => {
 
             <h2 className="font-medium text-3xl mb-4">Projects 🛠️</h2>
             <p className="text-gray-800 dark:text-gray-300 leading-6 font-light tracking-wide mb-6">
-                From November to April 2022, I worked on a project in Unreal Engine 5 called "Banfi Zombi," where the
+                From November to April 2023, I worked on a project in Unreal Engine 5 called "Banfi Zombi," where the
                 goal was to recreate a school belonging to a friend from scratch. From June until now, I have been
                 working on various projects related to LibreChat, continuously adding new features and creating several
                 Discord bots for the LibreChat community. Below are some of my most popular repositories.
@@ -90,7 +116,11 @@ const Index = ({ topRepos, libreRepo }: AppProps) => {
                     <RepoItem
                         key={repo.name}
                         name={repo.name}
-                        description={repo.description ? repo.description.slice(0, 100) + (repo.description.length > 100 ? '...' : '') : 'No description available'}
+                        description={
+                            repo.description
+                                ? repo.description.slice(0, 100) + (repo.description.length > 100 ? "..." : "")
+                                : "No description available"
+                        }
                         stars={repo.stargazers_count}
                         forks={repo.forks_count}
                         language={repo.language}
@@ -100,7 +130,11 @@ const Index = ({ topRepos, libreRepo }: AppProps) => {
                     <RepoItem
                         key={repo.name}
                         name={repo.name}
-                        description={repo.description ? repo.description.slice(0, 100) + (repo.description.length > 100 ? '...' : '') : 'No description available'}
+                        description={
+                            repo.description
+                                ? repo.description.slice(0, 100) + (repo.description.length > 100 ? "..." : "")
+                                : "No description available"
+                        }
                         stars={repo.stargazers_count}
                         forks={repo.forks_count}
                         language={repo.language}
@@ -139,6 +173,11 @@ export async function getStaticProps() {
     } catch (error) {
         console.error("Failed to fetch repositories:", error);
         repos = [];
+    }
+
+    if (!Array.isArray(libreChatRepo)) {
+        console.error("Fetched data is not an array:", libreChatRepo);
+        libreChatRepo = [];
     }
 
     if (!Array.isArray(repos)) {
