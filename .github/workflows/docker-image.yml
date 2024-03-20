@@ -26,7 +26,7 @@ jobs:
 
       - name: Build and push Docker image for bot
         run: |
-          docker build -f Dockerfile.bot -t my-personal-website .
+          docker build -f Dockerfile -t my-personal-website .
 
       - name: Tag and push bot image
         run: |
