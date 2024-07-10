@@ -17,8 +17,8 @@ const Talk = () => {
         >
             <h1 className="text-black dark:text-white font-bold text-3xl mb-3 mt-8">Let's chat 💬</h1>
             <p className="text-gray-800 dark:text-gray-200 mb-6">
-                Have an inquiry, or want to connect? Feel free to leave a message below, or get in touch via Discord
-                or email.
+                Have an inquiry, or want to connect? Feel free to leave a message below, or get in touch via Discord or
+                email.
             </p>
 
             <TimeStatus />
@@ -35,9 +35,9 @@ const Talk = () => {
                     />
 
                     <ContactLink
-                        name="hello@berrystatus.com"
+                        name="berry@librechat.ai"
                         icon={<FiMail className="w-6 h-6 text-gray-400" />}
-                        link="mailto:hello@berrystatus.com"
+                        link="mailto:berry@librechat.ai"
                         borderColor="hover:border-gray-400/50"
                     />
                 </div>

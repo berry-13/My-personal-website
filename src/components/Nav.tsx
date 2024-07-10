@@ -88,22 +88,22 @@ const Nav = () => {
                         }
                     />
                     <LinkButton
-                        title="Twitter"
-                        href={"https://twitter.com/berry13000"}
+                        title="X"
+                        href={"https://x.com/berry13000"}
                         icon={
                             <SiTwitter className="w-6 h-6 cursor-pointer hover:fill-white fill-gray-400 transition-colors" />
                         }
                     />
                     <LinkButton
                         title="LinkedIn"
-                        href={"https://linkedin.com/in/marco-beretta-593635274"}
+                        href={"https://linkedin.com/in/marco-beretta-berry"}
                         icon={
                             <SiLinkedin className="w-6 h-6 cursor-pointer hover:fill-white fill-gray-400 transition-colors" />
                         }
                     />
                     <LinkButton
                         title="Email"
-                        href={"mailto:hello@berrystatus.com"}
+                        href={"mailto:berry@librechat.ai"}
                         icon={
                             <FiMail className="w-6 h-6 cursor-pointer hover:stroke-white stroke-gray-400 transition-colors" />
                         }
@@ -164,15 +164,15 @@ const Nav = () => {
                                     icon={<SiGithub className="w-6 h-6 cursor-pointer" />}
                                 />
                                 <LinkButton
-                                    href={"https://twitter.com/Berry13000"}
+                                    href={"https://x.com/Berry13000"}
                                     icon={<SiTwitter className="w-6 h-6 cursor-pointer" />}
                                 />
                                 <LinkButton
-                                    href={"https://linkedin.com/in/marco-beretta-593635274/"}
+                                    href={"https://linkedin.com/in/marco-beretta-berry/"}
                                     icon={<SiLinkedin className="w-6 h-6 cursor-pointer" />}
                                 />
                                 <LinkButton
-                                    href={"mailto:hello@berrystatus.com"}
+                                    href={"mailto:berry@librechat.ai"}
                                     icon={<FiMail className="w-6 h-6 cursor-pointer" />}
                                 />
                             </div>

@@ -79,9 +79,9 @@ const Index = ({ topRepos, libreRepo }: AppProps) => {
                 <TechItem icon={SiReact} name="React.js" />
                 <TechItem icon={SiVisualstudiocode} name="VSCode" />
                 <TechItem icon={SiOpenai} name="OpenAI" />
-                <TechItem icon={SiUnrealengine} name="Unreal Engine" /> 
+                <TechItem icon={SiUnrealengine} name="Unreal Engine" />
                 <TechItem icon={SiCloudflare} name="Cloudflare" />
-                <TechItem icon={SiMongodb} name="MongoDB" /> 
+                <TechItem icon={SiMongodb} name="MongoDB" />
                 <TechItem icon={SiFirebase} name="Firebase" />
                 <TechItem icon={SiDocker} name="Docker" />
                 <TechItem icon={SiDiscord} name="Discord" />
