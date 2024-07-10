@@ -30,4 +30,9 @@ RUN npm ci --production
 # Stage 3: Create the final image
 FROM gcr.io/distroless/nodejs:14
 
-# Set environment variables
+WORKDIR /app
+
+COPY --from=dependencies /dependencies/node_modules ./node_modules
+COPY --from=build /build .
+
+CMD ["node", "server.js"]
