@@ -157,7 +157,6 @@ const Nav = () => {
                                     onClick={() => setMenuOpen(false)}
                                 />
                             </div>
-
                             <div className="flex flex-row items-center justify-center gap-6 py-4">
                                 <LinkButton
                                     href={"https://github.com/berry-13"}

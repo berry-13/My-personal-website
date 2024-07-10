@@ -42,9 +42,9 @@ const Index = ({ topRepos, libreRepo }: AppProps) => {
         >
             <h1 className="mt-36 font-bold text-4xl md:text-5xl mb-4">Hey, I'm Berry! 👋</h1>
             <p className="text-gray-800 dark:text-gray-300 leading-6 tracking-wide mb-12">
-                I'm a self-taught 15-year-old full-stack developer from Italy. I'm currently working on a project called{" "}
+                I'm a self-taught 15-year-old full-stack developer from Italy. I'm currently working on {" "}
                 <a
-                    href="https://github.com/danny-avila/LibreChat"
+                    href="https://librechat.ai"
                     rel="noreferrer"
                     className="font-semibold text-violet-500 hover:underline"
                 >
@@ -52,7 +52,6 @@ const Index = ({ topRepos, libreRepo }: AppProps) => {
                 </a>
                 .
             </p>
-
             <h2 className="font-medium text-3xl mb-4">What I Do 💭</h2>
             <p className="text-gray-800 dark:text-gray-300 leading-6 font-light tracking-wide mb-12">
                 In my free time, I enjoy creating open-source projects on{" "}
@@ -67,7 +66,6 @@ const Index = ({ topRepos, libreRepo }: AppProps) => {
                 immediately caught my attention. LibreChat allows the integration of multiple AI models and enhances
                 original client features like conversation and message search, prompt templates, and plugins.
             </p>
-
             <h2 className="font-medium text-3xl mb-4">AI 🤖</h2>
             <p className="text-gray-800 dark:text-gray-300 leading-6 font-light tracking-wide mb-6">
                 I have a strong passion for artificial intelligence and have developed skills in various AI-related
@@ -103,7 +101,6 @@ const Index = ({ topRepos, libreRepo }: AppProps) => {
                 images on Google based on user input. In August 2022, I had my first experience with OpenAI's APIs, as
                 the same Discord bot started generating images using the OpenAI API.
             </p>
-
             <h2 className="font-medium text-3xl mb-4">Projects 🛠️</h2>
             <p className="text-gray-800 dark:text-gray-300 leading-6 font-light tracking-wide mb-6">
                 From November to April 2023, I worked on a project in Unreal Engine 5 called "Banfi Zombi," where the
@@ -141,6 +138,7 @@ const Index = ({ topRepos, libreRepo }: AppProps) => {
                     />
                 ))}
             </div>
+            <b>HUGE thanks</b> to <a href="https://cnrad.dev">cnrad.dev</a> for the open-source code!
         </motion.div>
     );
 };
