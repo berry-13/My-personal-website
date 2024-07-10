@@ -9,7 +9,8 @@ jobs:
 
   build-and-push-image-bot:
     runs-on: ubuntu-latest
-    
+    permissions: write-all
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -30,5 +31,5 @@ jobs:
 
       - name: Tag and push bot image
         run: |
-          docker tag my-personal-website:latest ghcr.io/${{ github.repository_owner }}/My-personal-website:${{ github.sha }}
-          docker push ghcr.io/${{ github.repository_owner }}/My-personal-website:${{ github.sha }}
+          docker tag my-personal-website:latest ghcr.io/${{ github.repository_owner }}/my-personal-website:latest
+          docker push ghcr.io/${{ github.repository_owner }}/my-personal-website:latest
