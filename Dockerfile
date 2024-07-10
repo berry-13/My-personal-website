@@ -1,30 +1,21 @@
-FROM node:14-alpine AS build
+FROM node:18.17.0-alpine AS build
 
-# Disable telemetry
 ENV NEXT_TELEMETRY_DISABLED 1
 
 WORKDIR /build
 
-# Copy package and package-lock 
 COPY package.json package-lock.json ./
 
-# Clean install dependencies based package-lock
-# Note: We also install dev deps as typeScript may be needed
-RUN npm ci
+# Use --legacy-peer-deps to resolve dependency conflicts
+RUN npm install --legacy-peer-deps
 
-# Copy files
-# Use .dockerignore to avoid copying node_modules and others folders and files
 COPY . .
 
-# Build application
 RUN npm run build
 
-# =======================================
-# Image generate dependencies production
-# =======================================
-FROM node:14-alpine AS dependencies
+FROM node:18.17.0-alpine AS dependencies
 
-# Environment Production
+# Set environment to production
 ENV NODE_ENV production
 
 WORKDIR /dependencies
@@ -33,28 +24,10 @@ WORKDIR /dependencies
 COPY --from=build /build/package.json .
 COPY --from=build /build/package-lock.json ./
 
-# Clean install dependencies based package-lock
+# Clean install production dependencies based on package-lock
 RUN npm ci --production
 
-# =======================================
-# Image distroless final
-# =======================================
+# Stage 3: Create the final image
 FROM gcr.io/distroless/nodejs:14
 
-# Mark as prod, disable telemetry, set port
-ENV NODE_ENV production
-ENV PORT 3000
-ENV NEXT_TELEMETRY_DISABLED 1
-
-WORKDIR /app
-
-# Copy from build
-COPY --from=build /build/next.config.js .
-COPY --from=build /build/public/ ./public
-COPY --from=build /build/.next ./.next
-COPY --from=dependencies /dependencies/node_modules ./node_modules
-
-EXPOSE 3000
-
-# Run app command
-CMD ["node_modules/.bin/next", "start"]
+# Set environment variables
