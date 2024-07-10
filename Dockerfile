@@ -1,38 +1,23 @@
-FROM node:18.17.0-alpine AS build
+# Use the official Node.js image as the base image
+FROM node:16-alpine
 
-ENV NEXT_TELEMETRY_DISABLED 1
-
-WORKDIR /build
-
-COPY package.json package-lock.json ./
-
-# Use --legacy-peer-deps to resolve dependency conflicts
-RUN npm install --legacy-peer-deps
-
-COPY . .
-
-RUN npm run build
-
-FROM node:18.17.0-alpine AS dependencies
-
-# Set environment to production
-ENV NODE_ENV production
-
-WORKDIR /dependencies
-
-# Copy package and package-lock 
-COPY --from=build /build/package.json .
-COPY --from=build /build/package-lock.json ./
-
-# Clean install production dependencies based on package-lock
-RUN npm ci --production
-
-# Stage 3: Create the final image
-FROM gcr.io/distroless/nodejs:14
-
+# Set the working directory
 WORKDIR /app
 
-COPY --from=dependencies /dependencies/node_modules ./node_modules
-COPY --from=build /build .
+# Copy package.json and package-lock.json
+COPY package.json package-lock.json ./
 
-CMD ["node", "server.js"]
+# Install dependencies
+RUN npm install
+
+# Copy the rest of the application code
+COPY . .
+
+# Build the Next.js application
+RUN npm run build
+
+# Expose the port the app runs on
+EXPOSE 3000
+
+# Start the Next.js application
+CMD ["npm", "start"]
