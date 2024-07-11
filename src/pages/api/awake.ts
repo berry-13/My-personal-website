@@ -8,8 +8,8 @@ interface RateLimitInfo {
 
 const rateLimits = new Map<string, RateLimitInfo>();
 const globalRateLimit = { count: 0, timestamp: Date.now() };
-const maxRequestsPerIP = 5;
-const maxRequestsGlobal = 100;
+const maxRequestsPerIP = 10;
+const maxRequestsGlobal = 1000;
 const windowSizeInSeconds = 15 * 60;
 const globalWindowSizeInMilliseconds = 60 * 1000;
 
