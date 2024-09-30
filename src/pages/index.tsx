@@ -54,7 +54,7 @@ const Index = ({ topRepos, libreRepo }: AppProps) => {
             </p>
             <h2 className="font-medium text-3xl mb-4">What I Do 💭</h2>
             <p className="text-gray-800 dark:text-gray-300 leading-6 font-light tracking-wide mb-12">
-                In my free time, I enjoy creating open-source projects on {" "}
+                In my free time, I enjoy creating open-source projects on{" "}
                 <a
                     href="https://github.com/berry-13"
                     rel="noreferrer"
