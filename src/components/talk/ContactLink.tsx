@@ -1,8 +1,8 @@
 import React, { ReactElement } from "react";
 import { FiExternalLink } from "react-icons/fi";
 import { animated, useSpring } from "react-spring";
+import { classNames } from "@/src/util";
 import Link from "next/link";
-import { classNames } from "../../util/classNames";
 
 const calc = (x: number, y: number) => [-(y - window.innerHeight / 3) / 35, (x - window.innerWidth / 1.5) / 30, 1.05];
 const trans = (x: number, y: number, s: number): string =>
@@ -25,7 +25,7 @@ const ContactLink = ({
     }));
 
     return (
-        <Link href={link} passHref>
+        <Link href={link} passHref legacyBehavior>
             <animated.a
                 target="_blank"
                 rel="noreferrer noopener"
