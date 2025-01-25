@@ -17,34 +17,38 @@ const MessageComponent = () => {
 
     const sendMessage = async () => {
         const { email, message } = formState;
-
+    
         if (!email || !message) {
             setStatus(prev => ({ ...prev, error: "Please fill out all fields!" }));
             return;
         }
-
+    
         if (!emailRegex.test(email)) {
             setStatus(prev => ({ ...prev, error: "Please enter a valid email address." }));
             return;
         }
-
-        setStatus(prev => ({ ...prev, sending: true, error: "" }));
-
+    
+        setStatus({ sending: true, error: "", sent: false });
+    
         try {
             const response = await axios.post("/api/send", { email, message });
-
-            if (response.data.result === "SUCCESS") {
-                setStatus(prev => ({ ...prev, sent: true }));
-            } else {
-                throw new Error(response.data.result);
+            
+            if (response.data.result === "Success") {
+                setStatus({ sending: false, error: "", sent: true });
+                return;
             }
+            
+            setStatus({ 
+                sending: false, 
+                error: `Error: ${response.data.result}`, 
+                sent: false 
+            });
         } catch (error) {
-            setStatus(prev => ({
-                ...prev,
-                error: "Something went wrong. Please try again later.",
-            }));
-        } finally {
-            setStatus(prev => ({ ...prev, sending: false }));
+            setStatus({ 
+                sending: false, 
+                error: "Failed to send message. Please try again.", 
+                sent: false 
+            });
         }
     };
 
@@ -61,7 +65,7 @@ const MessageComponent = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             className="md:col-span-2 h-auto min-h-[21.5rem] bg-white/50 dark:bg-white/5 
-                 rounded-xl p-6 border border-zinc-800/50 shadow-lg shadow-black/5"
+                 rounded-xl p-6 border border-zinc-800/10 shadow-lg shadow-black/5"
         >
             <AnimatePresence mode="wait">
                 {status.sent ? (

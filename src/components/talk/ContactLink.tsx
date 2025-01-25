@@ -32,7 +32,7 @@ const ContactLink = ({ name, icon, link, borderColor }: ContactLinkProps) => {
                 className={cn(
                     "group flex items-center gap-3 p-4 mb-4",
                     "bg-white/50 dark:bg-white/5 backdrop-blur-sm",
-                    "border border-zinc-800/50 rounded-xl",
+                    "border border-zinc-800/10 rounded-xl",
                     "shadow-lg shadow-black/[0.02] hover:shadow-xl hover:shadow-black/[0.05]",
                     "transition-all duration-300 cursor-pointer",
                     borderColor || "hover:border-white/50"
