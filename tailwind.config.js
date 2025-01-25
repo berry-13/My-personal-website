@@ -1,13 +1,13 @@
 module.exports = {
     content: ["./src/pages/**/*.{js,ts,jsx,tsx}", "./src/components/**/*.{js,ts,jsx,tsx}"],
-    darkMode: 'class',
+    darkMode: "class",
     theme: {
         extend: {
             screens: {
-                'xs': '445px',
+                xs: "445px",
             },
             animation: {
-                'spin-slow': 'spin 2s linear infinite',
+                "spin-slow": "spin 2s linear infinite",
             },
         },
     },

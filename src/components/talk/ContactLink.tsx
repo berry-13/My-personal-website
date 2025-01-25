@@ -1,48 +1,66 @@
-import React, { ReactElement } from "react";
+import React from "react";
+import { motion } from "framer-motion";
 import { FiExternalLink } from "react-icons/fi";
-import { animated, useSpring } from "react-spring";
-import { classNames } from "@/src/util";
 import Link from "next/link";
+import { cn } from "~/utils";
 
-const calc = (x: number, y: number) => [-(y - window.innerHeight / 3) / 35, (x - window.innerWidth / 1.5) / 30, 1.05];
-const trans = (x: number, y: number, s: number): string =>
-    `perspective(600px) rotateX(${x}deg) rotateY(${y}deg) scale(${s})`;
-
-const ContactLink = ({
-    name,
-    icon,
-    link,
-    borderColor,
-}: {
+interface ContactLinkProps {
     name: string;
-    icon: ReactElement;
+    icon: React.ReactElement;
     link: string;
     borderColor?: string;
-}) => {
-    const [props, set] = useSpring(() => ({
-        xys: [0, 0, 1],
-        config: { mass: 1, tension: 350, friction: 40 },
-    }));
+}
 
+const ContactLink = ({ name, icon, link, borderColor }: ContactLinkProps) => {
     return (
-        <Link href={link} passHref legacyBehavior>
-            <animated.a
+        <Link href={link} legacyBehavior>
+            <motion.a
+                href={link}
                 target="_blank"
                 rel="noreferrer noopener"
-                onMouseMove={({ clientX: x, clientY: y }: { clientX: number; clientY: number }) =>
-                    set({ xys: calc(x, y) })
-                }
-                onMouseLeave={() => set({ xys: [0, 0, 1] })}
-                style={{ transform: props.xys.to(trans) }}
-                className={classNames(
-                    borderColor ? borderColor : "hover:border-white/50",
-                    `shadow-white shadow-none hover:shadow-lg mb-4 row-start-3 flex flex-row items-center bg-opacity-50 bg-white dark:bg-white/5 rounded-md p-4 border border-zinc-800/50 cursor-pointer transition-colors duration-150`
+                initial={{ scale: 1 }}
+                whileHover={{
+                    scale: 1.02,
+                    rotateX: -2,
+                    rotateY: 2,
+                }}
+                whileTap={{ scale: 0.98 }}
+                transition={{
+                    type: "tween",
+                    duration: 0.1,
+                }}
+                className={cn(
+                    "group flex items-center gap-3 p-4 mb-4",
+                    "bg-white/50 dark:bg-white/5 backdrop-blur-sm",
+                    "border border-zinc-800/50 rounded-xl",
+                    "shadow-lg shadow-black/[0.02] hover:shadow-xl hover:shadow-black/[0.05]",
+                    "transition-all duration-300 cursor-pointer",
+                    borderColor || "hover:border-white/50"
                 )}
             >
-                {icon}
-                <h1 className="font-medium text-sm text-black/80 dark:text-slate-400 mx-3">{name}</h1>
-                <FiExternalLink className="w-5 h-5 text-gray-600" />
-            </animated.a>
+                <motion.div
+                    initial={{ scale: 1 }}
+                    whileHover={{ scale: 1.1 }}
+                    transition={{ duration: 0.2 }}
+                    className="text-gray-600 dark:text-gray-400 group-hover:text-violet-500 
+                   dark:group-hover:text-violet-400 transition-colors duration-300"
+                >
+                    {icon}
+                </motion.div>
+
+                <span
+                    className="flex-1 font-medium text-sm text-black/80 dark:text-slate-400 
+                      group-hover:text-violet-500 dark:group-hover:text-violet-400 
+                      transition-colors duration-300"
+                >
+                    {name}
+                </span>
+
+                <FiExternalLink
+                    className="w-5 h-5 text-gray-600 group-hover:text-violet-500 
+                                dark:group-hover:text-violet-400 transition-colors duration-300"
+                />
+            </motion.a>
         </Link>
     );
 };

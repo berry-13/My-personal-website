@@ -26,6 +26,7 @@ import {
     SiHomeassistant,
     SiGooglegemini,
     SiAnthropic,
+    SiOllama,
 } from "react-icons/si";
 import { FaJava } from "react-icons/fa";
 
@@ -76,7 +77,7 @@ const itemVariants = {
             stiffness: 100,
             damping: 15,
             mass: 1,
-            delay: index * 0.04, // Staggered delay based on item index
+            delay: index * 0.04,
         },
     }),
     hover: {
@@ -84,10 +85,8 @@ const itemVariants = {
         y: -5,
         rotateX: 5,
         transition: {
-            type: "spring",
-            stiffness: 400,
-            damping: 10,
-            mass: 0.8,
+            type: "tween",
+            duration: 0.1,
         },
     },
     tap: {
@@ -107,10 +106,10 @@ const glowVariants = {
         scale: 1,
     },
     hover: {
-        opacity: [0, 0.5, 0.3],
+        opacity: [0.3, 0.5, 0.3],
         scale: 1.2,
         transition: {
-            duration: 0.6,
+            duration: 1,
             ease: "easeInOut",
             repeat: Infinity,
             repeatType: "reverse" as const,
@@ -137,6 +136,7 @@ const techStack: Omit<TechItemProps, "index">[] = [
     { icon: SiOpenai, name: "OpenAI", category: "ai", description: "AI integration" },
     { icon: SiGooglegemini, name: "Google Gemini", category: "ai", description: "AI integration" },
     { icon: SiAnthropic, name: "Anthropic", category: "ai", description: "AI integration" },
+    { icon: SiOllama, name: "Ollama", category: "ai", description: "AI integration" },
     { icon: SiUnrealengine, name: "Unreal Engine", category: "tools", description: "3D development" },
     { icon: SiCloudflare, name: "Cloudflare", category: "cloud", description: "Edge computing" },
     { icon: SiMongodb, name: "MongoDB", category: "tools", description: "Database" },
@@ -177,12 +177,13 @@ const TechItem = React.memo<TechItemProps>(({ icon: Icon, name, description, ind
             initial="hidden"
             animate="visible"
             whileTap="tap"
+            whileHover="hover"
             onHoverStart={handleHoverStart}
             onHoverEnd={handleHoverEnd}
             className="group relative flex flex-col items-center p-4 rounded-xl 
                      bg-white/5 backdrop-blur-sm border border-gray-200 
                      dark:border-gray-800 transition-all duration-300
-                     hover:shadow-lg hover:shadow-violet-500/10"
+                     hover:shadow-lg hover:shadow-violet-500/10 transform-gpu"
             style={{
                 perspective: "1000px",
                 transformStyle: "preserve-3d",
@@ -236,7 +237,6 @@ const TechItem = React.memo<TechItemProps>(({ icon: Icon, name, description, ind
 TechItem.displayName = "TechItem";
 
 const TechIcons: React.FC = () => {
-    // Memoize the grouped tech to avoid recalculating on every render
     const groupedTech = useMemo(() => {
         return techStack.reduce((acc, tech, globalIndex) => {
             if (!acc[tech.category]) {

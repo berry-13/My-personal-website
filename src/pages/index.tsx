@@ -1,41 +1,15 @@
+import dynamic from "next/dynamic";
 import React, { Suspense } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useInView } from "react-intersection-observer";
-import { getLanguageColor, getContrastTextColor, formatNumber } from "@/src/util";
-import dynamic from "next/dynamic";
-
-interface Repository {
-    name: string;
-    stargazers_count: number;
-    description: string;
-    language: string;
-    forks_count: number;
-}
-
-interface SectionProps {
-    title: string;
-    children: React.ReactNode;
-    emoji?: string;
-}
-
-interface ExternalLinkProps {
-    href: string;
-    children: React.ReactNode;
-}
-
-interface RepoGridProps {
-    libreRepo: Repository[];
-    topRepos: Repository[];
-}
-
-interface IndexProps {
-    topRepos: Repository[];
-    libreRepo: Repository[];
-}
+import type { SectionProps, ExternalLinkProps, RepoGridProps, IndexProps } from "@/src/types/types";
+import { getLanguageColor, formatNumber } from "~/utils";
+import { useRepos } from "~/hooks/useRepo";
 
 const TechIcons = dynamic(() => import("../components/TechIcons"), {
+    ssr: false,
     loading: () => <div className="w-full h-32 animate-pulse bg-gray-200 dark:bg-gray-800 rounded-md" />,
-});
+}) as React.ComponentType<{}>;
 
 const fadeInUp = {
     hidden: { opacity: 0, y: 20 },
@@ -96,46 +70,97 @@ const ExternalLink: React.FC<ExternalLinkProps> = ({ href, children }) => (
     </a>
 );
 
-const RepoGrid: React.FC<RepoGridProps> = ({ libreRepo, topRepos }) => (
-    <motion.div
-        variants={staggerContainer}
-        initial="hidden"
-        animate="visible"
-        className="grid grid-cols-1 md:grid-cols-2 gap-4"
-    >
-        {[...libreRepo, ...topRepos].map(repo => (
+const RepoGrid: React.FC<RepoGridProps> = ({ libreRepo, topRepos, isLoading, isError }) => {
+    if (isError) {
+        return (
             <motion.div
-                key={repo.name}
-                variants={fadeInUp}
-                className="bg-gray-50 border dark:border-transparent dark:bg-gray-800/50 dark:hover:bg-gray-800/80 backdrop-blur-lg rounded-xl p-6 hover:shadow-lg transition-all duration-300"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className="rounded-xl p-6 bg-red-500/10 border border-red-500/20 text-red-600 dark:text-red-400"
             >
-                <h3 className="text-xl font-semibold mb-2">{repo.name}</h3>
-                <p className="text-gray-600 dark:text-gray-400 mb-4">
-                    {repo.description
-                        ? `${repo.description.slice(0, 100)}${repo.description.length > 100 ? "..." : ""}`
-                        : "No description available"}
-                </p>
-                <div className="flex items-center gap-4 text-sm">
-                    <span className="flex items-center gap-1">⭐ {formatNumber(repo.stargazers_count)}</span>
-                    <span className="flex items-center gap-1">🔀 {formatNumber(repo.forks_count)}</span>
-                    {repo.language && (
-                        <span className="flex items-center gap-1">
-                            <span
-                                className="w-3 h-3 rounded-full"
-                                style={{
-                                    backgroundColor: getLanguageColor(repo.language),
-                                }}
-                            />
-                            {repo.language}
-                        </span>
-                    )}
-                </div>
+                Failed to load repositories. Please try again later.
             </motion.div>
-        ))}
-    </motion.div>
-);
+        );
+    }
+
+    if (isLoading) {
+        return (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {[1, 4].map(i => (
+                    <div
+                        key={i}
+                        className="animate-pulse rounded-xl p-6 bg-gray-50 dark:bg-gray-800/50 border dark:border-transparent"
+                    >
+                        <div className="h-6 w-1/3 bg-gray-200 dark:bg-gray-700 rounded mb-4" />
+                        <div className="space-y-2">
+                            <div className="h-4 w-full bg-gray-200 dark:bg-gray-700 rounded" />
+                            <div className="h-4 w-2/3 bg-gray-200 dark:bg-gray-700 rounded" />
+                        </div>
+                        <div className="flex gap-4 mt-4">
+                            <div className="h-4 w-16 bg-gray-200 dark:bg-gray-700 rounded" />
+                            <div className="h-4 w-16 bg-gray-200 dark:bg-gray-700 rounded" />
+                        </div>
+                    </div>
+                ))}
+            </div>
+        );
+    }
+
+    return (
+        <motion.div
+            variants={staggerContainer}
+            initial="hidden"
+            animate="visible"
+            className="grid grid-cols-1 md:grid-cols-2 gap-4"
+        >
+            {[...libreRepo, ...topRepos].map(repo => (
+                <motion.a
+                    key={repo.name}
+                    href={repo.html_url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    variants={fadeInUp}
+                    whileHover={{ scale: 1.02, y: -2 }}
+                    className="group bg-gray-50 border dark:border-transparent dark:bg-gray-800/50 
+                     dark:hover:bg-gray-800/80 backdrop-blur-lg rounded-xl p-6 
+                     hover:shadow-lg transition-all duration-300"
+                >
+                    <h3
+                        className="text-xl font-semibold mb-2 text-gray-900 dark:text-gray-100 
+                         group-hover:text-violet-500 dark:group-hover:text-violet-400 
+                         transition-colors duration-300"
+                    >
+                        {repo.name}
+                    </h3>
+                    <p className="text-gray-600 dark:text-gray-400 mb-4">
+                        {repo.description
+                            ? `${repo.description.slice(0, 100)}${repo.description.length > 100 ? "..." : ""}`
+                            : "No description available"}
+                    </p>
+                    <div className="flex items-center gap-4 text-sm">
+                        <span className="flex items-center gap-1">⭐ {formatNumber(repo.stargazers_count)}</span>
+                        <span className="flex items-center gap-1">🔀 {formatNumber(repo.forks_count)}</span>
+                        {repo.language && (
+                            <span className="flex items-center gap-1">
+                                <span
+                                    className="w-3 h-3 rounded-full"
+                                    style={{
+                                        backgroundColor: getLanguageColor(repo.language),
+                                    }}
+                                />
+                                {repo.language}
+                            </span>
+                        )}
+                    </div>
+                </motion.a>
+            ))}
+        </motion.div>
+    );
+};
 
 const Index: React.FC<IndexProps> = ({ topRepos, libreRepo }) => {
+    const { repos, isLoading, isError } = useRepos();
+
     return (
         <AnimatePresence>
             <motion.main
@@ -152,8 +177,8 @@ const Index: React.FC<IndexProps> = ({ topRepos, libreRepo }) => {
                 >
                     <h1 className="text-5xl md:text-6xl font-bold mb-6">Hey, I'm Berry! 👋</h1>
                     <p className="text-xl text-gray-600 dark:text-gray-300">
-                        A self-taught full-stack Software Engineer from Italy, currently working on{" "}
-                        <ExternalLink href="https://librechat.ai">LibreChat</ExternalLink>.
+                        A self-taught software engineer from Italy, currently working on{" "}
+                        <ExternalLink href="https://librechat.ai">LibreChat</ExternalLink>
                     </p>
                 </motion.div>
 
@@ -184,7 +209,12 @@ const Index: React.FC<IndexProps> = ({ topRepos, libreRepo }) => {
                 </Section>
 
                 <Section title="Featured Projects" emoji="✨">
-                    <RepoGrid libreRepo={libreRepo} topRepos={topRepos} />
+                    <RepoGrid
+                        libreRepo={repos?.libreChatRepos ?? []}
+                        topRepos={repos?.berryRepos ?? []}
+                        isLoading={isLoading}
+                        isError={isError}
+                    />
                 </Section>
 
                 <footer className="mt-24 text-center text-gray-600 dark:text-gray-400">
@@ -197,50 +227,5 @@ const Index: React.FC<IndexProps> = ({ topRepos, libreRepo }) => {
         </AnimatePresence>
     );
 };
-
-export async function getStaticProps() {
-    const fetchOptions = {
-        headers: {
-            Authorization: `token ${process.env.GITHUB_TOKEN}`,
-            Accept: "application/vnd.github.v3+json",
-        },
-        next: { revalidate: 3600 },
-    };
-
-    try {
-        const [libreChatRepo, berryRepos] = await Promise.all([
-            fetch("https://api.github.com/users/danny-avila/repos?type=owner&per_page=100", fetchOptions).then(res =>
-                res.json()
-            ),
-            fetch("https://api.github.com/users/berry-13/repos?type=owner&per_page=100", fetchOptions).then(res =>
-                res.json()
-            ),
-        ]);
-
-        const libreRepo = libreChatRepo.slice(0, 1);
-        const topRepos = berryRepos.slice(0, 3);
-
-        const filteredLibreChatRepos = libreRepo.filter(Boolean);
-        const filteredBerryRepos = topRepos.filter(Boolean);
-
-        const sortedLibreChatRepos = filteredLibreChatRepos.sort(
-            (a: Repository, b: Repository) => b.stargazers_count - a.stargazers_count
-        );
-        const sortedBerryRepos = filteredBerryRepos.sort(
-            (a: Repository, b: Repository) => b.stargazers_count - a.stargazers_count
-        );
-
-        return {
-            props: { topRepos: sortedBerryRepos, libreRepo: sortedLibreChatRepos },
-            revalidate: 3600,
-        };
-    } catch (error) {
-        console.error("Error fetching repos:", error);
-        return {
-            props: { topRepos: [], libreRepo: [] },
-            revalidate: 60,
-        };
-    }
-}
 
 export default Index;

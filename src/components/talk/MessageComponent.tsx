@@ -1,92 +1,166 @@
+import { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import axios from "axios";
-import { useRef, useState } from "react";
 import { RiSendPlane2Fill } from "react-icons/ri";
 import { ImSpinner2 } from "react-icons/im";
-import { AnimatePresence, motion } from "framer-motion";
+
+interface FormState {
+    email: string;
+    message: string;
+}
 
 const MessageComponent = () => {
-    const email = useRef<string>("");
-    const message = useRef<string>("");
-    const [sending, setSending] = useState<boolean>(false);
-    const [errMsg, setErrMsg] = useState<string>("");
-    const [messageSent, setMessageSent] = useState<boolean>(false);
+    const [formState, setFormState] = useState<FormState>({ email: "", message: "" });
+    const [status, setStatus] = useState({ sending: false, error: "", sent: false });
 
-    const emailRegex = new RegExp(
-        /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
-    );
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
     const sendMessage = async () => {
-        if (email.current == "" || message.current == "") return setErrMsg("Please fill out all fields!");
-        if (!emailRegex.test(email.current)) return setErrMsg("Hmm, that doesn't look like an email.");
+        const { email, message } = formState;
 
-        setSending(true);
+        if (!email || !message) {
+            setStatus(prev => ({ ...prev, error: "Please fill out all fields!" }));
+            return;
+        }
 
-        let response = await axios.post("/api/send", {
-            email: email.current,
-            message: message.current,
-        });
+        if (!emailRegex.test(email)) {
+            setStatus(prev => ({ ...prev, error: "Please enter a valid email address." }));
+            return;
+        }
 
-        if (response.data.result === "FIELD_EMPTY") return setErrMsg("Please fill out all fields!");
-        if (response.data.result === "DISCORD_API_ERROR") return setErrMsg("Something went wrong...");
+        setStatus(prev => ({ ...prev, sending: true, error: "" }));
 
-        setSending(false);
+        try {
+            const response = await axios.post("/api/send", { email, message });
 
-        return setMessageSent(true);
+            if (response.data.result === "SUCCESS") {
+                setStatus(prev => ({ ...prev, sent: true }));
+            } else {
+                throw new Error(response.data.result);
+            }
+        } catch (error) {
+            setStatus(prev => ({
+                ...prev,
+                error: "Something went wrong. Please try again later.",
+            }));
+        } finally {
+            setStatus(prev => ({ ...prev, sending: false }));
+        }
     };
 
+    const inputClasses = `
+    w-full p-3 rounded-xl text-sm transition-all duration-200
+    bg-slate-200/50 dark:bg-slate-200/5 
+    border border-transparent focus:border-violet-500
+    focus:outline-none focus:ring-2 focus:ring-violet-500/20
+    placeholder:text-gray-500/60 dark:placeholder:text-slate-200/20
+  `;
+
     return (
-        <div className="md:col-span-2 h-auto min-h-[21.5rem] row-span-3 bg-opacity-50 bg-white dark:bg-white/5 rounded-md p-4 border border-zinc-800/50">
-            <AnimatePresence exitBeforeEnter>
-                {messageSent && (
-                    <motion.p
-                        key={"contactThankYou"}
+        <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="md:col-span-2 h-auto min-h-[21.5rem] bg-white/50 dark:bg-white/5 
+                 rounded-xl p-6 border border-zinc-800/50 shadow-lg shadow-black/5"
+        >
+            <AnimatePresence mode="wait">
+                {status.sent ? (
+                    <motion.div
+                        initial={{ scale: 0.9, opacity: 0 }}
+                        animate={{ scale: 1, opacity: 1 }}
+                        exit={{ scale: 0.9, opacity: 0 }}
+                        className="h-full flex flex-col items-center justify-center space-y-4"
+                    >
+                        <motion.div
+                            initial={{ scale: 0 }}
+                            animate={{ scale: 1 }}
+                            transition={{ delay: 0.2, type: "spring" }}
+                            className="w-16 h-16 bg-violet-500 rounded-full flex items-center justify-center"
+                        >
+                            <svg className="w-8 h-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                            </svg>
+                        </motion.div>
+                        <p className="text-gray-600 dark:text-gray-300 text-center">
+                            Thanks for reaching out! I'll get back to you soon.
+                        </p>
+                    </motion.div>
+                ) : (
+                    <motion.form
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
-                        transition={{ duration: 0.25, ease: "easeOut" }}
-                        className="w-full h-full flex items-center justify-center text-gray-400 text-sm"
-                    >
-                        Thanks for reaching out! I'll get back to you soon.
-                    </motion.p>
-                )}
-                {!messageSent && (
-                    <motion.div
-                        key={"contactForm"}
-                        initial={{ opacity: 1 }}
-                        animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
-                        transition={{ duration: 0.25, ease: "easeOut" }}
+                        onSubmit={e => {
+                            e.preventDefault();
+                            sendMessage();
+                        }}
+                        className="space-y-4"
                     >
-                        <h1 className="font-bold text-sm dark:text-slate-500 mb-1">EMAIL</h1>
-                        <input
-                            placeholder="example@gmail.com"
-                            type="text"
-                            onChange={(e: any) => (email.current = e.target.value)}
-                            className="w-full p-2 mb-4 rounded-md bg-slate-300/50 dark:bg-slate-200/5 text-sm placeholder:text-gray-600 dark:placeholder:text-slate-200/20"
-                        />
-
-                        <h1 className="font-bold text-sm dark:text-slate-500 mb-1">MESSAGE</h1>
-                        <textarea
-                            placeholder="Hi Berry, what's up?"
-                            onChange={(e: any) => (message.current = e.target.value)}
-                            className="w-full min-h-[9rem] p-2 h-36 mb-4 rounded-md bg-slate-300/50 dark:bg-slate-200/5 text-sm placeholder:text-gray-600 dark:placeholder:text-slate-200/20"
-                        />
-
-                        <div className="w-full flex flex-row justify-between items-center">
-                            <p className="text-gray-900 dark:text-gray-300 text-sm">{errMsg}</p>
-
-                            <button
-                                onClick={sendMessage}
-                                className="border border-gray-800 hover:bg-gray-200 dark:border-indigo-600/80 dark:bg-indigo-600/70 dark:hover:bg-indigo-500/70 flex flex-row items-center justify-center rounded-full px-5 py-2 text-sm font-medium transition-colors duration-75"
-                            >
-                                <span className="mt-[2px]">Send</span>
-                                {!sending && <RiSendPlane2Fill className="ml-2" />}
-                                {sending && <ImSpinner2 className="w-4 h-4 ml-2 animate-spin" />}
-                            </button>
+                        <div className="space-y-1">
+                            <label className="font-medium text-sm text-gray-900 dark:text-slate-400">EMAIL</label>
+                            <motion.input
+                                whileFocus={{ scale: 1.01 }}
+                                type="email"
+                                placeholder="you@example.com"
+                                value={formState.email}
+                                onChange={e => {
+                                    setFormState(prev => ({ ...prev, email: e.target.value }));
+                                    setStatus(prev => ({ ...prev, error: "" }));
+                                }}
+                                className={inputClasses}
+                            />
                         </div>
-                    </motion.div>
+
+                        <div className="space-y-1">
+                            <label className="font-medium text-sm text-gray-900 dark:text-slate-400">MESSAGE</label>
+                            <motion.textarea
+                                whileFocus={{ scale: 1.01 }}
+                                placeholder="Hi Berry, let's collaborate!"
+                                value={formState.message}
+                                onChange={e => {
+                                    setFormState(prev => ({ ...prev, message: e.target.value }));
+                                    setStatus(prev => ({ ...prev, error: "" }));
+                                }}
+                                className={`${inputClasses} min-h-[9rem] resize-none`}
+                            />
+                        </div>
+
+                        <div className="flex items-center justify-between pt-2">
+                            <AnimatePresence mode="wait">
+                                {status.error && (
+                                    <motion.p
+                                        initial={{ opacity: 0, x: -20 }}
+                                        animate={{ opacity: 1, x: 0 }}
+                                        exit={{ opacity: 0, x: -20 }}
+                                        className="text-red-500 text-sm"
+                                    >
+                                        {status.error}
+                                    </motion.p>
+                                )}
+                            </AnimatePresence>
+
+                            <motion.button
+                                type="submit"
+                                whileHover={{ scale: 1.02 }}
+                                whileTap={{ scale: 0.98 }}
+                                disabled={status.sending}
+                                className="bg-violet-500 hover:bg-violet-600 text-white
+                         rounded-xl px-6 py-2.5 font-medium text-sm
+                         transition-all duration-200 disabled:opacity-50
+                         flex items-center space-x-2 shadow-lg shadow-violet-500/20"
+                            >
+                                <span>Send</span>
+                                {status.sending ? (
+                                    <ImSpinner2 className="w-4 h-4 animate-spin" />
+                                ) : (
+                                    <RiSendPlane2Fill className="w-4 h-4" />
+                                )}
+                            </motion.button>
+                        </div>
+                    </motion.form>
                 )}
             </AnimatePresence>
-        </div>
+        </motion.div>
     );
 };
 

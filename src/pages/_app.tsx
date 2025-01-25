@@ -1,11 +1,12 @@
+import { useEffect, useRef, PropsWithChildren } from "react";
 import Head from "next/head";
 import NProgress from "nprogress";
+import Lenis from "lenis";
 import { useRouter } from "next/router";
-import { useEffect, useRef } from "react";
-import type { AppProps } from "next/app";
 import { AnimatePresence, motion } from "framer-motion";
-import { ReactLenis } from "@studio-freight/react-lenis";
-import { NextComponentType, NextPageContext } from "next";
+import type { ReactElement, ReactNode } from "react";
+import type { AppProps } from "next/app";
+import type { NextPage } from "next";
 import Footer from "../components/Footer";
 import Nav from "../components/Nav";
 
@@ -13,8 +14,12 @@ import "../globals.css";
 import "react-tippy/dist/tippy.css";
 import "nprogress/nprogress.css";
 
-type MyAppProps = AppProps & {
-    Component: NextComponentType<NextPageContext, any, any>;
+export type NextPageWithLayout<P = {}, IP = P> = NextPage<P, IP> & {
+    getLayout?: (page: ReactElement) => ReactNode;
+};
+
+type AppPropsWithLayout = AppProps & {
+    Component: NextPageWithLayout;
 };
 
 NProgress.configure({
@@ -64,11 +69,33 @@ const pageVariants = {
     },
 };
 
-function MyApp({ Component, pageProps, router }: MyAppProps) {
+function MyApp({ Component, pageProps, router }: AppPropsWithLayout) {
     const audioRef = useRef<HTMLAudioElement | null>(null);
     const routerRef = useRouter();
 
-    // Handle route change events
+    useEffect(() => {
+        const lenis = new Lenis({
+            duration: 1.2,
+            easing: (t: number) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+            orientation: "vertical",
+            smoothWheel: true,
+            wheelMultiplier: 1,
+            touchMultiplier: 2,
+            infinite: false,
+        });
+
+        function raf(time: number) {
+            lenis.raf(time);
+            requestAnimationFrame(raf);
+        }
+
+        requestAnimationFrame(raf);
+
+        return () => {
+            lenis.destroy();
+        };
+    }, []);
+
     useEffect(() => {
         const handleStart = () => {
             NProgress.start();
@@ -94,7 +121,6 @@ function MyApp({ Component, pageProps, router }: MyAppProps) {
         };
     }, [router.events]);
 
-    // Initialize audio
     useEffect(() => {
         if (typeof window !== "undefined") {
             audioRef.current = new Audio("/pop.mp3");
@@ -102,7 +128,6 @@ function MyApp({ Component, pageProps, router }: MyAppProps) {
         }
     }, []);
 
-    // Play navigation sound
     const playNavigationSound = (): void => {
         if (audioRef.current) {
             audioRef.current.currentTime = 0;
@@ -111,18 +136,7 @@ function MyApp({ Component, pageProps, router }: MyAppProps) {
     };
 
     return (
-        <ReactLenis
-            root
-            options={{
-                duration: 1.2,
-                easing: (t: number) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
-                orientation: "vertical",
-                smoothWheel: true,
-                wheelMultiplier: 1,
-                touchMultiplier: 2,
-                infinite: false,
-            }}
-        >
+        <>
             <Head>
                 <meta charSet="utf-8" />
                 <title>{SEO.title}</title>
@@ -136,15 +150,15 @@ function MyApp({ Component, pageProps, router }: MyAppProps) {
                 <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)" />
             </Head>
 
-            <div className="min-h-screen bg-gradient-to-bl from-white via-white to-gray-50 dark:from-black dark:via-[#0d131f] dark:to-[#0d131f] transition-colors duration-300">
+            <div className="min-h-screen bg-gradient-to-bl from-white via-gray-50 to-white dark:from-black dark:via-[#0d131f] dark:to-[#0d131f] transition-colors duration-300">
                 <div className="flex justify-center">
                     <Nav />
                 </div>
                 <main className="w-full flex justify-center px-4">
                     <div className="w-full max-w-4xl text-black dark:text-white">
-                        <AnimatePresence initial={false}>
+                        <AnimatePresence mode="wait" initial={false}>
                             <motion.div
-                                key={routerRef.pathname}
+                                key={router.asPath}
                                 variants={pageVariants}
                                 initial="hidden"
                                 animate="visible"
@@ -186,7 +200,7 @@ function MyApp({ Component, pageProps, router }: MyAppProps) {
                     }
                 `}</style>
             </div>
-        </ReactLenis>
+        </>
     );
 }
 

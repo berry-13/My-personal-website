@@ -18,7 +18,6 @@ export default async function awake(req: NextApiRequest, res: NextApiResponse) {
 
     const now = Date.now();
 
-    // Global rate limit check
     if (now - globalRateLimit.timestamp < globalWindowSizeInMilliseconds) {
         if (globalRateLimit.count >= maxRequestsGlobal) {
             return res.status(429).json({ result: "Global rate limit exceeded" });
@@ -31,14 +30,12 @@ export default async function awake(req: NextApiRequest, res: NextApiResponse) {
 
     const ip = req.headers["x-forwarded-for"] || req.socket.remoteAddress;
 
-    // Expire old entries
     rateLimits.forEach((value, key) => {
         if (now - value.timestamp > windowSizeInSeconds * 1000) {
             rateLimits.delete(key);
         }
     });
 
-    // Check and update rate limit for IP
     const rateLimitInfo = rateLimits.get(ip as string);
     if (rateLimitInfo) {
         if (now - rateLimitInfo.timestamp < windowSizeInSeconds * 1000) {
@@ -62,13 +59,25 @@ export default async function awake(req: NextApiRequest, res: NextApiResponse) {
             },
         };
 
-        const response = await axios.get(`${process.env.AWAKE_BASE_URL}/api/states/${process.env.DEVICE}`, config);
+        const responseDoNotDisturb = await axios.get(
+            `${process.env.AWAKE_BASE_URL}/api/states/${process.env.DEVICE}`,
+            config
+        );
+        const responseAwake = await axios.get(
+            `${process.env.AWAKE_BASE_URL}/api/states/${process.env.SENSOR_AWAKE}`,
+            config
+        );
 
-        if (response.data.err) return res.status(500).json({ result: "API_ERROR" });
+        if (responseDoNotDisturb.data.err || responseAwake.data.err)
+            return res.status(500).json({ result: "API_ERROR" });
 
-        const isDoNotDisturb = response.data.state === "undefined" ? "false" : response.data.state !== "off";
+        const isDoNotDisturb =
+            responseDoNotDisturb.data.state === "undefined" ? "false" : responseDoNotDisturb.data.state !== "off";
+        const isAwake = responseAwake.data.state === "True" ? true : false;
 
-        return res.status(200).json({ result: "Success", isDoNotDisturb });
+        console.log(isAwake);
+
+        return res.status(200).json({ result: "Success", isDoNotDisturb, isAwake: isAwake });
     } catch (error) {
         return res.status(500).json({ result: "API_CALL_FAILED", error: error as any });
     }

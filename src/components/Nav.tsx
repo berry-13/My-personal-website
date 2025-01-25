@@ -1,16 +1,15 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { useRouter } from "next/router";
-import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { Tooltip } from "react-tippy";
 import { FiMail } from "react-icons/fi";
+import { useRouter } from "next/router";
 import { BsTwitterX } from "react-icons/bs";
 import { HiMenu, HiX } from "react-icons/hi";
 import { SiGithub, SiLinkedin } from "react-icons/si";
-import { classNames } from "@/src/util";
+import { AnimatePresence, motion } from "framer-motion";
 import ThemeToggle from "./ThemeToggle";
+import { cn } from "~/utils";
 
-// Navigation animation variants
 const navVariants = {
     hidden: { y: -20, opacity: 0 },
     visible: {
@@ -49,7 +48,7 @@ const LandingButton = ({ name, link, selected }: ButtonProps) => {
             <Link
                 href={link}
                 aria-current={selected ? "page" : undefined}
-                className={classNames(
+                className={cn(
                     "relative px-4 py-2 text-sm rounded-md transition-all duration-200",
                     "hover:text-black dark:hover:text-white",
                     selected
@@ -76,7 +75,7 @@ const MobileLandingButton = ({ name, link, selected, onClick }: ButtonProps) => 
             href={link}
             aria-current={selected ? "page" : undefined}
             onClick={onClick}
-            className={classNames(
+            className={cn(
                 "flex-grow flex justify-center items-center py-4 text-base transition-all duration-200",
                 "border border-slate-800/30 hover:bg-black/5 dark:hover:bg-white/5",
                 selected
@@ -98,21 +97,21 @@ interface LinkButtonProps {
 const LinkButton = ({ title, icon, href }: LinkButtonProps) => {
     return (
         <motion.div variants={itemVariants}>
-            <Tooltip title={title} position="top" duration={200}>
+            <Tooltip
+                title={title}
+                position="top"
+                trigger="mouseenter"
+                animation="scale"
+            >
                 <a
                     href={href}
                     target="_blank"
                     rel="noreferrer"
-                    aria-label={`Visit my ${title} profile`}
-                    className="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 transition-all duration-200"
+                    className="p-2 rounded-full transition-all duration-200"
                 >
-                    <motion.div
-                        whileHover={{ scale: 1.05 }}
-                        whileTap={{ scale: 0.95 }}
-                        className="text-gray-600 dark:text-gray-400 hover:text-black dark:hover:text-white transition-colors duration-200"
-                    >
+                    <div className="text-gray-700 hover:text-gray-950 dark:text-gray-400 dark:hover:text-gray-50 transition-colors duration-200">
                         {icon}
-                    </motion.div>
+                    </div>
                 </a>
             </Tooltip>
         </motion.div>
@@ -123,9 +122,7 @@ const Nav = () => {
     const router = useRouter();
     const [mobileMenuOpen, setMenuOpen] = useState(false);
     const [scrolled, setScrolled] = useState(false);
-    const shouldReduceMotion = useReducedMotion();
 
-    // Handle scroll effect
     useEffect(() => {
         const handleScroll = () => {
             setScrolled(window.scrollY > 20);
@@ -145,9 +142,9 @@ const Nav = () => {
                 variants={navVariants}
                 initial="hidden"
                 animate="visible"
-                className={classNames(
-                    "hidden z-[999] fixed w-[90%] md:w-[60rem] xs:flex items-center justify-between",
-                    "px-4 mt-4 md:mt-6 rounded-xl backdrop-blur-lg transition-all duration-300",
+                className={cn(
+                    "hidden z-[999] fixed w-11/12 lg:w-[60rem] xs:flex items-center justify-between",
+                    "px-4 mt-4 lg:mt-6 rounded-xl backdrop-blur-lg transition-all duration-300 h-16",
                     scrolled
                         ? "bg-white/80 dark:bg-[#12181d]/80 shadow-lg shadow-black/[0.03]"
                         : "bg-white/60 dark:bg-[#12181d]/60",
@@ -169,7 +166,8 @@ const Nav = () => {
                         icon={<SiGithub className="w-6 h-6" />}
                     />
                     <LinkButton
-                        title="Twitter"
+                        title="X (Twitter 🐦)"
+                        aria-label="Twitter"
                         href="https://x.com/berry13000"
                         icon={<BsTwitterX className="w-6 h-6" />}
                     />
@@ -213,8 +211,8 @@ const Nav = () => {
             </motion.nav>
 
             <AnimatePresence>
-                {mobileMenuOpen && (
-                    <>
+                {mobileMenuOpen ? (
+                    <div key="mobile-menu-container">
                         <motion.div
                             key="backdrop"
                             initial={{ opacity: 0 }}
@@ -274,8 +272,8 @@ const Nav = () => {
                                 </div>
                             </div>
                         </motion.div>
-                    </>
-                )}
+                    </div>
+                ) : null}
             </AnimatePresence>
         </>
     );
