@@ -123,7 +123,7 @@ const RepoGrid: React.FC<RepoGridProps> = ({ libreRepo, topRepos, isLoading, isE
                     whileHover={{ scale: 1.02, y: -2 }}
                     className="group bg-gray-50 border dark:border-transparent dark:bg-gray-800/50 
                      dark:hover:bg-gray-800/80 backdrop-blur-lg rounded-xl p-6 
-                     hover:shadow-lg transition-all duration-300"
+                     hover:shadow-lg transition-transform duration-300"
                 >
                     <h3
                         className="text-xl font-semibold mb-2 text-gray-900 dark:text-gray-100 
@@ -162,69 +162,73 @@ const Index: React.FC<IndexProps> = ({ topRepos, libreRepo }) => {
     const { repos, isLoading, isError } = useRepos();
 
     return (
-        <AnimatePresence>
-            <motion.main
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                className="max-w-4xl mx-auto px-6 py-24"
+<AnimatePresence>
+    <motion.main
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        className="max-w-4xl mx-auto px-6 py-24"
+    >
+        <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
+            className="mb-16"
+        >
+            <h1 className="text-5xl md:text-6xl font-bold mb-6">Hey, I'm Marco! 👋</h1>
+            <p className="text-xl text-gray-600 dark:text-gray-300">
+                A core contributor to{" "}
+                <ExternalLink href="https://librechat.ai">LibreChat</ExternalLink>, specializing in AI integration and full-stack development
+            </p>
+        </motion.div>
+
+        <Section title="What I Do" emoji="💭">
+            <p>
+                As a core contributor to LibreChat with over 170 PRs, I've implemented critical features including speech-to-text/text-to-speech integration,
+                accessibility improvements, and authentication systems. My work spans from user interface optimization to robust backend functionality, consistently
+                pushing the boundaries of AI integration in web applications.
+            </p>
+        </Section>
+
+        <Section title="Technical Expertise" emoji="🤖">
+            <p className="mb-8">
+                Proficient in TypeScript, JavaScript, React, and Next.js for frontend development, with strong capabilities in Python
+                for AI integration. Experienced with Arduino for hardware projects and Bash for automation. My focus is on creating
+                seamless, accessible, and performant applications that leverage cutting-edge AI technologies.
+            </p>
+            <Suspense
+                fallback={<div className="w-full h-32 animate-pulse bg-gray-200 dark:bg-gray-800 rounded-md" />}
             >
-                <motion.div
-                    initial={{ opacity: 0, y: 30 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
-                    className="mb-16"
-                >
-                    <h1 className="text-5xl md:text-6xl font-bold mb-6">Hey, I'm Berry! 👋</h1>
-                    <p className="text-xl text-gray-600 dark:text-gray-300">
-                        A self-taught software engineer from Italy, currently working on{" "}
-                        <ExternalLink href="https://librechat.ai">LibreChat</ExternalLink>
-                    </p>
-                </motion.div>
+                <TechIcons />
+            </Suspense>
+        </Section>
 
-                <Section title="What I Do" emoji="💭">
-                    <p>
-                        I'm passionate about creating open-source projects on{" "}
-                        <ExternalLink href="https://github.com/berry-13">GitHub</ExternalLink>, learning from others and
-                        sharing knowledge. Currently focused on LibreChat, integrating multiple AI models and enhancing
-                        client features.
-                    </p>
-                </Section>
+        <Section title="Notable Projects" emoji="🛠️">
+            <p>
+                Created "Banfi Zombi" in Unreal Engine 5, featuring adaptive AI NPCs whose storylines dynamically evolve based on
+                player interactions and choices, creating unique experiences for each user. Led the implementation of LibreChat's
+                audio capabilities, integrating WebRTC and websockets for AI Speech-to-Speech conversations, seamlessly combining
+                VAD-STT-LLM-TTS technologies for natural interactions.
+            </p>
+        </Section>
 
-                <Section title="Technologies" emoji="🤖">
-                    <p className="mb-8">Specialized in AI and full-stack development, with expertise in:</p>
-                    <Suspense
-                        fallback={<div className="w-full h-32 animate-pulse bg-gray-200 dark:bg-gray-800 rounded-md" />}
-                    >
-                        <TechIcons />
-                    </Suspense>
-                </Section>
+        <Section title="Featured Projects" emoji="✨">
+            <RepoGrid
+                libreRepo={repos?.libreChatRepos ?? []}
+                topRepos={repos?.berryRepos ?? []}
+                isLoading={isLoading}
+                isError={isError}
+            />
+        </Section>
 
-                <Section title="My Journey" emoji="🚀">
-                    <p>
-                        Starting with Python and PyTorch in late 2021, I've evolved through various projects - from
-                        Discord bots to AI integration. By 2022, I was working with OpenAI's APIs and creating
-                        innovative solutions.
-                    </p>
-                </Section>
-
-                <Section title="Featured Projects" emoji="✨">
-                    <RepoGrid
-                        libreRepo={repos?.libreChatRepos ?? []}
-                        topRepos={repos?.berryRepos ?? []}
-                        isLoading={isLoading}
-                        isError={isError}
-                    />
-                </Section>
-
-                <footer className="mt-24 text-center text-gray-600 dark:text-gray-400">
-                    <p>
-                        Built with ❤️ and inspiration from{" "}
-                        <ExternalLink href="https://cnrad.dev">cnrad.dev</ExternalLink>
-                    </p>
-                </footer>
-            </motion.main>
-        </AnimatePresence>
+        <footer className="mt-24 text-center text-gray-600 dark:text-gray-400">
+            <p>
+                Built with ❤️ and inspiration from{" "}
+                <ExternalLink href="https://cnrad.dev">cnrad.dev</ExternalLink>
+            </p>
+        </footer>
+    </motion.main>
+</AnimatePresence>
     );
 };
 
