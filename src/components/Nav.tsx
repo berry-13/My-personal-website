@@ -10,6 +10,22 @@ import { AnimatePresence, motion } from "framer-motion";
 import ThemeToggle from "./ThemeToggle";
 import { cn } from "~/utils";
 
+interface LandingButtonProps {
+    name: string;
+    link: string;
+    selected: boolean;
+}
+
+interface MobileNavButtonProps extends LandingButtonProps {
+    onClick: () => void;
+}
+
+interface LinkButtonProps {
+    title: string;
+    icon: React.ReactNode;
+    href: string;
+}
+
 const navVariants = {
     hidden: { y: -20, opacity: 0 },
     visible: {
@@ -35,7 +51,7 @@ const itemVariants = {
     },
 };
 
-const LandingButton = ({ name, link, selected }) => (
+const LandingButton = ({ name, link, selected }: LandingButtonProps) => (
     <motion.div variants={itemVariants}>
         <Link
             href={link}
@@ -60,7 +76,7 @@ const LandingButton = ({ name, link, selected }) => (
     </motion.div>
 );
 
-const MobileNavButton = ({ name, link, selected, onClick }) => (
+const MobileNavButton = ({ name, link, selected, onClick }: MobileNavButtonProps) => (
     <Link
         href={link}
         onClick={onClick}
@@ -77,7 +93,7 @@ const MobileNavButton = ({ name, link, selected, onClick }) => (
     </Link>
 );
 
-const LinkButton = ({ title, icon, href }) => (
+const LinkButton = ({ title, icon, href }: LinkButtonProps) => (
     <motion.div variants={itemVariants}>
         <Tooltip title={title} position="top" animation="scale">
             <a
