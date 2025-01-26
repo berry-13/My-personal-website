@@ -6,18 +6,16 @@ type Data = {
     message: string;
 };
 
-export default function handler(req: NextApiRequest, res: NextApiResponse) {
-
+export default async function handler(req: NextApiRequest, res: NextApiResponse) {
     const data = req.body as Data;
 
     if (!data) return res.status(500).json({ result: "lol, nice try :)" });
-
     if (data.message.length < 1 || data.email.length < 1) return res.status(500).json({ result: "FIELD_EMPTY" });
     if (data.message.length > 1000) return res.status(500).json({ result: "MESSAGE_TOO_LONG" });
     if (data.email.length > 500) return res.status(500).json({ result: "NAME_TOO_LONG" });
 
-    axios
-        .post(process.env.WEBHOOK_URL as string, {
+    try {
+        const response = await axios.post(process.env.WEBHOOK_URL as string, {
             embeds: [
                 {
                     color: 3108090,
@@ -28,9 +26,11 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
                     description: data.message,
                 },
             ],
-        })
-        .then(response => {
-            if (response.data.err) return res.status(500).json({ result: "DISCORD_API_ERROR" });
-            return res.status(200).json({ result: "Success" });
         });
+
+        if (response.data.err) return res.status(500).json({ result: "DISCORD_API_ERROR" });
+        return res.status(200).json({ result: "Success" });
+    } catch (error) {
+        return res.status(500).json({ result: "DISCORD_API_ERROR" });
+    }
 }

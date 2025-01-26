@@ -1,41 +1,94 @@
 import { useEffect, useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { format, getHours } from "date-fns";
+import { formatInTimeZone, toZonedTime } from "date-fns-tz";
+
+interface TimeStatus {
+    time: string;
+    awake: boolean;
+    doNotDisturb: boolean;
+}
 
 const TimeStatus = () => {
-    const [time, setTime] = useState<string>("00:00:00 p.m.");
-    const [awake, setAwake] = useState<boolean>(true);
-    const [doNotDisturb, setDoNotDisturb] = useState<boolean>(false);
+    const [status, setStatus] = useState<TimeStatus>({
+        time: "00:00 AM",
+        awake: true,
+        doNotDisturb: false,
+    });
 
-    async function fetchAwake() {
-        let response = await fetch("/api/awake");
+    const updateTime = () => {
+        const now = new Date();
+        const romeTime = toZonedTime(now, "Europe/Rome");
+        const formattedTime = formatInTimeZone(now, "Europe/Rome", "hh:mm a");
+        const hour = getHours(romeTime);
 
-        const data = await response.json();
-
-        if (data.isDoNotDisturb) setDoNotDisturb(true);
-    }
-
-    function updateTime() {
-        let current = new Date().toLocaleString("en-US", { timeZone: "Europe/Rome" });
-        setTime(`${current.slice(-11, -6)}${current.slice(-3, -1)}.M.`);
-        setTimeout(updateTime, 60 * 1000);
-
-        if (new Date().getHours() < 7) setAwake(false);
-    }
+        setStatus(prev => ({
+            ...prev,
+            time: formattedTime,
+        }));
+    };
 
     useEffect(() => {
         updateTime();
-        fetchAwake();
+        const interval = setInterval(updateTime, 60000);
+
+        fetch("/api/awake")
+            .then(res => res.json())
+            .then(data => {
+                setStatus(prev => ({
+                    ...prev,
+                    doNotDisturb: data.isDoNotDisturb,
+                    awake: data.isAwake,
+                }));
+            })
+            .catch(console.error);
+
+        return () => clearInterval(interval);
     }, []);
 
+    console.log(status);
+
     return (
-        <p className="text-black/50 dark:text-white/50 text-sm mb-10">
-            It's currently <span className="font-semibold text-black/60 dark:text-white/60">{time}</span> for me, so I'm
-            probably{" "}
-            <span className="font-semibold text-black/60 dark:text-white/60">{awake ? "awake" : "sleeping"}</span>
-            {awake && doNotDisturb && " but I have "}
-            <span className="font-semibold text-black/60 dark:text-white/60">
-                {awake && doNotDisturb && "do not disturb mode enabled."}
-            </span>
-        </p>
+        <motion.p
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="text-black/50 dark:text-white/50 text-sm mb-10 tracking-wide"
+        >
+            It's currently{" "}
+            <motion.span className="font-medium text-black/60 dark:text-white/60" whileHover={{ scale: 1.05 }}>
+                {status.time}
+            </motion.span>{" "}
+            for me and I'm probably{" "}
+            <AnimatePresence mode="wait">
+                <motion.span
+                    key={status.awake ? "awake" : "sleeping"}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    className={`font-medium ${
+                        status.awake
+                            ? "text-green-500/80 dark:text-green-400/80"
+                            : "text-blue-500/80 dark:text-blue-400/80"
+                    }`}
+                >
+                    {status.awake ? "awake" : "sleeping"}
+                </motion.span>
+            </AnimatePresence>
+            {status.doNotDisturb && status.awake && (
+                <>
+                    {" "}
+                    but I have{" "}
+                    <motion.span
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        className="font-medium text-amber-500/80 dark:text-amber-400/80"
+                    >
+                        do not disturb mode enabled on my phone
+                    </motion.span>
+                </>
+            )}
+            .
+        </motion.p>
     );
 };
 

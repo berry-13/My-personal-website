@@ -15,13 +15,13 @@ module.exports = {
                 permanent: true,
             },
             {
-                source: "/twitter",
-                destination: "https://twitter.com/Berry13000",
+                source: "/x",
+                destination: "https://x.com/Berry13000",
                 permanent: true,
             },
             {
                 source: "/linkedin",
-                destination: "https://linkedin.com/in/marco-beretta-593635274/",
+                destination: "https://linkedin.com/in/marco-beretta-berry/",
                 permanent: true,
             },
         ];

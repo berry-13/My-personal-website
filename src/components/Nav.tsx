@@ -1,183 +1,279 @@
-import { AnimatePresence, motion } from "framer-motion";
-import { SiTwitter, SiGithub, SiLinkedin } from "react-icons/si";
-import { FiMail } from "react-icons/fi";
+import { useState, useEffect } from "react";
 import Link from "next/link";
-import { useRouter } from "next/router";
-import ThemeToggle from "./ThemeToggle";
-import { classNames } from "../util/classNames";
-import { useState } from "react";
-import { HiMenu, HiX } from "react-icons/hi";
 import { Tooltip } from "react-tippy";
+import { FiMail } from "react-icons/fi";
+import { useRouter } from "next/router";
+import { BsTwitterX } from "react-icons/bs";
+import { HiMenu, HiX } from "react-icons/hi";
+import { SiGithub, SiLinkedin } from "react-icons/si";
+import { AnimatePresence, motion } from "framer-motion";
+import ThemeToggle from "./ThemeToggle";
+import { cn } from "~/utils";
 
-const LandingButton = ({ name, link, selected }: { name: string; link: string; selected: boolean }) => {
-    return (
-        <Link href={link}>
-            <a
-                className={classNames(
-                    selected
-                        ? "bg-black/10 dark:bg-[#c8c8dc]/10"
-                        : "bg-transparent hover:bg-gray-700/5 dark:hover:bg-[#c8c8dc]/5 dark:text-white",
-                    "cursor-pointer px-4 py-2 text-sm rounded-md text-black/80 hover:text-black dark:text-white/80 dark:hover:text-white transition-all duration-75"
-                )}
-            >
-                {name}
-            </a>
-        </Link>
-    );
+const navVariants = {
+    hidden: { y: -20, opacity: 0 },
+    visible: {
+        y: 0,
+        opacity: 1,
+        transition: {
+            duration: 0.6,
+            ease: [0.22, 1, 0.36, 1],
+            staggerChildren: 0.1,
+        },
+    },
 };
 
-const MobileLandingButton = ({
-    name,
-    link,
-    selected,
-    onClick,
-}: {
+const itemVariants = {
+    hidden: { y: -10, opacity: 0 },
+    visible: {
+        y: 0,
+        opacity: 1,
+        transition: {
+            duration: 0.5,
+            ease: [0.22, 1, 0.36, 1],
+        },
+    },
+};
+
+interface ButtonProps {
     name: string;
     link: string;
     selected: boolean;
-    onClick: () => void;
-}) => {
+    onClick?: () => void;
+}
+
+const LandingButton = ({ name, link, selected }: ButtonProps) => {
     return (
-        <Link href={link}>
-            <a
-                className={classNames(
-                    selected ? "bg-black/10 dark:bg-[#c8c8dc]/10" : "bg-transparent dark:text-white",
-                    "flex flex-grow justify-center border border-slate-800/30 cursor-pointer w-auto py-4 text-base text-black/80 dark:text-white/80 transition-all duration-75"
+        <motion.div variants={itemVariants}>
+            <Link
+                href={link}
+                aria-current={selected ? "page" : undefined}
+                className={cn(
+                    "relative px-4 py-2 text-sm rounded-md transition-all duration-200",
+                    "hover:text-black dark:hover:text-white",
+                    selected
+                        ? "text-black dark:text-white bg-black/10 dark:bg-white/10"
+                        : "text-black/70 dark:text-white/70"
                 )}
-                onClick={onClick}
             >
                 {name}
-            </a>
+                {selected && (
+                    <motion.div
+                        layoutId="navIndicator"
+                        className="absolute inset-0 rounded-md bg-black/10 dark:bg-white/10 -z-10"
+                        transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
+                    />
+                )}
+            </Link>
+        </motion.div>
+    );
+};
+
+const MobileLandingButton = ({ name, link, selected, onClick }: ButtonProps) => {
+    return (
+        <Link
+            href={link}
+            aria-current={selected ? "page" : undefined}
+            onClick={onClick}
+            className={cn(
+                "flex-grow flex justify-center items-center py-4 text-base transition-all duration-200",
+                "border border-slate-800/30 hover:bg-black/5 dark:hover:bg-white/5",
+                selected
+                    ? "text-black dark:text-white bg-black/10 dark:bg-white/10"
+                    : "text-black/70 dark:text-white/70"
+            )}
+        >
+            {name}
         </Link>
     );
 };
 
-const LinkButton = ({ title, icon, href }: any) => {
+interface LinkButtonProps {
+    title: string;
+    href: string;
+    icon: React.ReactNode;
+}
+
+const LinkButton = ({ title, icon, href }: LinkButtonProps) => {
     return (
-        <Tooltip title={title} position={"top"} duration={250}>
-            <a target="_blank" rel="noreferrer" href={href}>
-                {icon}
-            </a>
-        </Tooltip>
+        <motion.div variants={itemVariants}>
+            <Tooltip
+                title={title}
+                position="top"
+                trigger="mouseenter"
+                animation="scale"
+            >
+                <a
+                    href={href}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="p-2 rounded-full transition-all duration-200"
+                >
+                    <div className="text-gray-700 hover:text-gray-950 dark:text-gray-400 dark:hover:text-gray-50 transition-colors duration-200">
+                        {icon}
+                    </div>
+                </a>
+            </Tooltip>
+        </motion.div>
     );
 };
 
 const Nav = () => {
     const router = useRouter();
-
     const [mobileMenuOpen, setMenuOpen] = useState(false);
+    const [scrolled, setScrolled] = useState(false);
+
+    useEffect(() => {
+        const handleScroll = () => {
+            setScrolled(window.scrollY > 20);
+        };
+
+        window.addEventListener("scroll", handleScroll);
+        return () => window.removeEventListener("scroll", handleScroll);
+    }, []);
+
     const toggleMenu = () => {
-        setMenuOpen(old => !old);
+        setMenuOpen(prev => !prev);
     };
 
     return (
         <>
-            <motion.div className="hidden z-[999] fixed w-[90%] md:w-[50rem] xs:flex flex-row justify-between items-center px-4 py-2 mt-4 md:mt-6 rounded-md bg-white/60 dark:bg-[#12181d]/60 border border-slate-800/50 backdrop-blur-lg">
-                <div className="flex flex-row items-center justify-between gap-2">
+            <motion.nav
+                variants={navVariants}
+                initial="hidden"
+                animate="visible"
+                className={cn(
+                    "hidden z-[999] fixed w-11/12 lg:w-[60rem] xs:flex items-center justify-between",
+                    "px-4 mt-4 lg:mt-6 rounded-xl backdrop-blur-lg transition-all duration-300 h-16",
+                    scrolled
+                        ? "bg-white/80 dark:bg-[#12181d]/80 shadow-lg shadow-black/[0.03]"
+                        : "bg-white/60 dark:bg-[#12181d]/60",
+                    "border border-slate-800/50"
+                )}
+                role="navigation"
+                aria-label="Main navigation"
+            >
+                <div className="flex items-center space-x-2">
                     <ThemeToggle />
                     <LandingButton name="Home" link="/" selected={router.pathname === "/"} />
                     <LandingButton name="Contact" link="/contact" selected={router.pathname === "/contact"} />
                 </div>
 
-                <div className="flex flex-row items-center justify-center gap-2 xs:gap-4">
+                <div className="flex items-center space-x-4">
                     <LinkButton
                         title="GitHub"
-                        href={"https://github.com/berry-13"}
-                        icon={
-                            <SiGithub className="w-6 h-6 cursor-pointer hover:fill-white fill-gray-400 transition-colors" />
-                        }
+                        href="https://github.com/berry-13"
+                        icon={<SiGithub className="w-6 h-6" />}
                     />
                     <LinkButton
-                        title="X"
-                        href={"https://x.com/berry13000"}
-                        icon={
-                            <SiTwitter className="w-6 h-6 cursor-pointer hover:fill-white fill-gray-400 transition-colors" />
-                        }
+                        title="X (Twitter 🐦)"
+                        aria-label="Twitter"
+                        href="https://x.com/berry13000"
+                        icon={<BsTwitterX className="w-6 h-6" />}
                     />
                     <LinkButton
                         title="LinkedIn"
-                        href={"https://linkedin.com/in/marco-beretta-berry"}
-                        icon={
-                            <SiLinkedin className="w-6 h-6 cursor-pointer hover:fill-white fill-gray-400 transition-colors" />
-                        }
+                        href="https://linkedin.com/in/marco-beretta-berry"
+                        icon={<SiLinkedin className="w-6 h-6" />}
                     />
-                    <LinkButton
-                        title="Email"
-                        href={"mailto:berry@librechat.ai"}
-                        icon={
-                            <FiMail className="w-6 h-6 cursor-pointer hover:stroke-white stroke-gray-400 transition-colors" />
-                        }
-                    />
+                    <LinkButton title="Email" href="mailto:berry@librechat.ai" icon={<FiMail className="w-6 h-6 " />} />
                 </div>
-            </motion.div>
+            </motion.nav>
 
-            <motion.div className="xs:hidden z-[990] fixed w-full flex flex-row justify-between items-center px-4 py-3 bg-white/60 dark:bg-[#12181d]/60 border-b border-slate-800/50 backdrop-blur-lg">
-                <div className="flex flex-row items-center justify-between gap-2">
-                    <ThemeToggle />
-                </div>
+            {/* Mobile Navigation */}
+            <motion.nav
+                initial={false}
+                animate={scrolled ? "scrolled" : "top"}
+                variants={{
+                    scrolled: {
+                        backgroundColor: "rgba(255, 255, 255, 0.8)",
+                        backdropFilter: "blur(12px)",
+                    },
+                    top: {
+                        backgroundColor: "rgba(255, 255, 255, 0.6)",
+                        backdropFilter: "blur(8px)",
+                    },
+                }}
+                className="xs:hidden z-[1001] fixed w-full flex items-center justify-between px-4 py-3 border-b border-slate-800/50 bg-white/80 dark:bg-[#12181d]/80 backdrop-blur-xl transition-all duration-300"
+            >
+                <ThemeToggle />
+                <motion.button
+                    whileTap={{ scale: 0.95 }}
+                    onClick={toggleMenu}
+                    className="p-2 rounded-lg hover:bg-black/5 dark:hover:bg-white/5 transition-colors duration-200"
+                    aria-label={mobileMenuOpen ? "Close menu" : "Open menu"}
+                    aria-expanded={mobileMenuOpen}
+                >
+                    <motion.div animate={{ rotate: mobileMenuOpen ? 90 : 0 }} transition={{ duration: 0.2 }}>
+                        {mobileMenuOpen ? <HiX className="w-6 h-6" /> : <HiMenu className="w-6 h-6" />}
+                    </motion.div>
+                </motion.button>
+            </motion.nav>
 
-                <div className="flex flex-row items-center justify-center">
-                    <button onClick={toggleMenu} className="h-9 w-9 flex items-center justify-center">
-                        {!mobileMenuOpen ? <HiMenu className="w-7 h-7" /> : <HiX className="w-7 h-7" />}
-                    </button>
-                </div>
-            </motion.div>
-
-            <AnimatePresence exitBeforeEnter>
-                {mobileMenuOpen && (
-                    <>
+            <AnimatePresence>
+                {mobileMenuOpen ? (
+                    <div key="mobile-menu-container">
                         <motion.div
-                            key="NavBackdrop"
+                            key="backdrop"
                             initial={{ opacity: 0 }}
                             animate={{ opacity: 1 }}
                             exit={{ opacity: 0 }}
-                            transition={{ duration: 0.1, ease: "easeInOut" }}
-                            className="z-[500] fixed w-full h-screen overflow-hidden backdrop-blur-md bg-black/10 flex flex-col items-center justify-content"
+                            transition={{ duration: 0.3 }}
+                            className="fixed inset-0 z-[1000] bg-black/30 dark:bg-black/50 backdrop-blur-sm"
+                            onClick={() => setMenuOpen(false)}
+                            aria-hidden="true"
                         />
 
                         <motion.div
-                            key="NavMenu"
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            exit={{ opacity: 0 }}
-                            transition={{ duration: 0.1, ease: "easeInOut" }}
-                            className="flex flex-col items-center justify-start mt-16 fixed w-full h-auto z-[700] bg-white dark:bg-[#090c0f] border-x border-b border-slate-800/30"
+                            key="mobile-menu"
+                            initial={{ opacity: 0, y: -20, scale: 0.95 }}
+                            animate={{ opacity: 1, y: 0, scale: 1 }}
+                            exit={{ opacity: 0, y: -20, scale: 0.95 }}
+                            transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+                            className="fixed z-[1002] w-full bg-white dark:bg-[#090c0f] border-b border-slate-800/30 shadow-lg shadow-black/[0.03]"
                         >
-                            <div className="flex flex-row w-full justify-evenly">
-                                <MobileLandingButton
-                                    name="Home"
-                                    link="/"
-                                    selected={router.pathname === "/"}
-                                    onClick={() => setMenuOpen(false)}
-                                />
-                                <MobileLandingButton
-                                    name="Contact"
-                                    link="/contact"
-                                    selected={router.pathname === "/contact"}
-                                    onClick={() => setMenuOpen(false)}
-                                />
-                            </div>
-                            <div className="flex flex-row items-center justify-center gap-6 py-4">
-                                <LinkButton
-                                    href={"https://github.com/berry-13"}
-                                    icon={<SiGithub className="w-6 h-6 cursor-pointer" />}
-                                />
-                                <LinkButton
-                                    href={"https://x.com/Berry13000"}
-                                    icon={<SiTwitter className="w-6 h-6 cursor-pointer" />}
-                                />
-                                <LinkButton
-                                    href={"https://linkedin.com/in/marco-beretta-berry/"}
-                                    icon={<SiLinkedin className="w-6 h-6 cursor-pointer" />}
-                                />
-                                <LinkButton
-                                    href={"mailto:berry@librechat.ai"}
-                                    icon={<FiMail className="w-6 h-6 cursor-pointer" />}
-                                />
+                            <div className="flex flex-col space-y-4 p-4 mt-14">
+                                <div className="grid grid-cols-2 gap-2">
+                                    <MobileLandingButton
+                                        name="Home"
+                                        link="/"
+                                        selected={router.pathname === "/"}
+                                        onClick={() => setMenuOpen(false)}
+                                    />
+                                    <MobileLandingButton
+                                        name="Contact"
+                                        link="/contact"
+                                        selected={router.pathname === "/contact"}
+                                        onClick={() => setMenuOpen(false)}
+                                    />
+                                </div>
+
+                                <div className="flex justify-center space-x-6 py-4 border-t border-slate-800/30">
+                                    <LinkButton
+                                        title="GitHub"
+                                        href="https://github.com/berry-13"
+                                        icon={<SiGithub className="w-6 h-6" />}
+                                    />
+                                    <LinkButton
+                                        title="Twitter"
+                                        href="https://x.com/Berry13000"
+                                        icon={<BsTwitterX className="w-6 h-6" />}
+                                    />
+                                    <LinkButton
+                                        title="LinkedIn"
+                                        href="https://linkedin.com/in/marco-beretta-berry/"
+                                        icon={<SiLinkedin className="w-6 h-6" />}
+                                    />
+                                    <LinkButton
+                                        title="Email"
+                                        href="mailto:berry@librechat.ai"
+                                        icon={<FiMail className="w-6 h-6" />}
+                                    />
+                                </div>
                             </div>
                         </motion.div>
-                    </>
-                )}
+                    </div>
+                ) : null}
             </AnimatePresence>
         </>
     );

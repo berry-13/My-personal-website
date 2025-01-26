@@ -9,9 +9,15 @@ interface TechProps {
 export const TechItem = ({ name, icon }: TechProps) => {
     return (
         <li className="flex p-2">
-            <Tooltip title={name} position={"top"} duration={250}>
-                <span>{icon({ className: "h-6 w-6" })}</span>
-            </Tooltip>
+            <Tooltip
+                title={name}
+                position="top"
+                duration={250}
+                trigger="mouseenter"
+                animation="scale"
+                arrow={true}
+                html={<span>{icon({ className: "h-6 w-6" })}</span>}
+            />
         </li>
     );
 };

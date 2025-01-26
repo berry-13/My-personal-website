@@ -1,200 +1,235 @@
-import { motion } from "framer-motion";
-import {
-    SiVisualstudiocode,
-    SiGit,
-    SiDocker,
-    SiTypescript,
-    SiJavascript,
-    SiReact,
-    SiCloudflare,
-    SiUnrealengine,
-    SiArduino,
-    SiRaspberrypi,
-    SiBlender,
-    SiNginx,
-    SiPytorch,
-    SiMongodb,
-    SiOpenai,
-    SiFirebase,
-    SiDiscord,
-    SiKalilinux,
-    SiLinux,
-    SiGnubash,
-    SiGooglecloud,
-} from "react-icons/si";
-import { TechItem } from "../components/TechItem";
-import RepoItem from "../components/RepoItem";
+import dynamic from "next/dynamic";
+import React, { Suspense } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { useInView } from "react-intersection-observer";
+import type { SectionProps, ExternalLinkProps, RepoGridProps, IndexProps } from "@/src/types/types";
+import { getLanguageColor, formatNumber } from "~/utils";
+import { useRepos } from "~/hooks/useRepo";
 
-interface AppProps {
-    topRepos: Record<string, any>[];
-    libreRepo: Record<string, any>[];
-}
-const githubToken = process.env.GITHUB_TOKEN;
+const TechIcons = dynamic(() => import("../components/TechIcons"), {
+    ssr: false,
+    loading: () => <div className="w-full h-32 animate-pulse bg-gray-200 dark:bg-gray-800 rounded-md" />,
+}) as React.ComponentType<{}>;
 
-const Index = ({ topRepos, libreRepo }: AppProps) => {
+const fadeInUp = {
+    hidden: { opacity: 0, y: 20 },
+    visible: {
+        opacity: 1,
+        y: 0,
+        transition: { duration: 0.6, ease: [0.22, 1, 0.36, 1] },
+    },
+};
+
+const staggerContainer = {
+    hidden: { opacity: 0 },
+    visible: {
+        opacity: 1,
+        transition: {
+            staggerChildren: 0.2,
+            delayChildren: 0.1,
+        },
+    },
+};
+
+const Section: React.FC<SectionProps> = ({ title, children, emoji }) => {
+    const [ref, inView] = useInView({
+        threshold: 0.1,
+        triggerOnce: true,
+    });
+
+    return (
+        <motion.section
+            ref={ref}
+            initial="hidden"
+            animate={inView ? "visible" : "hidden"}
+            variants={fadeInUp}
+            className="mb-16"
+        >
+            <h2 className="font-medium text-3xl md:text-4xl mb-6 flex items-center gap-3">
+                {title}
+                <span className="text-2xl">{emoji}</span>
+            </h2>
+            <div className="text-gray-800 dark:text-gray-300 leading-7 tracking-wide">{children}</div>
+        </motion.section>
+    );
+};
+
+const ExternalLink: React.FC<ExternalLinkProps> = ({ href, children }) => (
+    <a
+        href={href}
+        rel="noreferrer"
+        className="inline-flex items-center font-semibold text-violet-500 hover:text-violet-600 dark:hover:text-violet-400 transition-colors duration-200"
+        target="_blank"
+    >
+        {children}
+        <svg className="w-4 h-4 ml-1" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6" strokeWidth="2" strokeLinecap="round" />
+            <path d="M15 3h6v6" strokeWidth="2" strokeLinecap="round" />
+            <path d="M10 14L21 3" strokeWidth="2" strokeLinecap="round" />
+        </svg>
+    </a>
+);
+
+const RepoGrid: React.FC<RepoGridProps> = ({ libreRepo, topRepos, isLoading, isError }) => {
+    if (isError) {
+        return (
+            <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className="rounded-xl p-6 bg-red-500/10 border border-red-500/20 text-red-600 dark:text-red-400"
+            >
+                Failed to load repositories. Please try again later.
+            </motion.div>
+        );
+    }
+
+    if (isLoading) {
+        return (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {[1, 4].map(i => (
+                    <div
+                        key={i}
+                        className="animate-pulse rounded-xl p-6 bg-gray-50 dark:bg-gray-800/50 border dark:border-transparent"
+                    >
+                        <div className="h-6 w-1/3 bg-gray-200 dark:bg-gray-700 rounded mb-4" />
+                        <div className="space-y-2">
+                            <div className="h-4 w-full bg-gray-200 dark:bg-gray-700 rounded" />
+                            <div className="h-4 w-2/3 bg-gray-200 dark:bg-gray-700 rounded" />
+                        </div>
+                        <div className="flex gap-4 mt-4">
+                            <div className="h-4 w-16 bg-gray-200 dark:bg-gray-700 rounded" />
+                            <div className="h-4 w-16 bg-gray-200 dark:bg-gray-700 rounded" />
+                        </div>
+                    </div>
+                ))}
+            </div>
+        );
+    }
+
     return (
         <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.95 }}
-            transition={{ ease: "easeOut", duration: 0.15 }}
-            className="mt-24 w-full mb-32"
+            variants={staggerContainer}
+            initial="hidden"
+            animate="visible"
+            className="grid grid-cols-1 md:grid-cols-2 gap-4"
         >
-            <h1 className="mt-36 font-bold text-4xl md:text-5xl mb-4">Hey, I'm Berry! 👋</h1>
-            <p className="text-gray-800 dark:text-gray-300 leading-6 tracking-wide mb-12">
-                I'm a self-taught 15-year-old full-stack developer from Italy. I'm currently working on{" "}
-                <a
-                    href="https://librechat.ai"
-                    rel="noreferrer"
-                    className="font-semibold text-violet-500 hover:underline"
+            {[...libreRepo, ...topRepos].map(repo => (
+                <motion.a
+                    key={repo.name}
+                    href={repo.html_url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    variants={fadeInUp}
+                    whileHover={{ scale: 1.02, y: -2 }}
+                    className="group bg-gray-50 border dark:border-transparent dark:bg-gray-800/50 
+                     dark:hover:bg-gray-800/80 backdrop-blur-lg rounded-xl p-6 
+                     hover:shadow-lg transition-transform duration-300"
                 >
-                    LibreChat
-                </a>
-                .
-            </p>
-            <h2 className="font-medium text-3xl mb-4">What I Do 💭</h2>
-            <p className="text-gray-800 dark:text-gray-300 leading-6 font-light tracking-wide mb-12">
-                In my free time, I enjoy creating open-source projects on {" "}
-                <a
-                    href="https://github.com/berry-13"
-                    rel="noreferrer"
-                    className="font-semibold text-violet-500 hover:underline"
-                >
-                    GitHub
-                </a>
-                , so I can learn from others and share what I know. Currently, I'm working on LibreChat, a project that
-                immediately caught my attention. LibreChat allows the integration of multiple AI models and enhances
-                original client features like conversation and message search, prompt templates, and plugins.
-            </p>
-            <h2 className="font-medium text-3xl mb-4">AI 🤖</h2>
-            <p className="text-gray-800 dark:text-gray-300 leading-6 font-light tracking-wide mb-6">
-                I have a strong passion for artificial intelligence and have developed skills in various AI-related
-                technologies.
-            </p>
-            <div className="w-full flex flex-wrap flex-row justify-center p-1 border border-slate-800 rounded-md bg-white/10 dark:bg-black/10 mb-12">
-                <TechItem icon={SiTypescript} name="TypeScript" />
-                <TechItem icon={SiJavascript} name="JavaScript" />
-                <TechItem icon={SiReact} name="React.js" />
-                <TechItem icon={SiVisualstudiocode} name="VSCode" />
-                <TechItem icon={SiOpenai} name="OpenAI" />
-                <TechItem icon={SiUnrealengine} name="Unreal Engine" />
-                <TechItem icon={SiCloudflare} name="Cloudflare" />
-                <TechItem icon={SiMongodb} name="MongoDB" />
-                <TechItem icon={SiFirebase} name="Firebase" />
-                <TechItem icon={SiDocker} name="Docker" />
-                <TechItem icon={SiDiscord} name="Discord" />
-                <TechItem icon={SiArduino} name="Arduino" />
-                <TechItem icon={SiRaspberrypi} name="Raspberry Pi" />
-                <TechItem icon={SiKalilinux} name="Kali Linux" />
-                <TechItem icon={SiLinux} name="Linux" />
-                <TechItem icon={SiGnubash} name="Bash" />
-                <TechItem icon={SiBlender} name="Blender" />
-                <TechItem icon={SiGooglecloud} name="Google Cloud" />
-                <TechItem icon={SiGit} name="Git" />
-                <TechItem icon={SiNginx} name="Nginx" />
-                <TechItem icon={SiPytorch} name="PyTorch" />
-            </div>
-            <h2 className="font-medium text-3xl mb-4">Here's how I ventured into the realm of IT 😊</h2>
-            <p className="text-gray-800 dark:text-gray-300 leading-6 font-light tracking-wide mb-6">
-                Towards the end of 2021, I started learning some Python and began to explore PyTorch, working on various
-                simple projects. In June 2022, I created my first project, which was a Discord bot that searched for
-                images on Google based on user input. In August 2022, I had my first experience with OpenAI's APIs, as
-                the same Discord bot started generating images using the OpenAI API.
-            </p>
-            <h2 className="font-medium text-3xl mb-4">Projects 🛠️</h2>
-            <p className="text-gray-800 dark:text-gray-300 leading-6 font-light tracking-wide mb-6">
-                From November to April 2023, I worked on a project in Unreal Engine 5 called "Banfi Zombi," where the
-                goal was to recreate a school belonging to a friend from scratch. From June until now, I have been
-                working on various projects related to LibreChat, continuously adding new features and creating several
-                Discord bots for the LibreChat community. Below are some of my most popular repositories.
-            </p>
-            <div className="w-full grid grid-cols-1 md:grid-cols-2 grid-rows-2 md:grid-rows-1 mb-12 gap-2">
-                {libreRepo.map((repo: Record<string, any>) => (
-                    <RepoItem
-                        key={repo.name}
-                        name={repo.name}
-                        description={
-                            repo.description
-                                ? repo.description.slice(0, 100) + (repo.description.length > 100 ? "..." : "")
-                                : "No description available"
-                        }
-                        stars={repo.stargazers_count}
-                        forks={repo.forks_count}
-                        language={repo.language}
-                    />
-                ))}
-                {topRepos.map((repo: Record<string, any>) => (
-                    <RepoItem
-                        key={repo.name}
-                        name={repo.name}
-                        description={
-                            repo.description
-                                ? repo.description.slice(0, 100) + (repo.description.length > 100 ? "..." : "")
-                                : "No description available"
-                        }
-                        stars={repo.stargazers_count}
-                        forks={repo.forks_count}
-                        language={repo.language}
-                    />
-                ))}
-            </div>
-            <b>HUGE thanks</b> to <a href="https://cnrad.dev">cnrad.dev</a> for the open-source code!
+                    <h3
+                        className="text-xl font-semibold mb-2 text-gray-900 dark:text-gray-100 
+                         group-hover:text-violet-500 dark:group-hover:text-violet-400 
+                         transition-colors duration-300"
+                    >
+                        {repo.name}
+                    </h3>
+                    <p className="text-gray-600 dark:text-gray-400 mb-4">
+                        {repo.description
+                            ? `${repo.description.slice(0, 100)}${repo.description.length > 100 ? "..." : ""}`
+                            : "No description available"}
+                    </p>
+                    <div className="flex items-center gap-4 text-sm">
+                        <span className="flex items-center gap-1">⭐ {formatNumber(repo.stargazers_count)}</span>
+                        <span className="flex items-center gap-1">🔀 {formatNumber(repo.forks_count)}</span>
+                        {repo.language && (
+                            <span className="flex items-center gap-1">
+                                <span
+                                    className="w-3 h-3 rounded-full"
+                                    style={{
+                                        backgroundColor: getLanguageColor(repo.language),
+                                    }}
+                                />
+                                {repo.language}
+                            </span>
+                        )}
+                    </div>
+                </motion.a>
+            ))}
         </motion.div>
     );
 };
 
-export async function getStaticProps() {
-    let libreChatRepo;
-    try {
-        libreChatRepo = await fetch(`https://api.github.com/users/danny-avila/repos?type=owner&per_page=100`, {
-            headers: {
-                Authorization: `token ${githubToken}`,
-            },
-        }).then(res => res.json());
-    } catch (error) {
-        console.error("Failed to fetch repositories:", error);
-        libreChatRepo = [];
-    }
+const Index: React.FC<IndexProps> = ({ topRepos, libreRepo }) => {
+    const { repos, isLoading, isError } = useRepos();
 
-    if (!Array.isArray(libreChatRepo)) {
-        console.error("Fetched data is not an array:", libreChatRepo);
-        libreChatRepo = [];
-    }
+    return (
+<AnimatePresence>
+    <motion.main
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        className="max-w-4xl mx-auto px-6 py-24"
+    >
+        <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
+            className="mb-16"
+        >
+            <h1 className="text-5xl md:text-6xl font-bold mb-6">Hey, I'm Marco! 👋</h1>
+            <p className="text-xl text-gray-600 dark:text-gray-300">
+                A core contributor to{" "}
+                <ExternalLink href="https://librechat.ai">LibreChat</ExternalLink>, specializing in AI integration and full-stack development
+            </p>
+        </motion.div>
 
-    let repos;
-    try {
-        repos = await fetch(`https://api.github.com/users/berry-13/repos?type=owner&per_page=100`, {
-            headers: {
-                Authorization: `token ${githubToken}`,
-            },
-        }).then(res => res.json());
-    } catch (error) {
-        console.error("Failed to fetch repositories:", error);
-        repos = [];
-    }
+        <Section title="What I Do" emoji="💭">
+            <p>
+                As a core contributor to LibreChat with over 170 PRs, I've implemented critical features including speech-to-text/text-to-speech integration,
+                accessibility improvements, and authentication systems. My work spans from user interface optimization to robust backend functionality, consistently
+                pushing the boundaries of AI integration in web applications.
+            </p>
+        </Section>
 
-    if (!Array.isArray(libreChatRepo)) {
-        console.error("Fetched data is not an array:", libreChatRepo);
-        libreChatRepo = [];
-    }
+        <Section title="Technical Expertise" emoji="🤖">
+            <p className="mb-8">
+                Proficient in TypeScript, JavaScript, React, and Next.js for frontend development, with strong capabilities in Python
+                for AI integration. Experienced with Arduino for hardware projects and Bash for automation. My focus is on creating
+                seamless, accessible, and performant applications that leverage cutting-edge AI technologies.
+            </p>
+            <Suspense
+                fallback={<div className="w-full h-32 animate-pulse bg-gray-200 dark:bg-gray-800 rounded-md" />}
+            >
+                <TechIcons />
+            </Suspense>
+        </Section>
 
-    if (!Array.isArray(repos)) {
-        console.error("Fetched data is not an array:", repos);
-        repos = [];
-    }
+        <Section title="Notable Projects" emoji="🛠️">
+            <p>
+                Created "Banfi Zombi" in Unreal Engine 5, featuring adaptive AI NPCs whose storylines dynamically evolve based on
+                player interactions and choices, creating unique experiences for each user. Led the implementation of LibreChat's
+                audio capabilities, integrating WebRTC and websockets for AI Speech-to-Speech conversations, seamlessly combining
+                VAD-STT-LLM-TTS technologies for natural interactions.
+            </p>
+        </Section>
 
-    const topRepos = repos
-        .sort((a: Record<string, any>, b: Record<string, any>) => b.stargazers_count - a.stargazers_count)
-        .slice(0, 1);
+        <Section title="Featured Projects" emoji="✨">
+            <RepoGrid
+                libreRepo={repos?.libreChatRepos ?? []}
+                topRepos={repos?.berryRepos ?? []}
+                isLoading={isLoading}
+                isError={isError}
+            />
+        </Section>
 
-    const libreRepo = libreChatRepo
-        .sort((a: Record<string, any>, b: Record<string, any>) => b.stargazers_count - a.stargazers_count)
-        .slice(0, 1);
-
-    return {
-        props: { topRepos, libreRepo },
-        revalidate: 3600,
-    };
-}
+        <footer className="mt-24 text-center text-gray-600 dark:text-gray-400">
+            <p>
+                Built with ❤️ and inspiration from{" "}
+                <ExternalLink href="https://cnrad.dev">cnrad.dev</ExternalLink>
+            </p>
+        </footer>
+    </motion.main>
+</AnimatePresence>
+    );
+};
 
 export default Index;

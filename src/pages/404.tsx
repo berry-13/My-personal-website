@@ -1,6 +1,6 @@
 import React from "react";
 import { motion } from "framer-motion";
-import Particles from "react-tsparticles";
+import Particles from "@tsparticles/react";
 import { loadSlim } from "tsparticles-slim";
 
 const NotFound: React.FC = () => {
@@ -12,7 +12,7 @@ const NotFound: React.FC = () => {
         <div className="relative h-screen w-full">
             <Particles
                 id="tsparticles"
-                init={particlesInit}
+                particlesLoaded={particlesInit}
                 options={{
                     fpsLimit: 120,
                     interactivity: {
@@ -21,7 +21,9 @@ const NotFound: React.FC = () => {
                                 enable: true,
                                 mode: "attract",
                             },
-                            resize: true,
+                            resize: {
+                                enable: true,
+                            },
                         },
                         modes: {
                             attract: {
@@ -57,7 +59,8 @@ const NotFound: React.FC = () => {
                         number: {
                             density: {
                                 enable: true,
-                                area: 1000,
+                                height: 1000,
+                                width: 1000,
                             },
                             value: 15,
                         },
