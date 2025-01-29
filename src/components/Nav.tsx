@@ -113,6 +113,7 @@ const LinkButton = ({ title, icon, href }: LinkButtonProps) => (
 
 const Nav = () => {
     const router = useRouter();
+    const isTelevomunicazioni = router.pathname === "/scuola/telecomunicazioni";
     const [mobileMenuOpen, setMenuOpen] = useState(false);
     const [scrolled, setScrolled] = useState(false);
 
@@ -161,7 +162,7 @@ const Nav = () => {
                 )}
             >
                 <div className="flex items-center space-x-2">
-                    <ThemeToggle />
+                    <ThemeToggle disabled={isTelevomunicazioni} />
                     <LandingButton name="Home" link="/" selected={router.pathname === "/"} />
                     <LandingButton name="Contact" link="/contact" selected={router.pathname === "/contact"} />
                 </div>
