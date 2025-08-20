@@ -79,6 +79,8 @@ export default async function awake(req: NextApiRequest, res: NextApiResponse) {
 
         return res.status(200).json({ result: "Success", isDoNotDisturb, isAwake: isAwake });
     } catch (error) {
-        return res.status(500).json({ result: "API_CALL_FAILED", error: error as any });
+        console.error("API call failed:", error);
+
+        return res.status(500).json({ result: "API_CALL_FAILED" });
     }
 }
