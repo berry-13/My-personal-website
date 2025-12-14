@@ -1,19 +1,33 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { motion } from "framer-motion";
-import Particles from "@tsparticles/react";
-import type { Engine } from "tsparticles-engine";
-import { loadSlim } from "tsparticles-slim";
+import Particles, { initParticlesEngine } from "@tsparticles/react";
+import { loadSlim } from "@tsparticles/slim";
 
 const NotFound: React.FC = () => {
-    const particlesInit = React.useCallback(async (engine: Engine) => {
-        await loadSlim(engine);
+    const [init, setInit] = useState(false);
+
+    useEffect(() => {
+        initParticlesEngine(async engine => {
+            await loadSlim(engine);
+        }).then(() => {
+            setInit(true);
+        });
     }, []);
+
+    if (!init) {
+        return (
+            <div className="relative h-screen w-full flex items-center justify-center">
+                <h1 className="text-black dark:text-white text-center font-bold text-3xl">
+                    Nothing to see here
+                </h1>
+            </div>
+        );
+    }
 
     return (
         <div className="relative h-screen w-full">
             <Particles
                 id="tsparticles"
-                init={particlesInit}
                 options={{
                     fpsLimit: 120,
                     interactivity: {
