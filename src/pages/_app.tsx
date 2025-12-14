@@ -1,8 +1,7 @@
-import { useEffect, useRef, PropsWithChildren } from "react";
+import { useEffect, useRef } from "react";
 import Head from "next/head";
 import NProgress from "nprogress";
 import Lenis from "lenis";
-import { useRouter } from "next/router";
 import { AnimatePresence, motion } from "framer-motion";
 import type { ReactElement, ReactNode } from "react";
 import type { AppProps } from "next/app";
@@ -14,7 +13,7 @@ import "../globals.css";
 import "react-tippy/dist/tippy.css";
 import "nprogress/nprogress.css";
 
-export type NextPageWithLayout<P = {}, IP = P> = NextPage<P, IP> & {
+export type NextPageWithLayout<P = object, IP = P> = NextPage<P, IP> & {
     getLayout?: (page: ReactElement) => ReactNode;
 };
 
@@ -71,7 +70,7 @@ const pageVariants = {
 
 function MyApp({ Component, pageProps, router }: AppPropsWithLayout) {
     const audioRef = useRef<HTMLAudioElement | null>(null);
-    const routerRef = useRouter();
+    const rafIdRef = useRef<number | null>(null);
 
     useEffect(() => {
         const lenis = new Lenis({
@@ -86,12 +85,15 @@ function MyApp({ Component, pageProps, router }: AppPropsWithLayout) {
 
         function raf(time: number) {
             lenis.raf(time);
-            requestAnimationFrame(raf);
+            rafIdRef.current = requestAnimationFrame(raf);
         }
 
-        requestAnimationFrame(raf);
+        rafIdRef.current = requestAnimationFrame(raf);
 
         return () => {
+            if (rafIdRef.current) {
+                cancelAnimationFrame(rafIdRef.current);
+            }
             lenis.destroy();
         };
     }, []);
@@ -131,7 +133,9 @@ function MyApp({ Component, pageProps, router }: AppPropsWithLayout) {
     const playNavigationSound = (): void => {
         if (audioRef.current) {
             audioRef.current.currentTime = 0;
-            audioRef.current.play().catch((): void => {});
+            audioRef.current.play().catch(() => {
+                // Audio playback failed - ignore (autoplay restrictions)
+            });
         }
     };
 

@@ -1,16 +1,15 @@
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { format, getHours } from "date-fns";
 import { formatInTimeZone, toZonedTime } from "date-fns-tz";
 
-interface TimeStatus {
+interface TimeStatusState {
     time: string;
     awake: boolean;
     doNotDisturb: boolean;
 }
 
 const TimeStatus = () => {
-    const [status, setStatus] = useState<TimeStatus>({
+    const [status, setStatus] = useState<TimeStatusState>({
         time: "00:00 AM",
         awake: true,
         doNotDisturb: false,
@@ -18,9 +17,7 @@ const TimeStatus = () => {
 
     const updateTime = () => {
         const now = new Date();
-        const romeTime = toZonedTime(now, "Europe/Rome");
         const formattedTime = formatInTimeZone(now, "Europe/Rome", "hh:mm a");
-        const hour = getHours(romeTime);
 
         setStatus(prev => ({
             ...prev,
@@ -35,18 +32,20 @@ const TimeStatus = () => {
         fetch("/api/awake")
             .then(res => res.json())
             .then(data => {
-                setStatus(prev => ({
-                    ...prev,
-                    doNotDisturb: data.isDoNotDisturb,
-                    awake: data.isAwake,
-                }));
+                if (data.result === "Success") {
+                    setStatus(prev => ({
+                        ...prev,
+                        doNotDisturb: data.isDoNotDisturb ?? false,
+                        awake: data.isAwake ?? true,
+                    }));
+                }
             })
-            .catch(console.error);
+            .catch(() => {
+                // Silently fail - keep default status
+            });
 
         return () => clearInterval(interval);
     }, []);
-
-    console.log(status);
 
     return (
         <motion.p
@@ -55,7 +54,10 @@ const TimeStatus = () => {
             className="text-black/50 dark:text-white/50 text-sm mb-10 tracking-wide"
         >
             It's currently{" "}
-            <motion.span className="font-medium text-black/60 dark:text-white/60" whileHover={{ scale: 1.05 }}>
+            <motion.span
+                className="font-medium text-black/60 dark:text-white/60"
+                whileHover={{ scale: 1.05 }}
+            >
                 {status.time}
             </motion.span>{" "}
             for me and I'm probably{" "}

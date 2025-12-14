@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from "react";
-import { ChevronDown, ChevronUp, Calculator, BookOpen } from "lucide-react";
+import React, { useState, useMemo, useId } from "react";
+import { ChevronDown, ChevronUp } from "lucide-react";
 import katex from "katex";
 import "katex/dist/katex.min.css";
 
@@ -12,39 +12,21 @@ const LatexFormula = ({ formula }: { formula: string }) => {
     return <div className="text-gray-800" dangerouslySetInnerHTML={{ __html: htmlString }} />;
 };
 
-const fadeInUp = {
-    hidden: { opacity: 0, y: 20 },
-    visible: {
-        opacity: 1,
-        y: 0,
-        transition: { duration: 0.6, ease: [0.22, 1, 0.36, 1] },
-    },
-};
-
 const ElectroGuide = () => {
     const [expandedSection, setExpandedSection] = useState("ohm");
     const [voltage, setVoltage] = useState("");
     const [current, setCurrent] = useState("");
     const [resistance, setResistance] = useState("");
 
-    useEffect(() => {
-        // Force light theme
-        const html = document.querySelector("html");
-        if (html) {
-            html.classList.remove("dark");
-            localStorage.setItem("theme", "light");
-        }
-    }, []);
+    const voltageId = useId();
+    const currentId = useId();
+    const resistanceId = useId();
 
-    interface LatexFormulaProps {
-        formula: string;
-    }
-
-    const renderLatex = (formula: string): React.ReactElement<LatexFormulaProps> => {
+    const renderLatex = (formula: string) => {
         return <LatexFormula formula={formula} />;
     };
 
-    const calculateResult = () => {
+    const calculationResult = useMemo(() => {
         if (voltage && current && !resistance) {
             const r = (parseFloat(voltage) / parseFloat(current)).toFixed(2);
             return {
@@ -70,7 +52,7 @@ const ElectroGuide = () => {
             };
         }
         return null;
-    };
+    }, [voltage, current, resistance]);
 
     const sections = [
         {
@@ -354,8 +336,11 @@ const ElectroGuide = () => {
                 <div className="space-y-6">
                     <div className="grid grid-cols-3 gap-4">
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Tensione (V)</label>
+                            <label htmlFor={voltageId} className="block text-sm font-medium text-gray-700 mb-1">
+                                Tensione (V)
+                            </label>
                             <input
+                                id={voltageId}
                                 type="number"
                                 value={voltage}
                                 onChange={e => setVoltage(e.target.value)}
@@ -364,8 +349,11 @@ const ElectroGuide = () => {
                             />
                         </div>
                         <div>
-                            <label className="block text-sm font-medium text-gray-800 mb-1">Corrente (I)</label>
+                            <label htmlFor={currentId} className="block text-sm font-medium text-gray-800 mb-1">
+                                Corrente (I)
+                            </label>
                             <input
+                                id={currentId}
                                 type="number"
                                 value={current}
                                 onChange={e => setCurrent(e.target.value)}
@@ -374,8 +362,11 @@ const ElectroGuide = () => {
                             />
                         </div>
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Resistenza (R)</label>
+                            <label htmlFor={resistanceId} className="block text-sm font-medium text-gray-700 mb-1">
+                                Resistenza (R)
+                            </label>
                             <input
+                                id={resistanceId}
                                 type="number"
                                 value={resistance}
                                 onChange={e => setResistance(e.target.value)}
@@ -385,14 +376,14 @@ const ElectroGuide = () => {
                         </div>
                     </div>
                     <div className="bg-gray-50 p-6 rounded-lg space-y-4">
-                        {calculateResult() && (
+                        {calculationResult && (
                             <>
                                 <p className="font-medium">Formula utilizzata:</p>
-                                {renderLatex(calculateResult().formula)}
+                                {renderLatex(calculationResult.formula)}
                                 <p className="font-medium mt-4">Calcolo:</p>
-                                {renderLatex(calculateResult().calculation)}
+                                {renderLatex(calculationResult.calculation)}
                                 <p className="font-medium mt-4">Risultato:</p>
-                                {renderLatex(calculateResult().result)}
+                                {renderLatex(calculationResult.result)}
                             </>
                         )}
                     </div>
@@ -402,25 +393,31 @@ const ElectroGuide = () => {
     ];
 
     return (
-        <div className="max-w-3xl mx-auto p-6 bg-transparent">
-            <h1 className="text-4xl font-light mb-8 text-center">Telecomunicazioni</h1>
+        <div className="max-w-3xl mx-auto p-6 bg-white dark:bg-gray-900">
+            <h1 className="text-4xl font-light mb-8 text-center text-gray-900 dark:text-white">Telecomunicazioni</h1>
 
             <div className="space-y-4">
                 {sections.map(section => (
-                    <div key={section.id} className="border rounded-lg overflow-hidden">
+                    <div key={section.id} className="border rounded-lg overflow-hidden dark:border-gray-700">
                         <button
                             onClick={() => setExpandedSection(section.id)}
-                            className="w-full p-4 flex justify-between items-center bg-transparent hover:bg-gray-50"
+                            className="w-full p-4 flex justify-between items-center bg-transparent hover:bg-gray-50 dark:hover:bg-gray-800"
+                            aria-expanded={expandedSection === section.id}
+                            aria-controls={`section-${section.id}`}
                         >
-                            <span className="text-lg font-medium text-gray-900">{section.title}</span>
+                            <span className="text-lg font-medium text-gray-900 dark:text-white">{section.title}</span>
                             {expandedSection === section.id ? (
-                                <ChevronUp className="w-5 h-5 text-gray-400" />
+                                <ChevronUp className="w-5 h-5 text-gray-400" aria-hidden="true" />
                             ) : (
-                                <ChevronDown className="w-5 h-5 text-gray-400" />
+                                <ChevronDown className="w-5 h-5 text-gray-400" aria-hidden="true" />
                             )}
                         </button>
 
-                        {expandedSection === section.id && <div className="p-4 border-t">{section.content}</div>}
+                        {expandedSection === section.id && (
+                            <div id={`section-${section.id}`} className="p-4 border-t dark:border-gray-700">
+                                {section.content}
+                            </div>
+                        )}
                     </div>
                 ))}
             </div>

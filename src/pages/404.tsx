@@ -1,10 +1,11 @@
 import React from "react";
 import { motion } from "framer-motion";
 import Particles from "@tsparticles/react";
+import type { Engine } from "tsparticles-engine";
 import { loadSlim } from "tsparticles-slim";
 
 const NotFound: React.FC = () => {
-    const particlesInit = React.useCallback(async (engine: any) => {
+    const particlesInit = React.useCallback(async (engine: Engine) => {
         await loadSlim(engine);
     }, []);
 
@@ -12,7 +13,7 @@ const NotFound: React.FC = () => {
         <div className="relative h-screen w-full">
             <Particles
                 id="tsparticles"
-                particlesLoaded={particlesInit}
+                init={particlesInit}
                 options={{
                     fpsLimit: 120,
                     interactivity: {
@@ -34,10 +35,10 @@ const NotFound: React.FC = () => {
                     },
                     particles: {
                         color: {
-                            value: "#ffffff",
+                            value: ["#818cf8", "#6366f1", "#4f46e5"],
                         },
                         links: {
-                            color: "#ffffff",
+                            color: "#6366f1",
                             distance: 150,
                             enable: true,
                             opacity: 0.5,
@@ -86,7 +87,9 @@ const NotFound: React.FC = () => {
                     exit={{ opacity: 0, scale: 0.95 }}
                     transition={{ ease: "easeOut", duration: 0.25 }}
                 >
-                    <h1 className="text-white text-center font-bold text-3xl">Nothing to see here 🤷‍♂️</h1>
+                    <h1 className="text-black dark:text-white text-center font-bold text-3xl">
+                        Nothing to see here
+                    </h1>
                 </motion.div>
             </div>
         </div>
