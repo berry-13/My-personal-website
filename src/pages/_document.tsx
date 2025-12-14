@@ -13,11 +13,19 @@ export default function Document() {
                                     var theme = localStorage.getItem('theme');
                                     if (theme === 'light') {
                                         document.documentElement.classList.remove('dark');
-                                    } else {
+                                    } else if (theme === 'dark') {
                                         document.documentElement.classList.add('dark');
+                                    } else {
+                                        // No preference saved, use system preference
+                                        if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+                                            document.documentElement.classList.add('dark');
+                                        }
                                     }
                                 } catch (e) {
-                                    document.documentElement.classList.add('dark');
+                                    // On error, respect system preference
+                                    if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
+                                        document.documentElement.classList.add('dark');
+                                    }
                                 }
                             })();
                         `,

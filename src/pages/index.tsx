@@ -187,7 +187,7 @@ const Index: React.FC = () => {
                     </p>
                 </motion.div>
 
-                <Section title="What I Do" emoji="">
+                <Section title="What I Do" emoji="💻">
                     <p>
                         As a core contributor to LibreChat with over 170 PRs, I've implemented critical features
                         including speech-to-text/text-to-speech integration, accessibility improvements, and
@@ -196,7 +196,7 @@ const Index: React.FC = () => {
                     </p>
                 </Section>
 
-                <Section title="Technical Expertise" emoji="">
+                <Section title="Technical Expertise" emoji="🛠️">
                     <p className="mb-8">
                         Proficient in TypeScript, JavaScript, React, and Next.js for frontend development, with strong
                         capabilities in Python for AI integration. Experienced with Arduino for hardware projects and
@@ -210,7 +210,7 @@ const Index: React.FC = () => {
                     </Suspense>
                 </Section>
 
-                <Section title="Notable Projects" emoji="">
+                <Section title="Notable Projects" emoji="🎮">
                     <p>
                         Created "Banfi Zombi" in Unreal Engine 5, featuring adaptive AI NPCs whose storylines
                         dynamically evolve based on player interactions and choices, creating unique experiences for
@@ -220,7 +220,7 @@ const Index: React.FC = () => {
                     </p>
                 </Section>
 
-                <Section title="Featured Projects" emoji="">
+                <Section title="Featured Projects" emoji="⭐">
                     <RepoGrid
                         libreRepo={repos?.libreChatRepos ?? []}
                         topRepos={repos?.berryRepos ?? []}

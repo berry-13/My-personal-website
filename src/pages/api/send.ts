@@ -82,11 +82,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     if (data.message.length > 1000) {
         return res.status(400).json({ result: "MESSAGE_TOO_LONG" });
     }
-    if (data.email.length > 500) {
-        return res.status(400).json({ result: "EMAIL_TOO_LONG" });
-    }
     if (!isValidEmail(data.email)) {
         return res.status(400).json({ result: "INVALID_EMAIL" });
+    }
+    if (data.email.length > 500) {
+        return res.status(400).json({ result: "EMAIL_TOO_LONG" });
     }
 
     try {

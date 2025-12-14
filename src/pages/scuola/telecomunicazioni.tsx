@@ -9,7 +9,7 @@ const LatexFormula = ({ formula }: { formula: string }) => {
         displayMode: true,
     });
 
-    return <div className="text-gray-800" dangerouslySetInnerHTML={{ __html: htmlString }} />;
+    return <div className="text-gray-800 dark:text-white" dangerouslySetInnerHTML={{ __html: htmlString }} />;
 };
 
 const ElectroGuide = () => {
