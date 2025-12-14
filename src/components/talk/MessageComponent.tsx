@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useId } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import axios from "axios";
 import { RiSendPlane2Fill } from "react-icons/ri";
@@ -12,49 +12,51 @@ interface FormState {
 const MessageComponent = () => {
     const [formState, setFormState] = useState<FormState>({ email: "", message: "" });
     const [status, setStatus] = useState({ sending: false, error: "", sent: false });
+    const emailId = useId();
+    const messageId = useId();
 
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const emailRegex = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)+$/;
 
     const sendMessage = async () => {
         const { email, message } = formState;
-    
+
         if (!email || !message) {
             setStatus(prev => ({ ...prev, error: "Please fill out all fields!" }));
             return;
         }
-    
+
         if (!emailRegex.test(email)) {
             setStatus(prev => ({ ...prev, error: "Please enter a valid email address." }));
             return;
         }
-    
+
         setStatus({ sending: true, error: "", sent: false });
-    
+
         try {
             const response = await axios.post("/api/send", { email, message });
-            
+
             if (response.data.result === "Success") {
                 setStatus({ sending: false, error: "", sent: true });
                 return;
             }
-            
-            setStatus({ 
-                sending: false, 
-                error: `Error: ${response.data.result}`, 
-                sent: false 
+
+            setStatus({
+                sending: false,
+                error: `Error: ${response.data.result}`,
+                sent: false,
             });
-        } catch (error) {
-            setStatus({ 
-                sending: false, 
-                error: "Failed to send message. Please try again.", 
-                sent: false 
+        } catch {
+            setStatus({
+                sending: false,
+                error: "Failed to send message. Please try again.",
+                sent: false,
             });
         }
     };
 
     const inputClasses = `
     w-full p-3 rounded-xl text-sm transition-all duration-200
-    bg-slate-200/50 dark:bg-slate-200/5 
+    bg-slate-200/50 dark:bg-slate-200/5
     border border-transparent focus:border-violet-500
     focus:outline-none focus:ring-2 focus:ring-violet-500/20
     placeholder:text-gray-500/60 dark:placeholder:text-slate-200/20
@@ -64,7 +66,7 @@ const MessageComponent = () => {
         <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="md:col-span-2 h-auto min-h-[21.5rem] bg-white/50 dark:bg-white/5 
+            className="md:col-span-2 h-auto min-h-[21.5rem] bg-white/50 dark:bg-white/5
                  rounded-xl p-6 border border-zinc-800/10 shadow-lg shadow-black/5"
         >
             <AnimatePresence mode="wait">
@@ -81,8 +83,19 @@ const MessageComponent = () => {
                             transition={{ delay: 0.2, type: "spring" }}
                             className="w-16 h-16 bg-violet-500 rounded-full flex items-center justify-center"
                         >
-                            <svg className="w-8 h-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                            <svg
+                                className="w-8 h-8 text-white"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                                stroke="currentColor"
+                                aria-hidden="true"
+                            >
+                                <path
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    strokeWidth={3}
+                                    d="M5 13l4 4L19 7"
+                                />
                             </svg>
                         </motion.div>
                         <p className="text-gray-600 dark:text-gray-300 text-center">
@@ -101,9 +114,15 @@ const MessageComponent = () => {
                         className="space-y-4"
                     >
                         <div className="space-y-1">
-                            <label className="font-medium text-sm text-gray-900 dark:text-slate-400">EMAIL</label>
+                            <label
+                                htmlFor={emailId}
+                                className="font-medium text-sm text-gray-900 dark:text-slate-400"
+                            >
+                                EMAIL
+                            </label>
                             <motion.input
                                 whileFocus={{ scale: 1.01 }}
+                                id={emailId}
                                 type="email"
                                 placeholder="you@example.com"
                                 value={formState.email}
@@ -112,13 +131,20 @@ const MessageComponent = () => {
                                     setStatus(prev => ({ ...prev, error: "" }));
                                 }}
                                 className={inputClasses}
+                                autoComplete="email"
                             />
                         </div>
 
                         <div className="space-y-1">
-                            <label className="font-medium text-sm text-gray-900 dark:text-slate-400">MESSAGE</label>
+                            <label
+                                htmlFor={messageId}
+                                className="font-medium text-sm text-gray-900 dark:text-slate-400"
+                            >
+                                MESSAGE
+                            </label>
                             <motion.textarea
                                 whileFocus={{ scale: 1.01 }}
+                                id={messageId}
                                 placeholder="Hi Berry, let's collaborate!"
                                 value={formState.message}
                                 onChange={e => {
@@ -137,6 +163,7 @@ const MessageComponent = () => {
                                         animate={{ opacity: 1, x: 0 }}
                                         exit={{ opacity: 0, x: -20 }}
                                         className="text-red-500 text-sm"
+                                        role="alert"
                                     >
                                         {status.error}
                                     </motion.p>
@@ -155,9 +182,9 @@ const MessageComponent = () => {
                             >
                                 <span>Send</span>
                                 {status.sending ? (
-                                    <ImSpinner2 className="w-4 h-4 animate-spin" />
+                                    <ImSpinner2 className="w-4 h-4 animate-spin" aria-hidden="true" />
                                 ) : (
-                                    <RiSendPlane2Fill className="w-4 h-4" />
+                                    <RiSendPlane2Fill className="w-4 h-4" aria-hidden="true" />
                                 )}
                             </motion.button>
                         </div>

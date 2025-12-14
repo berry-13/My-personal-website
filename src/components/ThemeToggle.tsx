@@ -6,11 +6,15 @@ interface ThemeToggleProps {
     disabled?: boolean;
 }
 
+type Theme = "light" | "dark";
+
 const ThemeToggle = ({ disabled }: ThemeToggleProps) => {
-    const [theme, setTheme] = useState<string>("dark");
+    const [theme, setTheme] = useState<Theme | null>(null);
+    const [mounted, setMounted] = useState(false);
 
     useEffect(() => {
-        const storedTheme = localStorage.getItem("theme") || "light";
+        setMounted(true);
+        const storedTheme = (localStorage.getItem("theme") as Theme) || "dark";
         setTheme(storedTheme);
         const html = document.querySelector("html");
         if (html) {
@@ -23,10 +27,10 @@ const ThemeToggle = ({ disabled }: ThemeToggleProps) => {
         }
     }, []);
 
-    const changeTheme = (theme: string) => {
-        if (disabled) return;
+    const changeTheme = () => {
+        if (disabled || !theme) return;
 
-        const newTheme = theme === "light" ? "dark" : "light";
+        const newTheme: Theme = theme === "light" ? "dark" : "light";
         const html = document.querySelector("html");
 
         localStorage.setItem("theme", newTheme);
@@ -41,13 +45,28 @@ const ThemeToggle = ({ disabled }: ThemeToggleProps) => {
         }
     };
 
+    if (!mounted) {
+        return (
+            <button
+                className={cn(
+                    "p-2 rounded-md bg-transparent",
+                    disabled ? "cursor-not-allowed opacity-50" : "cursor-pointer"
+                )}
+                disabled={disabled}
+                aria-label="Toggle theme"
+            >
+                <div className="w-6 h-6 xs:w-5 xs:h-5" />
+            </button>
+        );
+    }
+
     return (
         <button
             className={cn(
                 "p-2 rounded-md bg-transparent hover:bg-black/5 dark:hover:bg-white/5",
                 disabled ? "cursor-not-allowed opacity-50" : "cursor-pointer"
             )}
-            onClick={() => !disabled && changeTheme(theme)}
+            onClick={changeTheme}
             aria-label={`Switch to ${theme === "light" ? "dark" : "light"} mode`}
             disabled={disabled}
         >
