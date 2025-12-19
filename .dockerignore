@@ -1,0 +1,17 @@
+node_modules
+.next
+.git
+.gitignore
+.dockerignore
+Dockerfile*
+docker-compose*
+README.md
+LICENSE
+.vscode
+.idea
+.env
+.env.*
+*.log
+.DS_Store
+coverage
+.nyc_output

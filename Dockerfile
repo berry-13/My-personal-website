@@ -1,37 +1,38 @@
-# Stage 1: Build the application
-FROM oven/bun:1 AS builder
+# use the official Bun image
+# see all versions at https://hub.docker.com/r/oven/bun/tags
+FROM oven/bun:1 AS base
+WORKDIR /usr/src/app
 
-# Set the working directory
-WORKDIR /app
+# install dependencies into temp directory
+# this will cache them and speed up future builds
+FROM base AS install
+RUN mkdir -p /temp/dev
+COPY package.json bun.lock /temp/dev/
+RUN cd /temp/dev && bun install --frozen-lockfile
 
-# Copy package.json and bun.lock
-COPY package.json bun.lock ./
+# install with --production (exclude devDependencies)
+RUN mkdir -p /temp/prod
+COPY package.json bun.lock /temp/prod/
+RUN cd /temp/prod && bun install --frozen-lockfile --production
 
-# Install dependencies
-RUN bun install --frozen-lockfile
-
-# Copy the rest of the application code
+# copy node_modules from temp directory
+# then copy all (non-ignored) project files into the image
+FROM base AS prerelease
+COPY --from=install /temp/dev/node_modules node_modules
 COPY . .
 
 # Build the Next.js application
+ENV NODE_ENV=production
 RUN bun run build
 
-# Stage 2: Create the final image
-FROM oven/bun:1-alpine
+# copy production dependencies and source code into final image
+FROM base AS release
+COPY --from=install /temp/prod/node_modules node_modules
+COPY --from=prerelease /usr/src/app/.next ./.next
+COPY --from=prerelease /usr/src/app/public ./public
+COPY --from=prerelease /usr/src/app/package.json .
 
-# Set the working directory
-WORKDIR /app
-
-# Copy only the necessary files from the builder stage
-COPY --from=builder /app/package.json /app/bun.lock ./
-COPY --from=builder /app/.next ./.next
-COPY --from=builder /app/public ./public
-
-# Install only production dependencies
-RUN bun install --production --frozen-lockfile
-
-# Expose the port the app runs on
+# run the app
+USER bun
 EXPOSE 3000
-
-# Start the Next.js application
 CMD ["bun", "run", "start"]
