@@ -8,4 +8,4 @@ saveTextLockfile = true
 
 [test]
 # Preload test setup file before running tests
-preload = ["./src/test/setup.ts"]
+preload = ["./client/src/test/setup.tsx"]

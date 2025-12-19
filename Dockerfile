@@ -21,15 +21,14 @@ FROM base AS prerelease
 COPY --from=install /temp/dev/node_modules node_modules
 COPY . .
 
-# Build the Next.js application
+# Build the Vite + Elysia application
 ENV NODE_ENV=production
 RUN bun run build
 
-# copy production dependencies and source code into final image
+# copy production dependencies and built files into final image
 FROM base AS release
 COPY --from=install /temp/prod/node_modules node_modules
-COPY --from=prerelease /usr/src/app/.next ./.next
-COPY --from=prerelease /usr/src/app/public ./public
+COPY --from=prerelease /usr/src/app/dist ./dist
 COPY --from=prerelease /usr/src/app/package.json .
 
 # run the app
