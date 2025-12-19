@@ -104,7 +104,7 @@ importers:
         version: 5.1.2(vite@7.2.7(@types/node@20.19.9)(jiti@2.6.1)(lightningcss@1.30.2))
       autoprefixer:
         specifier: ^10.4.5
-        version: 10.4.20(postcss@8.5.1)
+        version: 10.4.20(postcss@8.5.6)
       eslint:
         specifier: ^8.57.0
         version: 8.57.1
@@ -113,13 +113,13 @@ importers:
         version: 15.5.9(eslint@8.57.1)(typescript@5.9.3)
       jsdom:
         specifier: ^27.3.0
-        version: 27.3.0(postcss@8.5.1)
+        version: 27.3.0(postcss@8.5.6)
       postcss:
-        specifier: ^8.4.12
-        version: 8.5.1
+        specifier: ^8.5.6
+        version: 8.5.6
       postcss-nesting:
         specifier: ^13.0.2
-        version: 13.0.2(postcss@8.5.1)
+        version: 13.0.2(postcss@8.5.6)
       tailwindcss:
         specifier: ^4.1.18
         version: 4.1.18
@@ -128,7 +128,7 @@ importers:
         version: 5.9.3
       vitest:
         specifier: ^4.0.15
-        version: 4.0.15(@types/node@20.19.9)(jiti@2.6.1)(jsdom@27.3.0(postcss@8.5.1))(lightningcss@1.30.2)
+        version: 4.0.15(@types/node@20.19.9)(jiti@2.6.1)(jsdom@27.3.0(postcss@8.5.6))(lightningcss@1.30.2)
 
 packages:
 
@@ -2608,10 +2608,6 @@ packages:
     resolution: {integrity: sha512-PS08Iboia9mts/2ygV3eLpY5ghnUcfLV/EXTOW1E2qYxJKGGBUtNjN76FYHnMs36RmARn41bC0AZmn+rR0OVpQ==}
     engines: {node: ^10 || ^12 || >=14}
 
-  postcss@8.5.1:
-    resolution: {integrity: sha512-6oz2beyjc5VMn/KV1pPw8fliQkhBXrVn1Z3TVyqZxU8kZpzEKhBdmCFqI6ZbmGtamQvQGuU1sgPTk8ZrXDD7jQ==}
-    engines: {node: ^10 || ^12 || >=14}
-
   postcss@8.5.6:
     resolution: {integrity: sha512-3Ybi1tAuwAP9s0r1UQ2J4n5Y0G05bJkpUIO0/bI9MhwmD70S5aTWbXGBwxHrelT+XM1k6dM0pk+SwNkpTRN7Pg==}
     engines: {node: ^10 || ^12 || >=14}
@@ -3368,9 +3364,9 @@ snapshots:
     dependencies:
       '@csstools/css-tokenizer': 3.0.4
 
-  '@csstools/css-syntax-patches-for-csstree@1.0.14(postcss@8.5.1)':
+  '@csstools/css-syntax-patches-for-csstree@1.0.14(postcss@8.5.6)':
     dependencies:
-      postcss: 8.5.1
+      postcss: 8.5.6
 
   '@csstools/css-tokenizer@3.0.4': {}
 
@@ -3845,7 +3841,7 @@ snapshots:
       '@alloc/quick-lru': 5.2.0
       '@tailwindcss/node': 4.1.18
       '@tailwindcss/oxide': 4.1.18
-      postcss: 8.5.1
+      postcss: 8.5.6
       tailwindcss: 4.1.18
 
   '@testing-library/dom@10.4.1':
@@ -4462,14 +4458,14 @@ snapshots:
 
   asynckit@0.4.0: {}
 
-  autoprefixer@10.4.20(postcss@8.5.1):
+  autoprefixer@10.4.20(postcss@8.5.6):
     dependencies:
       browserslist: 4.25.1
       caniuse-lite: 1.0.30001727
       fraction.js: 4.3.7
       normalize-range: 0.1.2
       picocolors: 1.1.1
-      postcss: 8.5.1
+      postcss: 8.5.6
       postcss-value-parser: 4.2.0
 
   available-typed-arrays@1.0.7:
@@ -4595,10 +4591,10 @@ snapshots:
 
   cssesc@3.0.0: {}
 
-  cssstyle@5.3.4(postcss@8.5.1):
+  cssstyle@5.3.4(postcss@8.5.6):
     dependencies:
       '@asamuzakjp/css-color': 4.1.0
-      '@csstools/css-syntax-patches-for-csstree': 1.0.14(postcss@8.5.1)
+      '@csstools/css-syntax-patches-for-csstree': 1.0.14(postcss@8.5.6)
       css-tree: 3.1.0
     transitivePeerDependencies:
       - postcss
@@ -5421,11 +5417,11 @@ snapshots:
     dependencies:
       argparse: 2.0.1
 
-  jsdom@27.3.0(postcss@8.5.1):
+  jsdom@27.3.0(postcss@8.5.6):
     dependencies:
       '@acemir/cssom': 0.9.29
       '@asamuzakjp/dom-selector': 6.7.6
-      cssstyle: 5.3.4(postcss@8.5.1)
+      cssstyle: 5.3.4(postcss@8.5.6)
       data-urls: 6.0.0
       decimal.js: 10.6.0
       html-encoding-sniffer: 4.0.0
@@ -5750,11 +5746,11 @@ snapshots:
 
   possible-typed-array-names@1.0.0: {}
 
-  postcss-nesting@13.0.2(postcss@8.5.1):
+  postcss-nesting@13.0.2(postcss@8.5.6):
     dependencies:
       '@csstools/selector-resolve-nested': 3.1.0(postcss-selector-parser@7.1.1)
       '@csstools/selector-specificity': 5.0.0(postcss-selector-parser@7.1.1)
-      postcss: 8.5.1
+      postcss: 8.5.6
       postcss-selector-parser: 7.1.1
 
   postcss-selector-parser@7.1.1:
@@ -5765,12 +5761,6 @@ snapshots:
   postcss-value-parser@4.2.0: {}
 
   postcss@8.4.31:
-    dependencies:
-      nanoid: 3.3.11
-      picocolors: 1.1.1
-      source-map-js: 1.2.1
-
-  postcss@8.5.1:
     dependencies:
       nanoid: 3.3.11
       picocolors: 1.1.1
@@ -6303,7 +6293,7 @@ snapshots:
       jiti: 2.6.1
       lightningcss: 1.30.2
 
-  vitest@4.0.15(@types/node@20.19.9)(jiti@2.6.1)(jsdom@27.3.0(postcss@8.5.1))(lightningcss@1.30.2):
+  vitest@4.0.15(@types/node@20.19.9)(jiti@2.6.1)(jsdom@27.3.0(postcss@8.5.6))(lightningcss@1.30.2):
     dependencies:
       '@vitest/expect': 4.0.15
       '@vitest/mocker': 4.0.15(vite@7.2.7(@types/node@20.19.9)(jiti@2.6.1)(lightningcss@1.30.2))
@@ -6327,7 +6317,7 @@ snapshots:
       why-is-node-running: 2.3.0
     optionalDependencies:
       '@types/node': 20.19.9
-      jsdom: 27.3.0(postcss@8.5.1)
+      jsdom: 27.3.0(postcss@8.5.6)
     transitivePeerDependencies:
       - jiti
       - less
