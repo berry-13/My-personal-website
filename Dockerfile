@@ -1,43 +1,37 @@
 # Stage 1: Build the application
-FROM node:18-alpine AS builder
-
-# Install pnpm
-RUN npm install -g pnpm
+FROM oven/bun:1 AS builder
 
 # Set the working directory
 WORKDIR /app
 
-# Copy package.json and pnpm-lock.yaml
-COPY package.json pnpm-lock.yaml ./
+# Copy package.json and bun.lockb
+COPY package.json bun.lockb ./
 
-# Install dependencies with pnpm
-RUN pnpm install --frozen-lockfile
+# Install dependencies
+RUN bun install --frozen-lockfile
 
 # Copy the rest of the application code
 COPY . .
 
 # Build the Next.js application
-RUN pnpm build
+RUN bun run build
 
 # Stage 2: Create the final image
-FROM node:18-alpine
-
-# Install pnpm
-RUN npm install -g pnpm
+FROM oven/bun:1-alpine
 
 # Set the working directory
 WORKDIR /app
 
 # Copy only the necessary files from the builder stage
-COPY --from=builder /app/package.json /app/pnpm-lock.yaml ./
+COPY --from=builder /app/package.json /app/bun.lockb ./
 COPY --from=builder /app/.next ./.next
 COPY --from=builder /app/public ./public
 
 # Install only production dependencies
-RUN pnpm install --prod --frozen-lockfile
+RUN bun install --production --frozen-lockfile
 
 # Expose the port the app runs on
 EXPOSE 3000
 
 # Start the Next.js application
-CMD ["pnpm", "start"]
+CMD ["bun", "run", "start"]
