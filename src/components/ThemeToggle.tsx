@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { FiSun, FiMoon } from "react-icons/fi";
-import { cn } from "~/utils";
+import { Button } from "~/components/ui";
 
 interface ThemeToggleProps {
     disabled?: boolean;
@@ -46,33 +46,18 @@ const ThemeToggle = ({ disabled }: ThemeToggleProps) => {
     };
 
     if (!mounted) {
-        return (
-            <button
-                className={cn(
-                    "p-2 rounded-md bg-transparent",
-                    disabled ? "cursor-not-allowed opacity-50" : "cursor-pointer"
-                )}
-                disabled={disabled}
-                aria-label="Toggle theme"
-            >
-                <div className="w-6 h-6 xs:w-5 xs:h-5" />
-            </button>
-        );
+        return <Button title="Toggle theme" icon={<div className="w-5 h-5" />} disabled={disabled} />;
     }
 
     return (
-        <button
-            className={cn(
-                "p-2 rounded-md bg-transparent hover:bg-black/5 dark:hover:bg-white/5",
-                disabled ? "cursor-not-allowed opacity-50" : "cursor-pointer"
-            )}
-            onClick={changeTheme}
+        <Button
+            icon={
+                theme === "light" ? <FiSun className="text-black w-5 h-5" /> : <FiMoon className="text-white w-5 h-5" />
+            }
             aria-label={`Switch to ${theme === "light" ? "dark" : "light"} mode`}
+            onClick={changeTheme}
             disabled={disabled}
-        >
-            {theme === "light" && <FiSun className="text-black w-6 h-6 xs:w-5 xs:h-5" />}
-            {theme === "dark" && <FiMoon className="text-white w-6 h-6 xs:w-5 xs:h-5" />}
-        </button>
+        />
     );
 };
 

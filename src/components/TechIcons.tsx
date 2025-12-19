@@ -215,7 +215,7 @@ const TechItem = React.memo<TechItemProps>(({ icon: Icon, name, description, ind
                             animate={{ opacity: 1, y: 0, scale: 1 }}
                             exit={{ opacity: 0, y: -10, scale: 0.9 }}
                             transition={{ duration: 0.2, ease: "easeOut" }}
-                            className="absolute top-full transform -translate-x-1/2 mt-8
+                            className="absolute top-full left-1/2 -translate-x-1/2 mt-8
                                        bg-black/90 dark:bg-white/90 text-white dark:text-black 
                                        text-xs rounded-lg px-3 py-2 whitespace-nowrap z-10
                                        shadow-lg backdrop-blur-sm"

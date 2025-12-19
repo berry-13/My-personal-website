@@ -1,18 +1,20 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { Tooltip } from "react-tippy";
-import { FiMail } from "react-icons/fi";
+import { FiMail, FiHome } from "react-icons/fi";
 import { useRouter } from "next/router";
 import { BsTwitterX } from "react-icons/bs";
 import { HiMenu, HiX } from "react-icons/hi";
+import { RiContactsLine } from "react-icons/ri";
 import { SiGithub, SiLinkedin } from "react-icons/si";
 import { AnimatePresence, motion, LayoutGroup } from "framer-motion";
+import { Button } from "~/components/ui";
 import ThemeToggle from "./ThemeToggle";
 import { cn } from "~/utils";
 
 interface LandingButtonProps {
     name: string;
     link: string;
+    icon: React.ReactNode;
     selected: boolean;
 }
 
@@ -21,53 +23,47 @@ interface MobileNavButtonProps extends LandingButtonProps {
     index: number;
 }
 
-interface LinkButtonProps {
-    title: string;
-    icon: React.ReactNode;
-    href: string;
-}
-
-const easeOutExpo = [0.22, 1, 0.36, 1] as const;
+// Apple-style cubic-bezier: slow start, smooth deceleration
+const appleEase = [0.25, 0.1, 0.25, 1] as const;
 
 const navVariants = {
-    hidden: { y: -30, opacity: 0, scale: 0.95 },
+    hidden: { y: -10, opacity: 0 },
     visible: {
         y: 0,
         opacity: 1,
-        scale: 1,
         transition: {
-            duration: 0.8,
-            ease: easeOutExpo,
-            staggerChildren: 0.08,
-            delayChildren: 0.2,
+            duration: 1,
+            ease: appleEase,
+            staggerChildren: 0.06,
+            delayChildren: 0.15,
         },
     },
 };
 
 const itemVariants = {
-    hidden: { y: -20, opacity: 0, scale: 0.9 },
+    hidden: { y: -10, opacity: 0 },
     visible: {
         y: 0,
         opacity: 1,
-        scale: 1,
         transition: {
-            duration: 0.6,
-            ease: easeOutExpo,
+            duration: 0.7,
+            ease: appleEase,
         },
     },
 };
 
-const LandingButton = ({ name, link, selected }: LandingButtonProps) => (
-    <motion.div variants={itemVariants} whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.98 }}>
+const LandingButton = ({ name, link, icon, selected }: LandingButtonProps) => (
+    <motion.div variants={itemVariants}>
         <Link
             href={link}
             aria-current={selected ? "page" : undefined}
             className={cn(
-                "relative px-5 py-2.5 text-sm font-medium rounded-xl transition-all duration-300",
+                "relative flex items-center gap-2 px-5 py-2.5 text-sm font-medium rounded-xl transition-all duration-300",
                 "hover:text-black dark:hover:text-white",
                 selected ? "text-black dark:text-white" : "text-black/60 dark:text-white/60"
             )}
         >
+            <span className="relative z-10">{icon}</span>
             <span className="relative z-10">{name}</span>
             {selected && (
                 <motion.div
@@ -84,7 +80,7 @@ const LandingButton = ({ name, link, selected }: LandingButtonProps) => (
     </motion.div>
 );
 
-const MobileNavButton = ({ name, link, selected, onClick, index }: MobileNavButtonProps) => (
+const MobileNavButton = ({ name, link, icon, selected, onClick, index }: MobileNavButtonProps) => (
     <motion.div
         initial={{ opacity: 0, x: -20 }}
         animate={{ opacity: 1, x: 0 }}
@@ -92,7 +88,7 @@ const MobileNavButton = ({ name, link, selected, onClick, index }: MobileNavButt
         transition={{
             delay: index * 0.05,
             duration: 0.3,
-            ease: easeOutExpo,
+            ease: appleEase,
         }}
         whileTap={{ scale: 0.98 }}
     >
@@ -102,42 +98,15 @@ const MobileNavButton = ({ name, link, selected, onClick, index }: MobileNavButt
             aria-current={selected ? "page" : undefined}
             className={cn(
                 "w-full px-6 py-4 text-base font-medium rounded-2xl transition-all duration-300",
-                "flex items-center justify-center backdrop-blur-sm",
+                "flex items-center justify-center gap-2 backdrop-blur-sm",
                 selected
                     ? "text-black dark:text-white bg-linear-to-r from-black/8 to-black/12 dark:from-white/8 dark:to-white/12"
                     : "text-black/60 dark:text-white/60 hover:bg-black/4 dark:hover:bg-white/4"
             )}
         >
+            {icon}
             {name}
         </Link>
-    </motion.div>
-);
-
-const LinkButton = ({ title, icon, href }: LinkButtonProps) => (
-    <motion.div
-        variants={itemVariants}
-        whileHover={{ scale: 1.1, rotate: 5 }}
-        whileTap={{ scale: 0.95 }}
-        transition={{ type: "spring", stiffness: 400, damping: 17 }}
-    >
-        <Tooltip title={title} position="top" animation="scale">
-            <a
-                href={href}
-                target="_blank"
-                rel="noreferrer"
-                aria-label={title}
-                className="block p-2.5 rounded-xl transition-all duration-300 hover:bg-black/5 dark:hover:bg-white/5"
-            >
-                <motion.div
-                    className="text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100 transition-colors duration-300"
-                    initial={{ rotate: 0 }}
-                    whileHover={{ rotate: [0, -10, 10, -10, 0] }}
-                    transition={{ duration: 0.5 }}
-                >
-                    {icon}
-                </motion.div>
-            </a>
-        </Tooltip>
     </motion.div>
 );
 
@@ -188,29 +157,24 @@ const Nav = () => {
                     scrolled
                         ? "bg-white/70 dark:bg-[#12181d]/70 shadow-2xl shadow-black/8 backdrop-saturate-180"
                         : "bg-white/50 dark:bg-[#12181d]/50 backdrop-saturate-150",
-                    "backdrop-blur-xl",
+                    "backdrop-blur-md",
                     "border border-white/20 dark:border-white/10",
-                    "before:absolute before:inset-0 before:rounded-2xl before:bg-linear-to-b before:from-white/20 before:to-transparent dark:before:from-white/5",
-                    "after:absolute after:inset-0 after:rounded-2xl after:bg-linear-to-t after:from-black/2 after:to-transparent dark:after:from-black/10"
+                    "before:absolute before:inset-0 before:rounded-2xl before:bg-gradient-to-b before:from-white/20 before:to-transparent dark:before:from-white/5",
+                    "after:absolute after:inset-0 after:rounded-2xl after:bg-gradient-to-t  after:to-transparent dark:after:from-black/10"
                 )}
-                style={{
-                    boxShadow: scrolled
-                        ? "0 10px 40px -10px rgba(0, 0, 0, 0.1), inset 0 1px 0 0 rgba(255, 255, 255, 0.2)"
-                        : "0 10px 30px -10px rgba(0, 0, 0, 0.05), inset 0 1px 0 0 rgba(255, 255, 255, 0.1)",
-                }}
             >
                 <LayoutGroup>
                     <div className="flex items-center space-x-1 relative z-10">
                         <motion.div variants={itemVariants}>
                             <ThemeToggle disabled={isTelevomunicazioni} />
                         </motion.div>
-                        <LandingButton name="Home" link="/" selected={router.pathname === "/"} />
-                        <LandingButton name="Contact" link="/contact" selected={router.pathname === "/contact"} />
+                        <LandingButton name="Home" link="/" icon={<FiHome className="w-4 h-4" />} selected={router.pathname === "/"} />
+                        <LandingButton name="Contact" link="/contact" icon={<RiContactsLine className="w-4 h-4" />} selected={router.pathname === "/contact"} />
                     </div>
                 </LayoutGroup>
                 <div className="flex items-center space-x-2 relative z-10">
                     {socialLinks.map(link => (
-                        <LinkButton key={link.title} {...link} />
+                        <Button key={link.title} {...link} />
                     ))}
                 </div>
             </motion.nav>
@@ -219,7 +183,7 @@ const Nav = () => {
             <motion.nav
                 initial={{ y: -100 }}
                 animate={{ y: 0 }}
-                transition={{ duration: 0.5, ease: easeOutExpo }}
+                transition={{ duration: 0.5, ease: appleEase }}
                 className={cn(
                     "xs:hidden fixed top-0 left-0 right-0 z-50",
                     "bg-white/80 dark:bg-[#12181d]/80 backdrop-blur-xl backdrop-saturate-150",
@@ -278,7 +242,7 @@ const Nav = () => {
                                 initial={{ opacity: 0, y: -20, scale: 0.95 }}
                                 animate={{ opacity: 1, y: 0, scale: 1 }}
                                 exit={{ opacity: 0, y: -20, scale: 0.95 }}
-                                transition={{ duration: 0.3, ease: easeOutExpo }}
+                                transition={{ duration: 0.3, ease: appleEase }}
                                 className="absolute top-full left-4 right-4 mt-2 bg-white/95 dark:bg-[#12181d]/95 backdrop-blur-xl backdrop-saturate-150 rounded-2xl border border-white/20 dark:border-white/10 p-6 shadow-2xl z-50"
                                 style={{
                                     boxShadow:
@@ -289,6 +253,7 @@ const Nav = () => {
                                     <MobileNavButton
                                         name="Home"
                                         link="/"
+                                        icon={<FiHome className="w-5 h-5" />}
                                         selected={router.pathname === "/"}
                                         onClick={() => setMenuOpen(false)}
                                         index={0}
@@ -296,6 +261,7 @@ const Nav = () => {
                                     <MobileNavButton
                                         name="Contact"
                                         link="/contact"
+                                        icon={<RiContactsLine className="w-5 h-5" />}
                                         selected={router.pathname === "/contact"}
                                         onClick={() => setMenuOpen(false)}
                                         index={1}
@@ -308,7 +274,7 @@ const Nav = () => {
                                     transition={{ delay: 0.2, duration: 0.4 }}
                                 >
                                     {socialLinks.map(link => (
-                                        <LinkButton key={link.title} {...link} />
+                                        <Button key={link.title} {...link} />
                                     ))}
                                 </motion.div>
                             </motion.div>
