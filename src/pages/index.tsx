@@ -189,30 +189,34 @@ const Index: React.FC = () => {
 
                 <Section title="What I Do" emoji="💻">
                     <p>
-                        As a core contributor to LibreChat with over 170 PRs, I've implemented critical features
-                        including speech-to-text/text-to-speech integration, accessibility improvements, and
-                        authentication systems. My work spans from user interface optimization to robust backend
-                        functionality, consistently pushing the boundaries of AI integration in web applications.
+                        As a core contributor to LibreChat, I've shipped over 170 PRs working on everything from
+                        speech-to-text and text-to-speech features to accessibility fixes and UI improvements. I enjoy
+                        tackling problems across the full stack, whether it's refining the frontend experience or
+                        building reliable backend systems and I'm passionate about making AI tools that actually work
+                        well for people
                     </p>
                 </Section>
 
                 <Section title="Technical Expertise" emoji="🛠️">
                     <p className="mb-8">
                         Proficient in TypeScript, JavaScript, React, and Next.js for frontend development, with strong
-                        capabilities in Python for AI integration. Experienced with Arduino for hardware projects and
-                        Bash for automation. My focus is on creating seamless, accessible, and performant applications
-                        that leverage cutting-edge AI technologies.
+                        capabilities in Java. Currently learning Rust for systems programming. Experienced with Arduino for
+                        hardware projects. My focus is on creating seamless, accessible, and performant
+                        applications that leverage cutting-edge AI technologies that actually works
                     </p>
                     <TechIcons />
                 </Section>
 
                 <Section title="Notable Projects" emoji="🎮">
+                    <p className="mb-4">
+                        In early 2023, just two months after ChatGPT's launch, I built "Banfi Zombi" in Unreal Engine 5
+                        with adaptive AI NPCs whose behaviors shifted based on player choices, making each playthrough feel different.
+                    </p>
                     <p>
-                        Created "Banfi Zombi" in Unreal Engine 5, featuring adaptive AI NPCs whose storylines
-                        dynamically evolve based on player interactions and choices, creating unique experiences for
-                        each user. Led the implementation of LibreChat's audio capabilities, integrating WebRTC and
-                        websockets for AI Speech-to-Speech conversations, seamlessly combining VAD-STT-LLM-TTS
-                        technologies for natural interactions.
+                        Since then, I've been focused on improving LibreChat's day-to-day usability—adding audio features,
+                        tweaking the UI to feel more intuitive, and making sure keyboard navigation and screen readers work properly.
+                        I've worked on the Agent Builder and built most of the frontend components. My goal is to make sure LibreChat
+                        actually feels good to use, not just powerful.
                     </p>
                 </Section>
 

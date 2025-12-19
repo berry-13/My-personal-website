@@ -1,4 +1,5 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
+import dynamic from "next/dynamic";
 import Head from "next/head";
 import NProgress from "nprogress";
 import Lenis from "lenis";
@@ -8,6 +9,10 @@ import type { AppProps } from "next/app";
 import type { NextPage } from "next";
 import Footer from "../components/Footer";
 import Nav from "../components/Nav";
+
+const DarkVeil = dynamic(() => import("../components/DarkVeil"), {
+    ssr: false,
+});
 
 import "../globals.css";
 import "react-tippy/dist/tippy.css";
@@ -71,6 +76,23 @@ const pageVariants = {
 function MyApp({ Component, pageProps, router }: AppPropsWithLayout) {
     const audioRef = useRef<HTMLAudioElement | null>(null);
     const rafIdRef = useRef<number | null>(null);
+    const [isDarkMode, setIsDarkMode] = useState(true);
+
+    useEffect(() => {
+        const checkTheme = () => {
+            setIsDarkMode(document.documentElement.classList.contains("dark"));
+        };
+
+        checkTheme();
+
+        const observer = new MutationObserver(checkTheme);
+        observer.observe(document.documentElement, {
+            attributes: true,
+            attributeFilter: ["class"],
+        });
+
+        return () => observer.disconnect();
+    }, []);
 
     useEffect(() => {
         const lenis = new Lenis({
@@ -154,11 +176,14 @@ function MyApp({ Component, pageProps, router }: AppPropsWithLayout) {
                 <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)" />
             </Head>
 
-            <div className="min-h-screen bg-gradient-to-bl from-white via-gray-50 to-white dark:from-black dark:via-[#0d131f] dark:to-[#0d131f] transition-colors duration-300">
-                <div className="flex justify-center">
+            <div className="min-h-screen transition-colors duration-300">
+                <div className="fixed inset-0 z-0 h-screen pointer-events-none">
+                    <DarkVeil hueShift={isDarkMode ? 0 : 180} speed={0.5} scanlineFrequency={0.5} scrollSync lightMode={!isDarkMode} />
+                </div>
+                <div className="fixed top-0 left-0 right-0 z-50 flex justify-center">
                     <Nav />
                 </div>
-                <main className="w-full flex justify-center px-4">
+                <main className="relative z-10 w-full flex justify-center px-4">
                     <div className="w-full max-w-4xl text-black dark:text-white">
                         <AnimatePresence mode="wait" initial={false}>
                             <motion.div
