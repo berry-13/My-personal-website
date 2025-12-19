@@ -4,9 +4,9 @@ import { Tooltip } from "react-tippy";
 import { FiMail } from "react-icons/fi";
 import { useRouter } from "next/router";
 import { BsTwitterX } from "react-icons/bs";
-import { HiMenu } from "react-icons/hi";
+import { HiMenu, HiX } from "react-icons/hi";
 import { SiGithub, SiLinkedin } from "react-icons/si";
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence, motion, LayoutGroup } from "framer-motion";
 import ThemeToggle from "./ThemeToggle";
 import { cn } from "~/utils";
 
@@ -18,94 +18,123 @@ interface LandingButtonProps {
 
 interface MobileNavButtonProps extends LandingButtonProps {
     onClick: () => void;
+    index: number;
 }
 
 interface LinkButtonProps {
     title: string;
     icon: React.ReactNode;
     href: string;
+    index?: number;
 }
 
 const navVariants = {
-    hidden: { y: -20, opacity: 0 },
+    hidden: { y: -30, opacity: 0, scale: 0.95 },
     visible: {
         y: 0,
         opacity: 1,
+        scale: 1,
         transition: {
-            duration: 0.6,
+            duration: 0.8,
             ease: [0.22, 1, 0.36, 1],
-            staggerChildren: 0.1,
+            staggerChildren: 0.08,
+            delayChildren: 0.2,
         },
     },
 };
 
 const itemVariants = {
-    hidden: { y: -10, opacity: 0 },
+    hidden: { y: -20, opacity: 0, scale: 0.9 },
     visible: {
         y: 0,
         opacity: 1,
+        scale: 1,
         transition: {
-            duration: 0.5,
+            duration: 0.6,
             ease: [0.22, 1, 0.36, 1],
         },
     },
 };
 
 const LandingButton = ({ name, link, selected }: LandingButtonProps) => (
-    <motion.div variants={itemVariants}>
+    <motion.div variants={itemVariants} whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.98 }}>
         <Link
             href={link}
             aria-current={selected ? "page" : undefined}
             className={cn(
-                "relative px-4 py-2 text-sm rounded-md transition-all duration-200",
+                "relative px-5 py-2.5 text-sm font-medium rounded-xl transition-all duration-300",
                 "hover:text-black dark:hover:text-white",
-                selected
-                    ? "text-black dark:text-white bg-black/10 dark:bg-white/10"
-                    : "text-black/70 dark:text-white/70"
+                selected ? "text-black dark:text-white" : "text-black/60 dark:text-white/60"
             )}
         >
-            {name}
+            <span className="relative z-10">{name}</span>
             {selected && (
                 <motion.div
-                    layoutId="navIndicator"
-                    className="absolute inset-0 rounded-md bg-black/10 dark:bg-white/10 -z-10"
-                    transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
+                    layoutId="navPill"
+                    className="absolute inset-0 rounded-xl bg-gradient-to-r from-black/[0.08] to-black/[0.12] dark:from-white/[0.08] dark:to-white/[0.12] backdrop-blur-sm"
+                    transition={{
+                        type: "spring",
+                        bounce: 0.25,
+                        duration: 0.6,
+                    }}
                 />
             )}
         </Link>
     </motion.div>
 );
 
-const MobileNavButton = ({ name, link, selected, onClick }: MobileNavButtonProps) => (
-    <Link
-        href={link}
-        onClick={onClick}
-        aria-current={selected ? "page" : undefined}
-        className={cn(
-            "w-full px-6 py-3 text-base rounded-lg transition-colors",
-            "flex items-center justify-center",
-            selected
-                ? "text-black dark:text-white bg-black/10 dark:bg-white/10"
-                : "text-black/70 dark:text-white/70 hover:bg-black/5 dark:hover:bg-white/5"
-        )}
+const MobileNavButton = ({ name, link, selected, onClick, index }: MobileNavButtonProps) => (
+    <motion.div
+        initial={{ opacity: 0, x: -20 }}
+        animate={{ opacity: 1, x: 0 }}
+        exit={{ opacity: 0, x: -20 }}
+        transition={{
+            delay: index * 0.05,
+            duration: 0.3,
+            ease: [0.22, 1, 0.36, 1],
+        }}
+        whileTap={{ scale: 0.98 }}
     >
-        {name}
-    </Link>
+        <Link
+            href={link}
+            onClick={onClick}
+            aria-current={selected ? "page" : undefined}
+            className={cn(
+                "w-full px-6 py-4 text-base font-medium rounded-2xl transition-all duration-300",
+                "flex items-center justify-center backdrop-blur-sm",
+                selected
+                    ? "text-black dark:text-white bg-gradient-to-r from-black/[0.08] to-black/[0.12] dark:from-white/[0.08] dark:to-white/[0.12]"
+                    : "text-black/60 dark:text-white/60 hover:bg-black/[0.04] dark:hover:bg-white/[0.04]"
+            )}
+        >
+            {name}
+        </Link>
+    </motion.div>
 );
 
-const LinkButton = ({ title, icon, href }: LinkButtonProps) => (
-    <motion.div variants={itemVariants}>
+const LinkButton = ({ title, icon, href, index = 0 }: LinkButtonProps) => (
+    <motion.div
+        variants={itemVariants}
+        whileHover={{ scale: 1.1, rotate: 5 }}
+        whileTap={{ scale: 0.95 }}
+        transition={{ type: "spring", stiffness: 400, damping: 17 }}
+    >
         <Tooltip title={title} position="top" animation="scale">
             <a
                 href={href}
                 target="_blank"
                 rel="noreferrer"
                 aria-label={title}
-                className="p-2 rounded-full transition-colors"
+                className="block p-2.5 rounded-xl transition-all duration-300 hover:bg-black/[0.05] dark:hover:bg-white/[0.05]"
             >
-                <div className="text-gray-700 hover:text-gray-950 dark:text-gray-400 dark:hover:text-gray-50 transition-colors duration-200">
+                <motion.div
+                    className="text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100 transition-colors duration-300"
+                    initial={{ rotate: 0 }}
+                    whileHover={{ rotate: [0, -10, 10, -10, 0] }}
+                    transition={{ duration: 0.5 }}
+                >
                     {icon}
-                </div>
+                </motion.div>
             </a>
         </Tooltip>
     </motion.div>
@@ -135,14 +164,14 @@ const Nav = () => {
     }, [mobileMenuOpen]);
 
     const socialLinks = [
-        { href: "https://github.com/berry-13", icon: <SiGithub className="w-6 h-6" />, title: "GitHub" },
-        { href: "https://x.com/berry13000", icon: <BsTwitterX className="w-6 h-6" />, title: "X (Twitter)" },
+        { href: "https://github.com/berry-13", icon: <SiGithub className="w-5 h-5" />, title: "GitHub" },
+        { href: "https://x.com/berry13000", icon: <BsTwitterX className="w-5 h-5" />, title: "X (Twitter)" },
         {
             href: "https://linkedin.com/in/marco-beretta-berry",
-            icon: <SiLinkedin className="w-6 h-6" />,
+            icon: <SiLinkedin className="w-5 h-5" />,
             title: "LinkedIn",
         },
-        { href: "mailto:berry@librechat.ai", icon: <FiMail className="w-6 h-6" />, title: "Email" },
+        { href: "mailto:berry@librechat.ai", icon: <FiMail className="w-5 h-5" />, title: "Email" },
     ];
 
     return (
@@ -154,43 +183,82 @@ const Nav = () => {
                 animate="visible"
                 className={cn(
                     "hidden z-[999] fixed w-11/12 lg:w-[60rem] xs:flex items-center justify-between",
-                    "px-4 mt-4 lg:mt-6 rounded-xl backdrop-blur-lg transition-all duration-300 h-16",
+                    "px-6 mt-4 lg:mt-6 rounded-2xl transition-all duration-500 h-[4.5rem]",
                     scrolled
-                        ? "bg-white/80 dark:bg-[#12181d]/80 shadow-lg shadow-black/[0.03]"
-                        : "bg-white/60 dark:bg-[#12181d]/60",
-                    "border border-slate-800/50"
+                        ? "bg-white/70 dark:bg-[#12181d]/70 shadow-2xl shadow-black/[0.08] backdrop-saturate-[180%]"
+                        : "bg-white/50 dark:bg-[#12181d]/50 backdrop-saturate-150",
+                    "backdrop-blur-xl",
+                    "border border-white/20 dark:border-white/10",
+                    "before:absolute before:inset-0 before:rounded-2xl before:bg-gradient-to-b before:from-white/20 before:to-transparent dark:before:from-white/5",
+                    "after:absolute after:inset-0 after:rounded-2xl after:bg-gradient-to-t after:from-black/[0.02] after:to-transparent dark:after:from-black/10"
                 )}
+                style={{
+                    boxShadow: scrolled
+                        ? "0 10px 40px -10px rgba(0, 0, 0, 0.1), inset 0 1px 0 0 rgba(255, 255, 255, 0.2)"
+                        : "0 10px 30px -10px rgba(0, 0, 0, 0.05), inset 0 1px 0 0 rgba(255, 255, 255, 0.1)",
+                }}
             >
-                <div className="flex items-center space-x-2">
-                    <ThemeToggle disabled={isTelevomunicazioni} />
-                    <LandingButton name="Home" link="/" selected={router.pathname === "/"} />
-                    <LandingButton name="Contact" link="/contact" selected={router.pathname === "/contact"} />
-                </div>
-                <div className="flex items-center space-x-4">
-                    {socialLinks.map(link => (
-                        <LinkButton key={link.title} {...link} />
+                <LayoutGroup>
+                    <div className="flex items-center space-x-1 relative z-10">
+                        <motion.div variants={itemVariants}>
+                            <ThemeToggle disabled={isTelevomunicazioni} />
+                        </motion.div>
+                        <LandingButton name="Home" link="/" selected={router.pathname === "/"} />
+                        <LandingButton name="Contact" link="/contact" selected={router.pathname === "/contact"} />
+                    </div>
+                </LayoutGroup>
+                <div className="flex items-center space-x-2 relative z-10">
+                    {socialLinks.map((link, index) => (
+                        <LinkButton key={link.title} {...link} index={index} />
                     ))}
                 </div>
             </motion.nav>
 
             {/* Mobile Navigation */}
-            <nav
+            <motion.nav
+                initial={{ y: -100 }}
+                animate={{ y: 0 }}
+                transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
                 className={cn(
                     "xs:hidden fixed top-0 left-0 right-0 z-50",
-                    "bg-white/90 dark:bg-[#12181d]/90",
-                    "border-b border-slate-800/50"
+                    "bg-white/80 dark:bg-[#12181d]/80 backdrop-blur-xl backdrop-saturate-150",
+                    "border-b border-white/20 dark:border-white/10"
                 )}
             >
-                <div className="flex items-center justify-between px-4 py-3">
+                <div className="flex items-center justify-between px-4 py-4">
                     <ThemeToggle />
-                    <button
+                    <motion.button
                         onClick={() => setMenuOpen(prev => !prev)}
                         aria-label={mobileMenuOpen ? "Close menu" : "Open menu"}
                         aria-expanded={mobileMenuOpen}
-                        className="p-2 rounded-lg text-black/70 dark:text-white/70 hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
+                        className="p-2.5 rounded-xl text-black/70 dark:text-white/70 hover:bg-black/5 dark:hover:bg-white/5 transition-all duration-300"
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
                     >
-                        <HiMenu className="w-6 h-6" />
-                    </button>
+                        <AnimatePresence mode="wait">
+                            {mobileMenuOpen ? (
+                                <motion.div
+                                    key="close"
+                                    initial={{ rotate: 0, opacity: 0 }}
+                                    animate={{ rotate: 180, opacity: 1 }}
+                                    exit={{ rotate: 0, opacity: 0 }}
+                                    transition={{ duration: 0.3 }}
+                                >
+                                    <HiX className="w-6 h-6" />
+                                </motion.div>
+                            ) : (
+                                <motion.div
+                                    key="menu"
+                                    initial={{ rotate: 0, opacity: 0 }}
+                                    animate={{ rotate: 0, opacity: 1 }}
+                                    exit={{ rotate: 180, opacity: 0 }}
+                                    transition={{ duration: 0.3 }}
+                                >
+                                    <HiMenu className="w-6 h-6" />
+                                </motion.div>
+                            )}
+                        </AnimatePresence>
+                    </motion.button>
                 </div>
 
                 <AnimatePresence>
@@ -200,42 +268,53 @@ const Nav = () => {
                                 initial={{ opacity: 0 }}
                                 animate={{ opacity: 1 }}
                                 exit={{ opacity: 0 }}
-                                transition={{ duration: 0.2 }}
-                                className="fixed inset-0 bg-black/20 dark:bg-black/40 z-40"
+                                transition={{ duration: 0.3 }}
+                                className="fixed inset-0 bg-black/30 dark:bg-black/50 z-40 backdrop-blur-sm"
                                 onClick={() => setMenuOpen(false)}
                                 aria-hidden="true"
                             />
                             <motion.div
-                                initial={{ opacity: 0, y: -10 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                exit={{ opacity: 0, y: -10 }}
-                                transition={{ duration: 0.2 }}
-                                className="absolute top-full left-0 right-0 bg-white dark:bg-[#12181d] border-b border-slate-800/50 p-4 shadow-lg z-50" // removed backdrop-blur-lg
+                                initial={{ opacity: 0, y: -20, scale: 0.95 }}
+                                animate={{ opacity: 1, y: 0, scale: 1 }}
+                                exit={{ opacity: 0, y: -20, scale: 0.95 }}
+                                transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
+                                className="absolute top-full left-4 right-4 mt-2 bg-white/95 dark:bg-[#12181d]/95 backdrop-blur-xl backdrop-saturate-150 rounded-2xl border border-white/20 dark:border-white/10 p-6 shadow-2xl z-50"
+                                style={{
+                                    boxShadow:
+                                        "0 20px 40px -10px rgba(0, 0, 0, 0.2), inset 0 1px 0 0 rgba(255, 255, 255, 0.1)",
+                                }}
                             >
-                                <div className="space-y-2">
+                                <div className="space-y-3">
                                     <MobileNavButton
                                         name="Home"
                                         link="/"
                                         selected={router.pathname === "/"}
                                         onClick={() => setMenuOpen(false)}
+                                        index={0}
                                     />
                                     <MobileNavButton
                                         name="Contact"
                                         link="/contact"
                                         selected={router.pathname === "/contact"}
                                         onClick={() => setMenuOpen(false)}
+                                        index={1}
                                     />
                                 </div>
-                                <div className="flex justify-center gap-8 mt-8 pt-6 border-t border-slate-800/30">
-                                    {socialLinks.map(link => (
-                                        <LinkButton key={link.title} {...link} />
+                                <motion.div
+                                    className="flex justify-center gap-6 mt-8 pt-6 border-t border-black/10 dark:border-white/10"
+                                    initial={{ opacity: 0 }}
+                                    animate={{ opacity: 1 }}
+                                    transition={{ delay: 0.2, duration: 0.4 }}
+                                >
+                                    {socialLinks.map((link, index) => (
+                                        <LinkButton key={link.title} {...link} index={index} />
                                     ))}
-                                </div>
+                                </motion.div>
                             </motion.div>
                         </>
                     )}
                 </AnimatePresence>
-            </nav>
+            </motion.nav>
         </>
     );
 };
