@@ -1,6 +1,10 @@
-import "@testing-library/jest-dom/vitest";
+import { GlobalRegistrator } from "@happy-dom/global-registrator";
+import { afterEach, mock } from "bun:test";
 import { cleanup } from "@testing-library/react";
-import { afterEach, vi } from "vitest";
+import "@testing-library/jest-dom";
+
+// Register happy-dom globals (document, window, etc.)
+GlobalRegistrator.register();
 
 // Cleanup after each test
 afterEach(() => {
@@ -8,51 +12,47 @@ afterEach(() => {
 });
 
 // Mock next/router
-vi.mock("next/router", () => ({
+mock.module("next/router", () => ({
     useRouter: () => ({
         pathname: "/",
-        push: vi.fn(),
-        replace: vi.fn(),
-        prefetch: vi.fn(),
+        push: mock(() => {}),
+        replace: mock(() => {}),
+        prefetch: mock(() => {}),
         query: {},
         asPath: "/",
         events: {
-            on: vi.fn(),
-            off: vi.fn(),
-            emit: vi.fn(),
+            on: mock(() => {}),
+            off: mock(() => {}),
+            emit: mock(() => {}),
         },
     }),
 }));
 
 // Mock IntersectionObserver
-class MockIntersectionObserver {
-    observe = vi.fn();
-    disconnect = vi.fn();
-    unobserve = vi.fn();
-}
-
-vi.stubGlobal("IntersectionObserver", MockIntersectionObserver);
+globalThis.IntersectionObserver = class MockIntersectionObserver {
+    observe() {}
+    disconnect() {}
+    unobserve() {}
+} as unknown as typeof IntersectionObserver;
 
 // Mock window.matchMedia
-vi.stubGlobal(
-    "matchMedia",
-    vi.fn().mockImplementation(query => ({
+Object.defineProperty(window, "matchMedia", {
+    writable: true,
+    value: (query: string) => ({
         matches: false,
         media: query,
         onchange: null,
-        addListener: vi.fn(),
-        removeListener: vi.fn(),
-        addEventListener: vi.fn(),
-        removeEventListener: vi.fn(),
-        dispatchEvent: vi.fn(),
-    }))
-);
+        addListener: () => {},
+        removeListener: () => {},
+        addEventListener: () => {},
+        removeEventListener: () => {},
+        dispatchEvent: () => false,
+    }),
+});
 
 // Mock ResizeObserver
-class MockResizeObserver {
-    observe = vi.fn();
-    disconnect = vi.fn();
-    unobserve = vi.fn();
-}
-
-vi.stubGlobal("ResizeObserver", MockResizeObserver);
+globalThis.ResizeObserver = class MockResizeObserver {
+    observe() {}
+    disconnect() {}
+    unobserve() {}
+} as unknown as typeof ResizeObserver;

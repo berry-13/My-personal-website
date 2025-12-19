@@ -1,31 +1,39 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
-import { renderHook, waitFor } from "@testing-library/react";
-import { useRepos } from "./useRepo";
+import { describe, it, expect, mock, beforeEach } from "bun:test";
+import { renderHook } from "@testing-library/react";
 
-// Mock SWR
-vi.mock("swr", () => ({
-    default: vi.fn(),
+// Mock SWR before importing the hook
+const mockUseSWR = mock(() => ({
+    data: undefined,
+    error: undefined,
+    isLoading: true,
+    isValidating: false,
+    mutate: mock(() => {}),
+}));
+
+mock.module("swr", () => ({
+    default: mockUseSWR,
 }));
 
 // Mock the github service
-vi.mock("~/services/github", () => ({
-    fetchRepos: vi.fn(),
+mock.module("~/services/github", () => ({
+    fetchRepos: mock(() => {}),
 }));
 
-import useSWR from "swr";
+// Import after mocking
+import { useRepos } from "./useRepo";
 
 describe("useRepos hook", () => {
     beforeEach(() => {
-        vi.resetAllMocks();
+        mockUseSWR.mockClear();
     });
 
     it("returns loading state initially", () => {
-        vi.mocked(useSWR).mockReturnValue({
+        mockUseSWR.mockReturnValue({
             data: undefined,
             error: undefined,
             isLoading: true,
             isValidating: false,
-            mutate: vi.fn(),
+            mutate: mock(() => {}),
         });
 
         const { result } = renderHook(() => useRepos());
@@ -41,12 +49,12 @@ describe("useRepos hook", () => {
             berryRepos: [{ id: 2, name: "test-repo" }],
         };
 
-        vi.mocked(useSWR).mockReturnValue({
+        mockUseSWR.mockReturnValue({
             data: mockRepos,
             error: undefined,
             isLoading: false,
             isValidating: false,
-            mutate: vi.fn(),
+            mutate: mock(() => {}),
         });
 
         const { result } = renderHook(() => useRepos());
@@ -57,12 +65,12 @@ describe("useRepos hook", () => {
     });
 
     it("returns error state when fetch fails", () => {
-        vi.mocked(useSWR).mockReturnValue({
+        mockUseSWR.mockReturnValue({
             data: undefined,
             error: new Error("Fetch failed"),
             isLoading: false,
             isValidating: false,
-            mutate: vi.fn(),
+            mutate: mock(() => {}),
         });
 
         const { result } = renderHook(() => useRepos());
@@ -73,16 +81,16 @@ describe("useRepos hook", () => {
     });
 
     it("calls useSWR with correct key", () => {
-        vi.mocked(useSWR).mockReturnValue({
+        mockUseSWR.mockReturnValue({
             data: undefined,
             error: undefined,
             isLoading: true,
             isValidating: false,
-            mutate: vi.fn(),
+            mutate: mock(() => {}),
         });
 
         renderHook(() => useRepos());
 
-        expect(useSWR).toHaveBeenCalledWith("repos", expect.any(Function));
+        expect(mockUseSWR).toHaveBeenCalledWith("repos", expect.any(Function));
     });
 });

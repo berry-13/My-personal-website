@@ -1,9 +1,10 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect, mock, beforeEach } from "bun:test";
 import { fetchRepos } from "./github";
 
 describe("fetchRepos", () => {
     beforeEach(() => {
-        vi.resetAllMocks();
+        // Reset fetch mock before each test
+        globalThis.fetch = mock(() => Promise.resolve(new Response()));
     });
 
     it("fetches and returns repos successfully", async () => {
@@ -12,10 +13,12 @@ describe("fetchRepos", () => {
             berryRepos: [{ id: 2, name: "repo1" }],
         };
 
-        global.fetch = vi.fn().mockResolvedValueOnce({
-            ok: true,
-            json: () => Promise.resolve(mockData),
-        });
+        globalThis.fetch = mock(() =>
+            Promise.resolve({
+                ok: true,
+                json: () => Promise.resolve(mockData),
+            } as Response)
+        );
 
         const result = await fetchRepos();
 
@@ -24,16 +27,18 @@ describe("fetchRepos", () => {
     });
 
     it("throws an error when response is not ok", async () => {
-        global.fetch = vi.fn().mockResolvedValueOnce({
-            ok: false,
-            status: 500,
-        });
+        globalThis.fetch = mock(() =>
+            Promise.resolve({
+                ok: false,
+                status: 500,
+            } as Response)
+        );
 
         await expect(fetchRepos()).rejects.toThrow("Failed to fetch repos");
     });
 
     it("throws an error on network failure", async () => {
-        global.fetch = vi.fn().mockRejectedValueOnce(new Error("Network error"));
+        globalThis.fetch = mock(() => Promise.reject(new Error("Network error")));
 
         await expect(fetchRepos()).rejects.toThrow("Network error");
     });

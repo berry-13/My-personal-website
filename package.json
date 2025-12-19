@@ -8,9 +8,9 @@
         "start": "next start",
         "lint": "next lint",
         "typecheck": "tsc --noEmit",
-        "test": "vitest",
-        "test:run": "vitest run",
-        "test:coverage": "vitest run --coverage"
+        "test": "NODE_ENV=development bun test",
+        "test:run": "NODE_ENV=development bun test",
+        "test:coverage": "NODE_ENV=development bun test --coverage"
     },
     "dependencies": {
         "@specy/liquid-glass-react": "^1.0.2",
@@ -37,6 +37,7 @@
         "tailwind-merge": "^3.4.0"
     },
     "devDependencies": {
+        "@happy-dom/global-registrator": "^20.0.11",
         "@next/bundle-analyzer": "^15.1.6",
         "@tailwindcss/postcss": "^4.1.18",
         "@testing-library/jest-dom": "^6.9.1",
@@ -47,15 +48,12 @@
         "@types/nprogress": "^0.2.0",
         "@types/react": "^18.2.0",
         "@types/react-dom": "^18.2.0",
-        "@vitejs/plugin-react": "^5.1.2",
         "autoprefixer": "^10.4.5",
         "eslint": "^8.57.0",
         "eslint-config-next": "^15.2.4",
-        "jsdom": "^27.3.0",
         "postcss": "^8.4.12",
         "postcss-nesting": "^13.0.2",
         "tailwindcss": "^4.1.18",
-        "typescript": "^5.9.3",
-        "vitest": "^4.0.15"
+        "typescript": "^5.9.3"
     }
 }
