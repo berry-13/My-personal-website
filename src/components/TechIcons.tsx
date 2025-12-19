@@ -48,14 +48,14 @@ const containerVariants = {
             staggerChildren: 0.08,
             delayChildren: 0.1,
             duration: 0.6,
-            ease: [0.22, 1, 0.36, 1],
+            ease: [0.22, 1, 0.36, 1] as const,
         },
     },
     exit: {
         opacity: 0,
         transition: {
             staggerChildren: 0.05,
-            staggerDirection: -1,
+            staggerDirection: -1 as const,
         },
     },
 };
@@ -73,7 +73,7 @@ const itemVariants = {
         scale: 1,
         rotateX: 0,
         transition: {
-            type: "spring",
+            type: "spring" as const,
             stiffness: 100,
             damping: 15,
             mass: 1,
@@ -85,7 +85,7 @@ const itemVariants = {
         y: -5,
         rotateX: 5,
         transition: {
-            type: "tween",
+            type: "tween" as const,
             duration: 0.1,
         },
     },
@@ -93,7 +93,7 @@ const itemVariants = {
         scale: 0.97,
         rotateX: 0,
         transition: {
-            type: "spring",
+            type: "spring" as const,
             stiffness: 400,
             damping: 10,
         },
@@ -110,7 +110,7 @@ const glowVariants = {
         scale: 1.2,
         transition: {
             duration: 1,
-            ease: "easeInOut",
+            ease: "easeInOut" as const,
             repeat: Infinity,
             repeatType: "reverse" as const,
         },
@@ -262,7 +262,7 @@ const TechIcons: React.FC = () => {
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: -20 }}
-                        transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+                        transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] as const }}
                         className="space-y-4"
                     >
                         <h3 className="text-lg font-medium capitalize text-gray-800 dark:text-gray-200">{category}</h3>

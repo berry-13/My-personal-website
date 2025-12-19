@@ -1,5 +1,5 @@
 import dynamic from "next/dynamic";
-import React, { Suspense } from "react";
+import React from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useInView } from "react-intersection-observer";
 import type { SectionProps, ExternalLinkProps, RepoGridProps } from "@/src/types/types";
@@ -16,7 +16,7 @@ const fadeInUp = {
     visible: {
         opacity: 1,
         y: 0,
-        transition: { duration: 0.6, ease: [0.22, 1, 0.36, 1] },
+        transition: { duration: 0.6, ease: [0.22, 1, 0.36, 1] as const },
     },
 };
 
@@ -176,7 +176,7 @@ const Index: React.FC = () => {
                 <motion.div
                     initial={{ opacity: 0, y: 30 }}
                     animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
+                    transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] as const }}
                     className="mb-16"
                 >
                     <h1 className="text-5xl md:text-6xl font-bold mb-6">Hey, I'm Marco!</h1>
@@ -203,11 +203,7 @@ const Index: React.FC = () => {
                         Bash for automation. My focus is on creating seamless, accessible, and performant applications
                         that leverage cutting-edge AI technologies.
                     </p>
-                    <Suspense
-                        fallback={<div className="w-full h-32 animate-pulse bg-gray-200 dark:bg-gray-800 rounded-md" />}
-                    >
-                        <TechIcons />
-                    </Suspense>
+                    <TechIcons />
                 </Section>
 
                 <Section title="Notable Projects" emoji="🎮">

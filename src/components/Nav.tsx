@@ -25,8 +25,9 @@ interface LinkButtonProps {
     title: string;
     icon: React.ReactNode;
     href: string;
-    index?: number;
 }
+
+const easeOutExpo = [0.22, 1, 0.36, 1] as const;
 
 const navVariants = {
     hidden: { y: -30, opacity: 0, scale: 0.95 },
@@ -36,7 +37,7 @@ const navVariants = {
         scale: 1,
         transition: {
             duration: 0.8,
-            ease: [0.22, 1, 0.36, 1],
+            ease: easeOutExpo,
             staggerChildren: 0.08,
             delayChildren: 0.2,
         },
@@ -51,7 +52,7 @@ const itemVariants = {
         scale: 1,
         transition: {
             duration: 0.6,
-            ease: [0.22, 1, 0.36, 1],
+            ease: easeOutExpo,
         },
     },
 };
@@ -71,7 +72,7 @@ const LandingButton = ({ name, link, selected }: LandingButtonProps) => (
             {selected && (
                 <motion.div
                     layoutId="navPill"
-                    className="absolute inset-0 rounded-xl bg-gradient-to-r from-black/[0.08] to-black/[0.12] dark:from-white/[0.08] dark:to-white/[0.12] backdrop-blur-sm"
+                    className="absolute inset-0 rounded-xl bg-linear-to-r from-black/8 to-black/12 dark:from-white/8 dark:to-white/12 backdrop-blur-sm"
                     transition={{
                         type: "spring",
                         bounce: 0.25,
@@ -91,7 +92,7 @@ const MobileNavButton = ({ name, link, selected, onClick, index }: MobileNavButt
         transition={{
             delay: index * 0.05,
             duration: 0.3,
-            ease: [0.22, 1, 0.36, 1],
+            ease: easeOutExpo,
         }}
         whileTap={{ scale: 0.98 }}
     >
@@ -103,8 +104,8 @@ const MobileNavButton = ({ name, link, selected, onClick, index }: MobileNavButt
                 "w-full px-6 py-4 text-base font-medium rounded-2xl transition-all duration-300",
                 "flex items-center justify-center backdrop-blur-sm",
                 selected
-                    ? "text-black dark:text-white bg-gradient-to-r from-black/[0.08] to-black/[0.12] dark:from-white/[0.08] dark:to-white/[0.12]"
-                    : "text-black/60 dark:text-white/60 hover:bg-black/[0.04] dark:hover:bg-white/[0.04]"
+                    ? "text-black dark:text-white bg-linear-to-r from-black/8 to-black/12 dark:from-white/8 dark:to-white/12"
+                    : "text-black/60 dark:text-white/60 hover:bg-black/4 dark:hover:bg-white/4"
             )}
         >
             {name}
@@ -112,7 +113,7 @@ const MobileNavButton = ({ name, link, selected, onClick, index }: MobileNavButt
     </motion.div>
 );
 
-const LinkButton = ({ title, icon, href, index = 0 }: LinkButtonProps) => (
+const LinkButton = ({ title, icon, href }: LinkButtonProps) => (
     <motion.div
         variants={itemVariants}
         whileHover={{ scale: 1.1, rotate: 5 }}
@@ -125,7 +126,7 @@ const LinkButton = ({ title, icon, href, index = 0 }: LinkButtonProps) => (
                 target="_blank"
                 rel="noreferrer"
                 aria-label={title}
-                className="block p-2.5 rounded-xl transition-all duration-300 hover:bg-black/[0.05] dark:hover:bg-white/[0.05]"
+                className="block p-2.5 rounded-xl transition-all duration-300 hover:bg-black/5 dark:hover:bg-white/5"
             >
                 <motion.div
                     className="text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100 transition-colors duration-300"
@@ -182,15 +183,15 @@ const Nav = () => {
                 initial="hidden"
                 animate="visible"
                 className={cn(
-                    "hidden z-[999] fixed w-11/12 lg:w-[60rem] xs:flex items-center justify-between",
-                    "px-6 mt-4 lg:mt-6 rounded-2xl transition-all duration-500 h-[4.5rem]",
+                    "hidden z-999 fixed w-11/12 lg:w-240 xs:flex items-center justify-between",
+                    "px-6 mt-4 lg:mt-6 rounded-2xl transition-all duration-500 h-18",
                     scrolled
-                        ? "bg-white/70 dark:bg-[#12181d]/70 shadow-2xl shadow-black/[0.08] backdrop-saturate-[180%]"
+                        ? "bg-white/70 dark:bg-[#12181d]/70 shadow-2xl shadow-black/8 backdrop-saturate-180"
                         : "bg-white/50 dark:bg-[#12181d]/50 backdrop-saturate-150",
                     "backdrop-blur-xl",
                     "border border-white/20 dark:border-white/10",
-                    "before:absolute before:inset-0 before:rounded-2xl before:bg-gradient-to-b before:from-white/20 before:to-transparent dark:before:from-white/5",
-                    "after:absolute after:inset-0 after:rounded-2xl after:bg-gradient-to-t after:from-black/[0.02] after:to-transparent dark:after:from-black/10"
+                    "before:absolute before:inset-0 before:rounded-2xl before:bg-linear-to-b before:from-white/20 before:to-transparent dark:before:from-white/5",
+                    "after:absolute after:inset-0 after:rounded-2xl after:bg-linear-to-t after:from-black/2 after:to-transparent dark:after:from-black/10"
                 )}
                 style={{
                     boxShadow: scrolled
@@ -208,8 +209,8 @@ const Nav = () => {
                     </div>
                 </LayoutGroup>
                 <div className="flex items-center space-x-2 relative z-10">
-                    {socialLinks.map((link, index) => (
-                        <LinkButton key={link.title} {...link} index={index} />
+                    {socialLinks.map(link => (
+                        <LinkButton key={link.title} {...link} />
                     ))}
                 </div>
             </motion.nav>
@@ -218,7 +219,7 @@ const Nav = () => {
             <motion.nav
                 initial={{ y: -100 }}
                 animate={{ y: 0 }}
-                transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
+                transition={{ duration: 0.5, ease: easeOutExpo }}
                 className={cn(
                     "xs:hidden fixed top-0 left-0 right-0 z-50",
                     "bg-white/80 dark:bg-[#12181d]/80 backdrop-blur-xl backdrop-saturate-150",
@@ -277,7 +278,7 @@ const Nav = () => {
                                 initial={{ opacity: 0, y: -20, scale: 0.95 }}
                                 animate={{ opacity: 1, y: 0, scale: 1 }}
                                 exit={{ opacity: 0, y: -20, scale: 0.95 }}
-                                transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
+                                transition={{ duration: 0.3, ease: easeOutExpo }}
                                 className="absolute top-full left-4 right-4 mt-2 bg-white/95 dark:bg-[#12181d]/95 backdrop-blur-xl backdrop-saturate-150 rounded-2xl border border-white/20 dark:border-white/10 p-6 shadow-2xl z-50"
                                 style={{
                                     boxShadow:
@@ -306,8 +307,8 @@ const Nav = () => {
                                     animate={{ opacity: 1 }}
                                     transition={{ delay: 0.2, duration: 0.4 }}
                                 >
-                                    {socialLinks.map((link, index) => (
-                                        <LinkButton key={link.title} {...link} index={index} />
+                                    {socialLinks.map(link => (
+                                        <LinkButton key={link.title} {...link} />
                                     ))}
                                 </motion.div>
                             </motion.div>
