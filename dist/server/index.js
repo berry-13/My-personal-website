@@ -18395,7 +18395,7 @@ async function staticPlugin({
   assets = "public",
   prefix = "/public",
   staticLimit = 1024,
-  alwaysStatic = true,
+  alwaysStatic = false,
   ignorePatterns = [".DS_Store", ".git", ".env"],
   headers: initialHeaders,
   maxAge = 86400,
