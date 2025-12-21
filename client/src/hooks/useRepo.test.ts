@@ -25,9 +25,6 @@ mock.module("~/services/github", () => ({
     fetchRepos: () => {},
 }));
 
-// Import after mocking
-import { useRepos } from "./useRepo";
-
 describe("useRepos hook", () => {
     beforeEach(() => {
         // Reset to initial loading state
@@ -37,7 +34,9 @@ describe("useRepos hook", () => {
         mockState.isValidating = false;
     });
 
-    it("returns loading state initially", () => {
+    it("returns loading state initially", async () => {
+        // Dynamic import to get fresh mock state
+        const { useRepos } = await import("./useRepo");
         const { result } = renderHook(() => useRepos());
 
         expect(result.current.isLoading).toBe(true);
@@ -45,7 +44,7 @@ describe("useRepos hook", () => {
         expect(result.current.isError).toBe(false);
     });
 
-    it("returns repos when fetched successfully", () => {
+    it("returns repos when fetched successfully", async () => {
         const mockRepos = {
             libreChatRepos: [{ id: 1, name: "LibreChat" }],
             berryRepos: [{ id: 2, name: "test-repo" }],
@@ -54,6 +53,7 @@ describe("useRepos hook", () => {
         mockState.data = mockRepos;
         mockState.isLoading = false;
 
+        const { useRepos } = await import("./useRepo");
         const { result } = renderHook(() => useRepos());
 
         expect(result.current.isLoading).toBe(false);
@@ -61,10 +61,11 @@ describe("useRepos hook", () => {
         expect(result.current.isError).toBe(false);
     });
 
-    it("returns error state when fetch fails", () => {
+    it("returns error state when fetch fails", async () => {
         mockState.error = new Error("Fetch failed");
         mockState.isLoading = false;
 
+        const { useRepos } = await import("./useRepo");
         const { result } = renderHook(() => useRepos());
 
         expect(result.current.isLoading).toBe(false);
@@ -72,9 +73,8 @@ describe("useRepos hook", () => {
         expect(result.current.isError).toBe(true);
     });
 
-    it("uses SWR with repos key", () => {
-        // This test verifies the hook returns the expected structure
-        // The actual SWR call is validated by the other tests working correctly
+    it("uses SWR with repos key", async () => {
+        const { useRepos } = await import("./useRepo");
         const { result } = renderHook(() => useRepos());
 
         expect(result.current).toHaveProperty("repos");

@@ -28,8 +28,9 @@ jobs:
       - name: Build and push Docker image for bot
         run: |
           for i in 1 2 3; do
-            docker build -f Dockerfile -t my-personal-website . && break || sleep 15
+            docker build -f Dockerfile -t my-personal-website . && exit 0 || sleep 15
           done
+          exit 1
 
       - name: Tag and push bot image
         run: |
