@@ -171,8 +171,8 @@ const TechItem = React.memo<TechItemProps>(({ icon: Icon, name, description, ind
             onHoverStart={handleHoverStart}
             onHoverEnd={handleHoverEnd}
             className="group relative flex flex-col items-center p-4 rounded-xl
-                     bg-white/5 backdrop-blur-sm border border-gray-200
-                     dark:border-gray-800 transition-all duration-300
+                     bg-white/5 backdrop-blur-sm border border-black/15
+                     dark:border-white/5 transition-all duration-300
                      hover:shadow-lg hover:shadow-violet-500/10 transform-gpu"
             style={{
                 perspective: "1000px",

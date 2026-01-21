@@ -54,7 +54,7 @@ const ExternalLink: React.FC<ExternalLinkProps> = ({ href, children }) => (
     <a
         href={href}
         rel="noreferrer"
-        className="inline-flex items-center font-semibold text-violet-500 hover:text-violet-600 dark:hover:text-violet-400 transition-colors duration-200"
+        className="inline-flex items-center font-semibold text-blue-500 hover:text-blue-600 dark:hover:text-blue-400 transition-colors duration-200"
         target="_blank"
     >
         {children}
@@ -116,10 +116,10 @@ const RepoGrid: React.FC<RepoGridProps> = ({ libreRepo, topRepos, isLoading, isE
                     target="_blank"
                     rel="noopener noreferrer"
                     variants={fadeInUp}
-                    whileHover={{ scale: 1.02, y: -2 }}
-                    className="group bg-gray-50 border dark:border-transparent dark:bg-gray-800/50
-                     dark:hover:bg-gray-800/80 backdrop-blur-lg rounded-xl p-6
-                     hover:shadow-lg transition-transform duration-300"
+                    whileHover={{ scale: 1.02, y: -2, boxShadow: "0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1)" }}
+                    transition={{ duration: 0.2, ease: "easeOut" }}
+                    className="group bg-gray-50 border border-black/15 dark:border-white/5 dark:bg-white/5
+                     dark:hover:bg-white/10 backdrop-blur-lg rounded-xl p-6"
                 >
                     <h3
                         className="text-xl font-semibold mb-2 text-gray-900 dark:text-gray-100

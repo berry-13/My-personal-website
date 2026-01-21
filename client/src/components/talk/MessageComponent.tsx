@@ -176,9 +176,9 @@ const MessageComponent = () => {
                                 whileTap={{ scale: 0.98 }}
                                 disabled={status.sending}
                                 className="bg-violet-500 hover:bg-violet-600 text-white
-                         rounded-xl px-6 py-2.5 font-medium text-sm
-                         transition-all duration-200 disabled:opacity-50
-                         flex items-center space-x-2 shadow-lg shadow-violet-500/20"
+                                rounded-xl px-6 py-2.5 font-medium text-sm cursor-pointer
+                                transition-all duration-200 disabled:opacity-50 w-full
+                                flex items-center justify-center space-x-2 shadow-lg shadow-violet-500/20"
                             >
                                 <span>Send</span>
                                 {status.sending ? (

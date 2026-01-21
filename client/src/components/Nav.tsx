@@ -156,7 +156,7 @@ const Nav = () => {
                         ? "bg-white/70 dark:bg-[#12181d]/70 shadow-2xl shadow-black/8 backdrop-saturate-180"
                         : "bg-white/50 dark:bg-[#12181d]/50 backdrop-saturate-150",
                     "backdrop-blur-md",
-                    "border border-white/20 dark:border-white/10",
+                    "border border-black/15 dark:border-white/10",
                     "before:absolute before:inset-0 before:rounded-2xl before:bg-gradient-to-b before:from-white/20 before:to-transparent dark:before:from-white/5",
                     "after:absolute after:inset-0 after:rounded-2xl after:bg-gradient-to-t after:to-transparent dark:after:from-black/10"
                 )}
