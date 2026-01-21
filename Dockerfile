@@ -1,28 +1,27 @@
-# use the official Bun image
-FROM oven/bun:1.2-debian AS base
-WORKDIR /usr/src/app
-
-# copy pre-installed dependencies from host (installed in CI)
-FROM base AS deps
+FROM oven/bun:1.2-debian AS deps
+WORKDIR /app
 COPY package.json bun.lock ./
-COPY node_modules ./node_modules
+RUN bun install --frozen-lockfile
 
-# build stage
-FROM base AS build
-COPY --from=deps /usr/src/app/node_modules ./node_modules
+FROM oven/bun:1.2-debian AS build
+WORKDIR /app
+COPY --from=deps /app/node_modules ./node_modules
 COPY . .
-
 ENV NODE_ENV=production
 RUN bun run build
 
-# production stage - install only production deps
-FROM base AS release
+FROM oven/bun:1.2-debian AS prod-deps
+WORKDIR /app
 COPY package.json bun.lock ./
-COPY --from=deps /usr/src/app/node_modules ./node_modules
 RUN bun install --frozen-lockfile --production
 
-COPY --from=build /usr/src/app/dist ./dist
-
-USER bun
+FROM oven/bun:1.2-debian
+WORKDIR /app
+COPY --from=prod-deps /app/node_modules ./node_modules
+COPY --from=build /app/dist/server ./dist/server
+COPY --from=build /app/dist/*.* ./dist/
+COPY --from=build /app/dist/assets ./dist/assets
+COPY --from=build /app/package.json ./
+ENV NODE_ENV=production
 EXPOSE 3000
-CMD ["bun", "run", "start"]
+CMD ["bun", "dist/server/index.js"]
