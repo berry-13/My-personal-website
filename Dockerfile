@@ -6,6 +6,10 @@ WORKDIR /usr/src/app
 # install dependencies into temp directory
 # this will cache them and speed up future builds
 FROM base AS install
+
+# Configure IPv4 preference to avoid ConnectionRefused errors
+RUN echo "precedence ::ffff:0:0/96 100" >> /etc/gai.conf
+
 RUN mkdir -p /temp/dev
 COPY package.json bun.lock /temp/dev/
 RUN cd /temp/dev && bun install --frozen-lockfile
