@@ -1,41 +1,28 @@
 # use the official Bun image
-# see all versions at https://hub.docker.com/r/oven/bun/tags
-FROM oven/bun:1 AS base
+FROM oven/bun:1.2-debian AS base
 WORKDIR /usr/src/app
 
-# install dependencies into temp directory
-# this will cache them and speed up future builds
-FROM base AS install
+# copy pre-installed dependencies from host (installed in CI)
+FROM base AS deps
+COPY package.json bun.lock ./
+COPY node_modules ./node_modules
 
-# Configure IPv4 preference to avoid ConnectionRefused errors
-RUN echo "precedence ::ffff:0:0/96 100" >> /etc/gai.conf
-
-RUN mkdir -p /temp/dev
-COPY package.json bun.lock /temp/dev/
-RUN cd /temp/dev && bun install --frozen-lockfile
-
-# install with --production (exclude devDependencies)
-RUN mkdir -p /temp/prod
-COPY package.json bun.lock /temp/prod/
-RUN cd /temp/prod && bun install --frozen-lockfile --production
-
-# copy node_modules from temp directory
-# then copy all (non-ignored) project files into the image
-FROM base AS prerelease
-COPY --from=install /temp/dev/node_modules node_modules
+# build stage
+FROM base AS build
+COPY --from=deps /usr/src/app/node_modules ./node_modules
 COPY . .
 
-# Build the Vite + Elysia application
 ENV NODE_ENV=production
 RUN bun run build
 
-# copy production dependencies and built files into final image
+# production stage - install only production deps
 FROM base AS release
-COPY --from=install /temp/prod/node_modules node_modules
-COPY --from=prerelease /usr/src/app/dist ./dist
-COPY --from=prerelease /usr/src/app/package.json .
+COPY package.json bun.lock ./
+COPY --from=deps /usr/src/app/node_modules ./node_modules
+RUN bun install --frozen-lockfile --production
 
-# run the app
+COPY --from=build /usr/src/app/dist ./dist
+
 USER bun
 EXPOSE 3000
 CMD ["bun", "run", "start"]
