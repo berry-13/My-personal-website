@@ -25,4 +25,5 @@ COPY --from=build /usr/src/app/dist ./dist
 
 USER bun
 EXPOSE 3000
-CMD ["bun", "run", "start"]
+ENV NODE_ENV=production
+CMD ["bun", "dist/server/index.js"]

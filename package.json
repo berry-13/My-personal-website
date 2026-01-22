@@ -9,7 +9,7 @@
         "dev:client": "vite",
         "build": "bun run build:client && bun run build:server",
         "build:client": "vite build",
-        "build:server": "bun build server/index.ts --outdir=dist/server --target=bun",
+        "build:server": "bun build server/index.ts --outfile=dist/server/index.js --target=bun",
         "start": "NODE_ENV=production bun dist/server/index.js",
         "preview": "vite preview",
         "lint": "eslint client/src --ext .ts,.tsx",
