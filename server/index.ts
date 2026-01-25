@@ -5,6 +5,8 @@ import { reposRoute } from "./routes/repos";
 import { sendRoute } from "./routes/send";
 import { awakeRoute } from "./routes/awake";
 
+const indexHtml = await Bun.file("dist/index.html").text();
+
 const app = new Elysia()
     // CORS configuration
     .use(
@@ -15,7 +17,7 @@ const app = new Elysia()
         })
     )
     // Global middleware for security headers and rate limiting
-    .onRequest(({ request, set }) => {
+    .onRequest(({ set }) => {
         // Add security headers
         set.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains";
         set.headers["X-Frame-Options"] = "DENY";
@@ -33,14 +35,20 @@ const app = new Elysia()
     .get("/github", ({ redirect }) => redirect("https://github.com/berry-13", 301))
     .get("/x", ({ redirect }) => redirect("https://x.com/Berry13000", 301))
     .get("/linkedin", ({ redirect }) => redirect("https://linkedin.com/in/marco-beretta-berry/", 301))
-    // Serve static files from dist (built Vite app)
+    // Serve static assets from dist (CSS, JS, images)
     .use(
-        staticPlugin({
+        await staticPlugin({
             assets: "dist",
             prefix: "/",
-            indexHTML: true,
+            indexHTML: false,
+            ignorePatterns: ["*.html"],
         })
     )
+    // SPA fallback - serve index.html for all non-API routes
+    .get("*", ({ set }) => {
+        set.headers["Content-Type"] = "text/html; charset=utf-8";
+        return indexHtml;
+    })
     .listen(process.env.PORT || 3000);
 
 console.log(`Server running at http://localhost:${app.server?.port}`);
