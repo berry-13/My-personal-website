@@ -22,7 +22,15 @@ jobs:
           bun-version: latest
 
       - name: Install dependencies on host
-        run: bun install --frozen-lockfile
+        run: |
+          for i in 1 2 3; do
+            bun install --frozen-lockfile && exit 0
+            echo "Attempt $i failed, retrying in 10s..."
+            sleep 10
+          done
+          exit 1
+        env:
+          BUN_CONFIG_NETWORK_PREFER_IPV4: "true"
 
       - name: Verify node_modules exists
         run: ls -la node_modules | head -5
