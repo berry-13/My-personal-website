@@ -1,11 +1,11 @@
-FROM oven/bun:1.2-debian AS build
+FROM oven/bun:1.3-debian AS build
 WORKDIR /app
 COPY node_modules ./node_modules
 COPY . .
 ENV NODE_ENV=production
 RUN bun run build:client
 
-FROM oven/bun:1.2-debian
+FROM oven/bun:1.3-debian
 WORKDIR /app
 COPY --from=build /app/node_modules ./node_modules
 COPY --from=build /app/dist ./dist
