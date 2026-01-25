@@ -42,3 +42,6 @@ jobs:
           tags: ghcr.io/${{ github.repository_owner }}/my-personal-website:latest
           cache-from: type=gha
           cache-to: type=gha,mode=max
+          network: host
+          build-args: |
+            BUN_CONFIG_NETWORK_PREFER_IPV4=true

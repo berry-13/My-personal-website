@@ -1,6 +1,7 @@
 FROM oven/bun:1.2-debian AS deps
 WORKDIR /app
 COPY package.json bun.lock ./
+ENV BUN_CONFIG_NETWORK_PREFER_IPV4=true
 RUN bun install --frozen-lockfile
 
 FROM oven/bun:1.2-debian AS build
