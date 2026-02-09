@@ -55,6 +55,7 @@ const ContactLink = ({ name, icon, link, borderColor }: ContactLinkProps) => {
             </span>
 
             <FiExternalLink
+                aria-hidden="true"
                 className="w-5 h-5 text-gray-600 group-hover:text-violet-500
                                 dark:group-hover:text-violet-400 transition-colors duration-300"
             />

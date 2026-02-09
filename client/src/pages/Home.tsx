@@ -58,7 +58,7 @@ const ExternalLink: React.FC<ExternalLinkProps> = ({ href, children }) => (
         target="_blank"
     >
         {children}
-        <svg className="w-4 h-4 ml-1" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+        <svg className="w-4 h-4 ml-1" viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
             <path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6" strokeWidth="2" strokeLinecap="round" />
             <path d="M15 3h6v6" strokeWidth="2" strokeLinecap="round" />
             <path d="M10 14L21 3" strokeWidth="2" strokeLinecap="round" />
@@ -81,10 +81,12 @@ const RepoGrid: React.FC<RepoGridProps> = ({ libreRepo, topRepos, isLoading, isE
 
     if (isLoading) {
         return (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4" role="status" aria-label="Loading repositories">
+                <span className="sr-only">Loading repositories...</span>
                 {[1, 2, 3, 4].map(i => (
                     <div
                         key={i}
+                        aria-hidden="true"
                         className="animate-pulse rounded-xl p-6 bg-gray-50 dark:bg-gray-800/50 border dark:border-transparent"
                     >
                         <div className="h-6 w-1/3 bg-gray-200 dark:bg-gray-700 rounded mb-4" />
@@ -135,15 +137,18 @@ const RepoGrid: React.FC<RepoGridProps> = ({ libreRepo, topRepos, isLoading, isE
                     </p>
                     <div className="flex items-center gap-4 text-sm">
                         <span className="flex items-center gap-1">
-                            <span aria-hidden="true">&#11088;</span> {formatNumber(repo.stargazers_count)}
+                            <span aria-hidden="true">&#11088;</span>
+                            <span className="sr-only">Stars:</span> {formatNumber(repo.stargazers_count)}
                         </span>
                         <span className="flex items-center gap-1">
-                            <span aria-hidden="true">&#128256;</span> {formatNumber(repo.forks_count)}
+                            <span aria-hidden="true">&#128256;</span>
+                            <span className="sr-only">Forks:</span> {formatNumber(repo.forks_count)}
                         </span>
                         {repo.language && (
                             <span className="flex items-center gap-1">
                                 <span
                                     className="w-3 h-3 rounded-full"
+                                    aria-hidden="true"
                                     style={{
                                         backgroundColor: getLanguageColor(repo.language),
                                     }}
@@ -163,7 +168,7 @@ const Home: React.FC = () => {
 
     return (
         <AnimatePresence>
-            <motion.main
+            <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
@@ -233,7 +238,7 @@ const Home: React.FC = () => {
                         <ExternalLink href="https://cnrad.dev">cnrad.dev</ExternalLink>
                     </p>
                 </footer>
-            </motion.main>
+            </motion.div>
         </AnimatePresence>
     );
 };

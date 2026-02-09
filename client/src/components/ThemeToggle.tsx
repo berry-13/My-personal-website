@@ -51,6 +51,7 @@ const ThemeToggle = ({ disabled }: ThemeToggleProps) => {
 
     return (
         <Button
+            title={theme === "light" ? "Switch to dark theme" : "Switch to light theme"}
             icon={
                 theme === "light" ? <FiSun className="text-black w-5 h-5" /> : <FiMoon className="text-white w-5 h-5" />
             }
