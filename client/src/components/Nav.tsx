@@ -146,6 +146,7 @@ const Nav = () => {
         <>
             {/* Desktop Navigation */}
             <motion.nav
+                aria-label="Desktop navigation"
                 variants={navVariants}
                 initial="hidden"
                 animate="visible"
@@ -179,6 +180,7 @@ const Nav = () => {
 
             {/* Mobile Navigation */}
             <motion.nav
+                aria-label="Mobile navigation"
                 initial={{ y: -100 }}
                 animate={{ y: 0 }}
                 transition={{ duration: 0.5, ease: appleEase }}

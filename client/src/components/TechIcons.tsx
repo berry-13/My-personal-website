@@ -170,10 +170,16 @@ const TechItem = React.memo<TechItemProps>(({ icon: Icon, name, description, ind
             whileHover="hover"
             onHoverStart={handleHoverStart}
             onHoverEnd={handleHoverEnd}
+            onFocus={handleHoverStart}
+            onBlur={handleHoverEnd}
+            tabIndex={0}
+            role="img"
+            aria-label={description ? `${name}: ${description}` : name}
             className="group relative flex flex-col items-center p-4 rounded-xl
                      bg-white/5 backdrop-blur-sm border border-black/15
                      dark:border-white/5 transition-all duration-300
-                     hover:shadow-lg hover:shadow-violet-500/10 transform-gpu"
+                     hover:shadow-lg hover:shadow-violet-500/10 transform-gpu
+                     focus:outline-none focus-visible:ring-2 focus-visible:ring-violet-500/50 focus-visible:ring-offset-2 focus-visible:ring-offset-transparent"
             style={{
                 perspective: "1000px",
                 transformStyle: "preserve-3d",
@@ -187,6 +193,7 @@ const TechItem = React.memo<TechItemProps>(({ icon: Icon, name, description, ind
             />
             <motion.div className="relative flex flex-col items-center" style={{ transformStyle: "preserve-3d" }}>
                 <Icon
+                    aria-hidden="true"
                     className="w-8 h-8 mb-2 text-gray-700 dark:text-gray-300
                              group-hover:text-violet-500 transition-colors duration-300"
                 />
@@ -201,6 +208,7 @@ const TechItem = React.memo<TechItemProps>(({ icon: Icon, name, description, ind
                 <AnimatePresence>
                     {description && isHovered && (
                         <motion.div
+                            role="tooltip"
                             initial={{ opacity: 0, y: 10, scale: 0.9 }}
                             animate={{ opacity: 1, y: 0, scale: 1 }}
                             exit={{ opacity: 0, y: -10, scale: 0.9 }}

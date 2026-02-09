@@ -43,8 +43,9 @@ const pageVariants = {
 };
 
 const PageLoader = () => (
-    <div className="flex items-center justify-center min-h-[50vh]">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-violet-500" />
+    <div className="flex items-center justify-center min-h-[50vh]" role="status" aria-label="Loading page">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-violet-500" aria-hidden="true" />
+        <span className="sr-only">Loading...</span>
     </div>
 );
 
@@ -124,7 +125,13 @@ function App() {
 
     return (
         <div className="min-h-screen transition-colors duration-300">
-            <div className="fixed inset-0 z-0 h-screen pointer-events-none">
+            <a
+                href="#main-content"
+                className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-[100] focus:px-4 focus:py-2 focus:bg-violet-500 focus:text-white focus:rounded-lg focus:text-sm focus:font-medium"
+            >
+                Skip to main content
+            </a>
+            <div className="fixed inset-0 z-0 h-screen pointer-events-none" aria-hidden="true">
                 <Suspense fallback={null}>
                     <DarkVeil hueShift={isDarkMode ? 0 : 180} speed={0.5} scanlineFrequency={0.5} scrollSync lightMode={!isDarkMode} />
                 </Suspense>
@@ -132,7 +139,7 @@ function App() {
             <div className="fixed top-0 left-0 right-0 z-50 flex justify-center">
                 <Nav />
             </div>
-            <main className="relative z-10 w-full flex justify-center px-4">
+            <main id="main-content" className="relative z-10 w-full flex justify-center px-4">
                 <div className="w-full max-w-4xl text-black dark:text-white">
                     <AnimatePresence mode="wait" initial={false}>
                         <motion.div

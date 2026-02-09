@@ -72,6 +72,8 @@ const MessageComponent = () => {
             <AnimatePresence mode="wait">
                 {status.sent ? (
                     <motion.div
+                        role="status"
+                        aria-live="polite"
                         initial={{ scale: 0.9, opacity: 0 }}
                         animate={{ scale: 1, opacity: 1 }}
                         exit={{ scale: 0.9, opacity: 0 }}

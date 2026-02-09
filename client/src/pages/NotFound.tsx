@@ -25,7 +25,7 @@ const NotFound: React.FC = () => {
     }
 
     return (
-        <div className="relative h-screen w-full">
+        <div className="relative h-screen w-full" role="img" aria-label="404 page not found">
             <Particles
                 id="tsparticles"
                 options={{
