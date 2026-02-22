@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import axios from "axios";
 import { RiSendPlane2Fill } from "react-icons/ri";
 import { ImSpinner2 } from "react-icons/im";
+import { isValidEmail } from "~/utils/validation";
 
 interface FormState {
     email: string;
@@ -15,8 +16,6 @@ const MessageComponent = () => {
     const emailId = useId();
     const messageId = useId();
 
-    const emailRegex = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)+$/;
-
     const sendMessage = async () => {
         const { email, message } = formState;
 
@@ -25,7 +24,7 @@ const MessageComponent = () => {
             return;
         }
 
-        if (!emailRegex.test(email)) {
+        if (!isValidEmail(email)) {
             setStatus(prev => ({ ...prev, error: "Please enter a valid email address." }));
             return;
         }
@@ -45,10 +44,18 @@ const MessageComponent = () => {
                 error: `Error: ${response.data.result}`,
                 sent: false,
             });
-        } catch {
+        } catch (error) {
+            let errorMessage = "Failed to send message. Please try again.";
+
+            if (error instanceof TypeError && error.message === "Failed to fetch") {
+                errorMessage = "Network error. Please check your connection.";
+            }
+
+            console.warn("Contact form submission failed:", error instanceof Error ? error.message : "Unknown error");
+
             setStatus({
                 sending: false,
-                error: "Failed to send message. Please try again.",
+                error: errorMessage,
                 sent: false,
             });
         }

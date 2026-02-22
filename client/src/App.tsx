@@ -99,10 +99,10 @@ function App() {
     }, []);
 
     useEffect(() => {
-        if (typeof window !== "undefined") {
-            audioRef.current = new Audio("/pop.mp3");
-            audioRef.current.volume = 0.4;
-        }
+        const audio = new Audio("/pop.mp3");
+        audio.preload = "auto";
+        audio.volume = 0.4;
+        audioRef.current = audio;
     }, []);
 
     const playNavigationSound = (): void => {

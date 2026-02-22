@@ -5,13 +5,22 @@ import { reposRoute } from "./routes/repos";
 import { sendRoute } from "./routes/send";
 import { awakeRoute } from "./routes/awake";
 
+// Fail fast if critical env vars are missing
+const requiredEnvVars = ["WEBHOOK_URL", "GITHUB_TOKEN"];
+for (const envVar of requiredEnvVars) {
+    if (!process.env[envVar]) {
+        console.error(`Missing required environment variable: ${envVar}`);
+        process.exit(1);
+    }
+}
+
 const indexHtml = await Bun.file("dist/index.html").text();
 
 const app = new Elysia()
     // CORS configuration
     .use(
         cors({
-            origin: process.env.ALLOWED_ORIGIN || "*",
+            origin: process.env.ALLOWED_ORIGIN || false,
             methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
             allowedHeaders: ["Content-Type", "Authorization"],
         })
@@ -25,6 +34,8 @@ const app = new Elysia()
         set.headers["Referrer-Policy"] = "strict-origin-when-cross-origin";
         set.headers["Permissions-Policy"] = "camera=(), microphone=(), geolocation=()";
         set.headers["X-XSS-Protection"] = "1; mode=block";
+        set.headers["Content-Security-Policy"] =
+            "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self' https://api.github.com; frame-ancestors 'none'";
         set.headers["X-Request-ID"] = crypto.randomUUID();
     })
     // API routes
