@@ -1,6 +1,8 @@
 FROM oven/bun:1.3.6-debian AS build
 WORKDIR /app
-COPY node_modules ./node_modules
+RUN echo "precedence ::ffff:0:0/96 100" >> /etc/gai.conf
+COPY package.json bun.lock* ./
+RUN bun install
 COPY . .
 ENV NODE_ENV=production
 RUN bun run build:client
