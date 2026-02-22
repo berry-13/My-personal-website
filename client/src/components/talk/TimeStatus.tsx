@@ -40,8 +40,8 @@ const TimeStatus = () => {
                     }));
                 }
             })
-            .catch(() => {
-                // Silently fail - keep default status
+            .catch((error) => {
+                console.warn("Failed to fetch awake status:", error instanceof Error ? error.message : "Unknown error");
             });
 
         return () => clearInterval(interval);
