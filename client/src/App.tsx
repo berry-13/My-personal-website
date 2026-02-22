@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState, lazy, Suspense } from "react";
 import { Routes, Route, useLocation } from "react-router-dom";
-import NProgress from "nprogress";
 import Lenis from "lenis";
 import { AnimatePresence, motion } from "framer-motion";
 import Nav from "./components/Nav";
@@ -10,14 +9,6 @@ const DarkVeil = lazy(() => import("./components/DarkVeil"));
 const Home = lazy(() => import("./pages/Home"));
 const Contact = lazy(() => import("./pages/Contact"));
 const NotFound = lazy(() => import("./pages/NotFound"));
-
-NProgress.configure({
-    showSpinner: false,
-    trickleSpeed: 200,
-    minimum: 0.08,
-    easing: "ease",
-    speed: 200,
-});
 
 const pageVariants = {
     hidden: {
@@ -116,8 +107,6 @@ function App() {
 
     useEffect(() => {
         if (prevPathRef.current !== location.pathname) {
-            NProgress.start();
-            NProgress.done();
             playNavigationSound();
             prevPathRef.current = location.pathname;
         }

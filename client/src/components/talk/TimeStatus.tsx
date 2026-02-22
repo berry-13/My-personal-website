@@ -4,14 +4,14 @@ import { formatInTimeZone } from "date-fns-tz";
 
 interface TimeStatusState {
     time: string;
-    awake: boolean;
+    awake: boolean | null;
     doNotDisturb: boolean;
 }
 
 const TimeStatus = () => {
     const [status, setStatus] = useState<TimeStatusState>({
         time: "00:00 AM",
-        awake: true,
+        awake: null,
         doNotDisturb: false,
     });
 
@@ -36,7 +36,7 @@ const TimeStatus = () => {
                     setStatus(prev => ({
                         ...prev,
                         doNotDisturb: data.isDoNotDisturb ?? false,
-                        awake: data.isAwake ?? true,
+                        awake: data.isAwake ?? null,
                     }));
                 }
             })
@@ -46,6 +46,18 @@ const TimeStatus = () => {
 
         return () => clearInterval(interval);
     }, []);
+
+    const getStatusText = () => {
+        if (status.awake === null) return "around";
+        return status.awake ? "awake" : "sleeping";
+    };
+
+    const getStatusColor = () => {
+        if (status.awake === null) return "text-gray-500/80 dark:text-gray-400/80";
+        return status.awake
+            ? "text-green-500/80 dark:text-green-400/80"
+            : "text-blue-500/80 dark:text-blue-400/80";
+    };
 
     return (
         <motion.p
@@ -63,17 +75,13 @@ const TimeStatus = () => {
             for me and I'm probably{" "}
             <AnimatePresence mode="wait">
                 <motion.span
-                    key={status.awake ? "awake" : "sleeping"}
+                    key={getStatusText()}
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
-                    className={`font-medium ${
-                        status.awake
-                            ? "text-green-500/80 dark:text-green-400/80"
-                            : "text-blue-500/80 dark:text-blue-400/80"
-                    }`}
+                    className={`font-medium ${getStatusColor()}`}
                 >
-                    {status.awake ? "awake" : "sleeping"}
+                    {getStatusText()}
                 </motion.span>
             </AnimatePresence>
             {status.doNotDisturb && status.awake && (

@@ -102,11 +102,18 @@ export default function DarkVeil({
   scrollSync = false,
   lightMode = false
 }: Props) {
-  const ref = useRef<HTMLCanvasElement>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
   const scrollY = useRef(0);
 
+  // Store props in refs so the render loop always reads current values
+  // without needing to tear down and rebuild the WebGL pipeline
+  const propsRef = useRef({ hueShift, noiseIntensity, scanlineIntensity, speed, scanlineFrequency, warpAmount, resolutionScale, scrollSync, lightMode });
+  propsRef.current = { hueShift, noiseIntensity, scanlineIntensity, speed, scanlineFrequency, warpAmount, resolutionScale, scrollSync, lightMode };
+
+  // One-time WebGL setup - never recreated on prop changes
   useEffect(() => {
-    const canvas = ref.current as HTMLCanvasElement;
+    const canvas = canvasRef.current;
+    if (!canvas) return;
     const parent = canvas.parentElement as HTMLElement;
 
     const renderer = new Renderer({
@@ -138,12 +145,13 @@ export default function DarkVeil({
     const resize = () => {
       const w = parent.clientWidth,
         h = parent.clientHeight;
-      renderer.setSize(w * resolutionScale, h * resolutionScale);
+      const scale = propsRef.current.resolutionScale;
+      renderer.setSize(w * scale, h * scale);
       program.uniforms.uResolution.value.set(w, h);
     };
 
     const handleScroll = () => {
-      if (scrollSync) {
+      if (propsRef.current.scrollSync) {
         const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
         scrollY.current = maxScroll > 0 ? (window.scrollY / maxScroll) * 2 : 0;
       }
@@ -158,14 +166,15 @@ export default function DarkVeil({
     let frame = 0;
 
     const loop = () => {
-      program.uniforms.uTime.value = ((performance.now() - start) / 1000) * speed;
-      program.uniforms.uHueShift.value = hueShift;
-      program.uniforms.uNoise.value = noiseIntensity;
-      program.uniforms.uScan.value = scanlineIntensity;
-      program.uniforms.uScanFreq.value = scanlineFrequency;
-      program.uniforms.uWarp.value = warpAmount;
+      const p = propsRef.current;
+      program.uniforms.uTime.value = ((performance.now() - start) / 1000) * p.speed;
+      program.uniforms.uHueShift.value = p.hueShift;
+      program.uniforms.uNoise.value = p.noiseIntensity;
+      program.uniforms.uScan.value = p.scanlineIntensity;
+      program.uniforms.uScanFreq.value = p.scanlineFrequency;
+      program.uniforms.uWarp.value = p.warpAmount;
       program.uniforms.uScrollY.value = scrollY.current;
-      program.uniforms.uLightMode.value = lightMode ? 1 : 0;
+      program.uniforms.uLightMode.value = p.lightMode ? 1 : 0;
       renderer.render({ scene: mesh });
       frame = requestAnimationFrame(loop);
     };
@@ -176,7 +185,11 @@ export default function DarkVeil({
       cancelAnimationFrame(frame);
       window.removeEventListener('resize', resize);
       window.removeEventListener('scroll', handleScroll);
+      // Properly release the WebGL context to prevent GPU memory leaks
+      gl.getExtension('WEBGL_lose_context')?.loseContext();
     };
-  }, [hueShift, noiseIntensity, scanlineIntensity, speed, scanlineFrequency, warpAmount, resolutionScale, scrollSync, lightMode]);
-  return <canvas ref={ref} className="w-full h-full block" />;
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  return <canvas ref={canvasRef} className="w-full h-full block" />;
 }

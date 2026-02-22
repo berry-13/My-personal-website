@@ -39,9 +39,6 @@ export const sendRoute = new Elysia({ prefix: "/api" }).post(
                         {
                             color: 3108090,
                             title: email,
-                            author: {
-                                name: ip,
-                            },
                             description: message,
                         },
                     ],

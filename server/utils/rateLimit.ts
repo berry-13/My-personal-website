@@ -5,15 +5,17 @@ interface RateLimitInfo {
 
 export class RateLimiter {
     private limits = new Map<string, RateLimitInfo>();
+    private cleanupTimer: ReturnType<typeof setInterval>;
 
     constructor(
         private maxRequests: number,
         private windowMs: number,
-    ) {}
+    ) {
+        this.cleanupTimer = setInterval(() => this.cleanup(), windowMs);
+    }
 
     check(ip: string): boolean {
         const now = Date.now();
-        this.cleanup(now);
 
         const info = this.limits.get(ip);
         if (!info) {
@@ -35,33 +37,37 @@ export class RateLimiter {
         return true;
     }
 
-    private cleanup(now: number) {
+    private cleanup() {
+        const now = Date.now();
         for (const [key, val] of this.limits) {
             if (now - val.timestamp > this.windowMs) {
                 this.limits.delete(key);
             }
         }
     }
+
+    destroy() {
+        clearInterval(this.cleanupTimer);
+        this.limits.clear();
+    }
 }
 
 /**
  * Extract client IP from the request.
  * Trusts proxy headers only when TRUSTED_PROXY=true (i.e. behind nginx/Cloudflare).
- * Falls back to the server-provided header or "unknown".
+ * Falls back to "unknown".
  */
 export function getClientIP(request: Request): string {
     if (process.env.TRUSTED_PROXY === "true") {
         const forwarded = request.headers.get("x-forwarded-for");
         if (forwarded) return forwarded.split(",")[0].trim();
+
+        const cfIp = request.headers.get("cf-connecting-ip");
+        if (cfIp) return cfIp.trim();
+
+        const realIp = request.headers.get("x-real-ip");
+        if (realIp) return realIp.trim();
     }
-
-    // Cloudflare
-    const cfIp = request.headers.get("cf-connecting-ip");
-    if (cfIp) return cfIp.trim();
-
-    // nginx
-    const realIp = request.headers.get("x-real-ip");
-    if (realIp) return realIp.trim();
 
     return "unknown";
 }

@@ -3,8 +3,8 @@ import type { ReactNode } from "react";
 export interface Repository {
     name: string;
     stargazers_count: number;
-    description: string;
-    language: string;
+    description: string | null;
+    language: string | null;
     forks_count: number;
     html_url: string;
 }
@@ -25,9 +25,4 @@ export interface RepoGridProps {
     topRepos: Repository[];
     isLoading?: boolean;
     isError?: boolean;
-}
-
-export interface IndexProps {
-    topRepos?: Repository[];
-    libreRepo?: Repository[];
 }

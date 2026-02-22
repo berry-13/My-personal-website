@@ -5,7 +5,6 @@ import ErrorBoundary from "./components/ErrorBoundary";
 import App from "./App";
 import "./globals.css";
 import "react-tippy/dist/tippy.css";
-import "nprogress/nprogress.css";
 
 createRoot(document.getElementById("root")!).render(
     <StrictMode>

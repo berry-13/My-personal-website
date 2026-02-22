@@ -18,7 +18,6 @@ const ThemeToggle = ({ disabled }: ThemeToggleProps) => {
         setTheme(storedTheme);
         const html = document.querySelector("html");
         if (html) {
-            html.setAttribute("lang", "en");
             if (storedTheme === "light") {
                 html.classList.remove("dark");
             } else {

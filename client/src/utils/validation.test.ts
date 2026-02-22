@@ -1,5 +1,5 @@
 import { describe, it, expect } from "bun:test";
-import { isValidEmail, isValidContactData, validateContactMessage } from "./validation";
+import { isValidEmail, validateContactMessage } from "./validation";
 
 describe("isValidEmail", () => {
     it("validates correct email formats", () => {
@@ -24,101 +24,44 @@ describe("isValidEmail", () => {
     });
 });
 
-describe("isValidContactData", () => {
-    it("returns true for valid contact data", () => {
-        expect(isValidContactData({ email: "test@example.com", message: "Hello" })).toBe(true);
-    });
-
-    it("returns false for null", () => {
-        expect(isValidContactData(null)).toBe(false);
-    });
-
-    it("returns false for undefined", () => {
-        expect(isValidContactData(undefined)).toBe(false);
-    });
-
-    it("returns false for missing email", () => {
-        expect(isValidContactData({ message: "Hello" })).toBe(false);
-    });
-
-    it("returns false for missing message", () => {
-        expect(isValidContactData({ email: "test@example.com" })).toBe(false);
-    });
-
-    it("returns false for non-string email", () => {
-        expect(isValidContactData({ email: 123, message: "Hello" })).toBe(false);
-    });
-
-    it("returns false for non-string message", () => {
-        expect(isValidContactData({ email: "test@example.com", message: 123 })).toBe(false);
-    });
-
-    it("returns false for non-object types", () => {
-        expect(isValidContactData("string")).toBe(false);
-        expect(isValidContactData(123)).toBe(false);
-        expect(isValidContactData([])).toBe(false);
-    });
-});
-
 describe("validateContactMessage", () => {
     it("returns valid for correct data", () => {
-        const result = validateContactMessage({
-            email: "test@example.com",
-            message: "Hello, this is a test message",
-        });
+        const result = validateContactMessage("test@example.com", "Hello, this is a test message");
         expect(result.isValid).toBe(true);
         expect(result.error).toBeUndefined();
     });
 
     it("returns FIELD_EMPTY for empty email", () => {
-        const result = validateContactMessage({
-            email: "",
-            message: "Hello",
-        });
+        const result = validateContactMessage("", "Hello");
         expect(result.isValid).toBe(false);
         expect(result.error).toBe("FIELD_EMPTY");
     });
 
     it("returns FIELD_EMPTY for empty message", () => {
-        const result = validateContactMessage({
-            email: "test@example.com",
-            message: "",
-        });
+        const result = validateContactMessage("test@example.com", "");
         expect(result.isValid).toBe(false);
         expect(result.error).toBe("FIELD_EMPTY");
     });
 
     it("returns MESSAGE_TOO_LONG for message over 1000 chars", () => {
-        const result = validateContactMessage({
-            email: "test@example.com",
-            message: "a".repeat(1001),
-        });
+        const result = validateContactMessage("test@example.com", "a".repeat(1001));
         expect(result.isValid).toBe(false);
         expect(result.error).toBe("MESSAGE_TOO_LONG");
     });
 
     it("accepts message at exactly 1000 chars", () => {
-        const result = validateContactMessage({
-            email: "test@example.com",
-            message: "a".repeat(1000),
-        });
+        const result = validateContactMessage("test@example.com", "a".repeat(1000));
         expect(result.isValid).toBe(true);
     });
 
     it("returns INVALID_EMAIL for malformed email", () => {
-        const result = validateContactMessage({
-            email: "not-an-email",
-            message: "Hello",
-        });
+        const result = validateContactMessage("not-an-email", "Hello");
         expect(result.isValid).toBe(false);
         expect(result.error).toBe("INVALID_EMAIL");
     });
 
     it("returns EMAIL_TOO_LONG for email over 500 chars", () => {
-        const result = validateContactMessage({
-            email: "a".repeat(490) + "@example.com",
-            message: "Hello",
-        });
+        const result = validateContactMessage("a".repeat(490) + "@example.com", "Hello");
         expect(result.isValid).toBe(false);
         expect(result.error).toBe("EMAIL_TOO_LONG");
     });

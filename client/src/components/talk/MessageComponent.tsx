@@ -1,6 +1,6 @@
 import { useState, useId } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import axios from "axios";
+import axios, { AxiosError } from "axios";
 import { RiSendPlane2Fill } from "react-icons/ri";
 import { ImSpinner2 } from "react-icons/im";
 import { isValidEmail } from "~/utils/validation";
@@ -15,6 +15,11 @@ const MessageComponent = () => {
     const [status, setStatus] = useState({ sending: false, error: "", sent: false });
     const emailId = useId();
     const messageId = useId();
+
+    const resetForm = () => {
+        setFormState({ email: "", message: "" });
+        setStatus({ sending: false, error: "", sent: false });
+    };
 
     const sendMessage = async () => {
         const { email, message } = formState;
@@ -47,7 +52,9 @@ const MessageComponent = () => {
         } catch (error) {
             let errorMessage = "Failed to send message. Please try again.";
 
-            if (error instanceof TypeError && error.message === "Failed to fetch") {
+            if (error instanceof AxiosError && error.response?.status === 429) {
+                errorMessage = "Too many messages sent. Please try again later.";
+            } else if (error instanceof AxiosError && !error.response) {
                 errorMessage = "Network error. Please check your connection.";
             }
 
@@ -110,6 +117,15 @@ const MessageComponent = () => {
                         <p className="text-gray-600 dark:text-gray-300 text-center">
                             Thanks for reaching out! I'll get back to you soon.
                         </p>
+                        <motion.button
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            transition={{ delay: 0.5 }}
+                            onClick={resetForm}
+                            className="text-sm text-violet-500 hover:text-violet-600 transition-colors duration-200"
+                        >
+                            Send another message
+                        </motion.button>
                     </motion.div>
                 ) : (
                     <motion.form

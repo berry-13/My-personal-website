@@ -9,10 +9,11 @@ RUN bun run build:client
 
 FROM oven/bun:1.3.6-debian
 WORKDIR /app
-COPY --from=build /app/node_modules ./node_modules
+COPY --from=build /app/package.json ./
+COPY --from=build /app/bun.lock* ./
+RUN bun install --production --frozen-lockfile
 COPY --from=build /app/dist ./dist
 COPY --from=build /app/server ./server
-COPY --from=build /app/package.json ./
 ENV NODE_ENV=production
 EXPOSE 3000
 CMD ["bun", "server/index.ts"]

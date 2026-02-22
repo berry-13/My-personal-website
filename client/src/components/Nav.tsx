@@ -110,7 +110,6 @@ const MobileNavButton = ({ name, link, icon, selected, onClick, index }: MobileN
 
 const Nav = () => {
     const location = useLocation();
-    const isTelevomunicazioni = location.pathname === "/scuola/telecomunicazioni";
     const [mobileMenuOpen, setMenuOpen] = useState(false);
     const [scrolled, setScrolled] = useState(false);
 
@@ -133,7 +132,7 @@ const Nav = () => {
 
     const socialLinks = [
         { href: "https://github.com/berry-13", icon: <SiGithub className="w-5 h-5" />, title: "GitHub" },
-        { href: "https://x.com/berry13000", icon: <BsTwitterX className="w-5 h-5" />, title: "X (Twitter)" },
+        { href: "https://x.com/Berry13000", icon: <BsTwitterX className="w-5 h-5" />, title: "X (Twitter)" },
         {
             href: "https://linkedin.com/in/marco-beretta-berry",
             icon: <SiLinkedin className="w-5 h-5" />,
@@ -165,7 +164,7 @@ const Nav = () => {
                 <LayoutGroup>
                     <div className="flex items-center space-x-1 relative z-10">
                         <motion.div variants={itemVariants}>
-                            <ThemeToggle disabled={isTelevomunicazioni} />
+                            <ThemeToggle />
                         </motion.div>
                         <LandingButton name="Home" link="/" icon={<FiHome className="w-4 h-4" />} selected={location.pathname === "/"} />
                         <LandingButton name="Contact" link="/contact" icon={<RiContactsLine className="w-4 h-4" />} selected={location.pathname === "/contact"} />

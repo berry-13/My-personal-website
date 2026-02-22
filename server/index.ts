@@ -35,7 +35,7 @@ const app = new Elysia()
         set.headers["Permissions-Policy"] = "camera=(), microphone=(), geolocation=()";
         set.headers["X-XSS-Protection"] = "1; mode=block";
         set.headers["Content-Security-Policy"] =
-            "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self' https://api.github.com; frame-ancestors 'none'";
+            "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self' https://api.github.com; frame-ancestors 'none'";
         set.headers["X-Request-ID"] = crypto.randomUUID();
     })
     // API routes

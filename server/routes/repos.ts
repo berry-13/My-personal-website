@@ -31,6 +31,15 @@ function validateRepositories(data: unknown): data is Repository[] {
 
 const rateLimiter = new RateLimiter(30, 60 * 1000); // 30 requests per 1 minute
 
+const repoSchema = t.Object({
+    name: t.String(),
+    html_url: t.String(),
+    description: t.Union([t.String(), t.Null()]),
+    stargazers_count: t.Number(),
+    forks_count: t.Number(),
+    language: t.Union([t.String(), t.Null()]),
+});
+
 export const reposRoute = new Elysia({ prefix: "/api" }).get(
     "/repos",
     async ({ request, set }) => {
@@ -63,34 +72,35 @@ export const reposRoute = new Elysia({ prefix: "/api" }).get(
         };
 
         try {
-            const [dannyRepos, berryRepos] = await Promise.all([
-                fetchWithTimeout("https://api.github.com/users/danny-avila/repos?type=owner&per_page=100", fetchOptions),
+            const [libreChatResponse, berryReposResponse] = await Promise.all([
+                fetchWithTimeout("https://api.github.com/repos/danny-avila/LibreChat", fetchOptions),
                 fetchWithTimeout("https://api.github.com/users/berry-13/repos?type=owner&per_page=100", fetchOptions),
             ]);
 
-            if (!dannyRepos.ok || !berryRepos.ok) {
-                throw new Error(`GitHub API request failed (${dannyRepos.status}, ${berryRepos.status})`);
+            if (!libreChatResponse.ok || !berryReposResponse.ok) {
+                throw new Error(`GitHub API request failed (${libreChatResponse.status}, ${berryReposResponse.status})`);
             }
 
-            const [dannyData, berryData] = await Promise.all([
-                dannyRepos.json(),
-                berryRepos.json(),
+            const [libreChatData, berryData] = await Promise.all([
+                libreChatResponse.json(),
+                berryReposResponse.json(),
             ]);
 
-            if (!validateRepositories(dannyData) || !validateRepositories(berryData)) {
-                throw new Error("Invalid response format from GitHub API");
+            const libreChatRepos: Repository[] = [];
+            if (isValidRepository(libreChatData)) {
+                libreChatRepos.push(libreChatData);
             }
 
-            const libreChatRepo = dannyData.filter(
-                (repo) => repo.name.toLowerCase() === "librechat"
-            );
+            if (!validateRepositories(berryData)) {
+                throw new Error("Invalid response format from GitHub API");
+            }
 
             const topBerryRepos = berryData
                 .sort((a, b) => b.stargazers_count - a.stargazers_count)
                 .slice(0, 3);
 
             return {
-                libreChatRepos: libreChatRepo,
+                libreChatRepos,
                 berryRepos: topBerryRepos,
             };
         } catch (error) {
@@ -110,8 +120,8 @@ export const reposRoute = new Elysia({ prefix: "/api" }).get(
     {
         response: t.Object({
             error: t.Optional(t.String()),
-            libreChatRepos: t.Array(t.Any()),
-            berryRepos: t.Array(t.Any()),
+            libreChatRepos: t.Array(repoSchema),
+            berryRepos: t.Array(repoSchema),
         }),
     }
 );
