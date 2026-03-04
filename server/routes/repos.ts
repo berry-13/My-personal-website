@@ -85,9 +85,10 @@ export const reposRoute = new Elysia({ prefix: "/api" }).get(
                 (repo) => repo.name.toLowerCase() === "librechat"
             );
 
-            const topBerryRepos = berryData
-                .sort((a, b) => b.stargazers_count - a.stargazers_count)
-                .slice(0, 3);
+            const featuredNames = ["railflush", "fiscapi", "verse-rag", "portainer-mcp"];
+            const topBerryRepos = berryData.filter(
+                (repo) => featuredNames.includes(repo.name.toLowerCase())
+            );
 
             return {
                 libreChatRepos: libreChatRepo,

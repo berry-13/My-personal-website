@@ -1,6 +1,7 @@
 import { lazy, Suspense } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useInView } from "react-intersection-observer";
+import { Star, GitFork } from "lucide-react";
 import type { SectionProps, ExternalLinkProps, RepoGridProps } from "~/types/types";
 import { getLanguageColor, formatNumber } from "~/utils";
 import { useRepos } from "~/hooks/useRepo";
@@ -137,11 +138,11 @@ const RepoGrid: React.FC<RepoGridProps> = ({ libreRepo, topRepos, isLoading, isE
                     </p>
                     <div className="flex items-center gap-4 text-sm">
                         <span className="flex items-center gap-1">
-                            <span aria-hidden="true">&#11088;</span>
+                            <Star aria-hidden="true" className="w-4 h-4" />
                             <span className="sr-only">Stars:</span> {formatNumber(repo.stargazers_count)}
                         </span>
                         <span className="flex items-center gap-1">
-                            <span aria-hidden="true">&#128256;</span>
+                            <GitFork aria-hidden="true" className="w-4 h-4" />
                             <span className="sr-only">Forks:</span> {formatNumber(repo.forks_count)}
                         </span>
                         {repo.language && (
@@ -188,7 +189,7 @@ const Home: React.FC = () => {
                     </p>
                 </motion.div>
 
-                <Section title="What I Do" emoji="...">
+                <Section title="What I Do" emoji={"\u{1F4BB}"}>
                     <p>
                         As a core contributor to LibreChat, I've shipped over 170 PRs working on everything from
                         speech-to-text and text-to-speech features to accessibility fixes and UI improvements. I enjoy
@@ -198,7 +199,7 @@ const Home: React.FC = () => {
                     </p>
                 </Section>
 
-                <Section title="Technical Expertise" emoji="...">
+                <Section title="Technical Expertise" emoji={"\u{1F6E0}\uFE0F"}>
                     <p className="mb-8">
                         Proficient in TypeScript, JavaScript, React, and Next.js for frontend development, with strong
                         capabilities in Java. Currently learning Rust for systems programming. Experienced with Arduino for
@@ -210,7 +211,7 @@ const Home: React.FC = () => {
                     </Suspense>
                 </Section>
 
-                <Section title="Notable Projects" emoji="...">
+                <Section title="Notable Projects" emoji={"\u{1F680}"}>
                     <p className="mb-4">
                         In early 2023, just two months after ChatGPT's launch, I built "Banfi Zombi" in Unreal Engine 5
                         with adaptive AI NPCs whose behaviors shifted based on player choices, making each playthrough feel different.
@@ -223,7 +224,7 @@ const Home: React.FC = () => {
                     </p>
                 </Section>
 
-                <Section title="Featured Projects" emoji="...">
+                <Section title="Featured Projects" emoji={"\u{2B50}"}>
                     <RepoGrid
                         libreRepo={repos?.libreChatRepos ?? []}
                         topRepos={repos?.berryRepos ?? []}
