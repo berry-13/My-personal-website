@@ -4,7 +4,8 @@ import { FiMail, FiHome } from "react-icons/fi";
 import { BsTwitterX } from "react-icons/bs";
 import { HiMenu, HiX } from "react-icons/hi";
 import { RiContactsLine } from "react-icons/ri";
-import { SiGithub, SiLinkedin } from "react-icons/si";
+import { SiGithub } from "react-icons/si";
+import { Linkedin } from "lucide-react";
 import { AnimatePresence, motion, LayoutGroup } from "framer-motion";
 import { Button } from "~/components/ui";
 import ThemeToggle from "./ThemeToggle";
@@ -136,7 +137,7 @@ const Nav = () => {
         { href: "https://x.com/berry13000", icon: <BsTwitterX className="w-5 h-5" />, title: "X (Twitter)" },
         {
             href: "https://linkedin.com/in/marco-beretta-berry",
-            icon: <SiLinkedin className="w-5 h-5" />,
+            icon: <Linkedin className="w-5 h-5" />,
             title: "LinkedIn",
         },
         { href: "mailto:berry@librechat.ai", icon: <FiMail className="w-5 h-5" />, title: "Email" },
