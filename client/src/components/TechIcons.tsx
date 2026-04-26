@@ -234,7 +234,7 @@ const TechItem = React.memo<TechItemProps>(({ icon: Icon, name, description, ind
 
 TechItem.displayName = "TechItem";
 
-const TechIcons: React.FC = () => {
+const TechIcons = () => {
     const groupedTech = useMemo(() => {
         return techStack.reduce((acc, tech, globalIndex) => {
             if (!acc[tech.category]) {

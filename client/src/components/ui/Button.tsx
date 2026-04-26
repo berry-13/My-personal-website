@@ -1,13 +1,5 @@
-import { Tooltip } from "react-tippy";
+import * as Tooltip from "@radix-ui/react-tooltip";
 import { motion, type Variants } from "framer-motion";
-
-// Type assertion for react-tippy which has incorrect types
-const TooltipWrapper = Tooltip as unknown as React.FC<{
-    title: string;
-    position?: string;
-    animation?: string;
-    children: React.ReactNode;
-}>;
 
 export interface ButtonProps {
     title?: string;
@@ -57,9 +49,19 @@ const Button = ({ title, label, icon, href, onClick, disabled, variants = defaul
 
     if (title) {
         return (
-            <TooltipWrapper title={title} position="bottom" animation="scale">
-                {content}
-            </TooltipWrapper>
+            <Tooltip.Root>
+                <Tooltip.Trigger asChild>{content}</Tooltip.Trigger>
+                <Tooltip.Portal>
+                    <Tooltip.Content
+                        side="bottom"
+                        sideOffset={6}
+                        className="z-[1000] rounded-md bg-black/90 dark:bg-white/90 px-2 py-1 text-xs text-white dark:text-black shadow-lg backdrop-blur-sm data-[state=delayed-open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=delayed-open]:fade-in-0"
+                    >
+                        {title}
+                        <Tooltip.Arrow className="fill-black/90 dark:fill-white/90" />
+                    </Tooltip.Content>
+                </Tooltip.Portal>
+            </Tooltip.Root>
         );
     }
 

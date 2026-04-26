@@ -1,6 +1,5 @@
 import { useState, useId } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import axios from "axios";
 import { RiSendPlane2Fill } from "react-icons/ri";
 import { ImSpinner2 } from "react-icons/im";
 import { isValidEmail } from "~/utils/validation";
@@ -32,16 +31,22 @@ const MessageComponent = () => {
         setStatus({ sending: true, error: "", sent: false });
 
         try {
-            const response = await axios.post("/api/send", { email, message });
+            const response = await fetch("/api/send", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ email, message }),
+            });
 
-            if (response.data.result === "Success") {
+            const data = (await response.json()) as { result: string };
+
+            if (response.ok && data.result === "Success") {
                 setStatus({ sending: false, error: "", sent: true });
                 return;
             }
 
             setStatus({
                 sending: false,
-                error: `Error: ${response.data.result}`,
+                error: `Error: ${data.result}`,
                 sent: false,
             });
         } catch (error) {
