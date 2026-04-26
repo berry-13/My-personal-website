@@ -1,12 +1,13 @@
 import { lazy, Suspense } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useInView } from "react-intersection-observer";
-import { Star, GitFork } from "lucide-react";
+import { FaStar, FaCodeBranch } from "react-icons/fa";
 import type { SectionProps, ExternalLinkProps, RepoGridProps } from "~/types/types";
 import { getLanguageColor, formatNumber } from "~/utils";
 import { useRepos } from "~/hooks/useRepo";
 
 const TechIcons = lazy(() => import("~/components/TechIcons"));
+const ContributionGraph = lazy(() => import("~/components/ContributionGraph"));
 
 const fadeInUp = {
     hidden: { opacity: 0, y: 20 },
@@ -28,7 +29,7 @@ const staggerContainer = {
     },
 };
 
-const Section: React.FC<SectionProps> = ({ title, children, emoji }) => {
+const Section = ({ title, children, emoji }: SectionProps) => {
     const [ref, inView] = useInView({
         threshold: 0.1,
         triggerOnce: true,
@@ -51,7 +52,7 @@ const Section: React.FC<SectionProps> = ({ title, children, emoji }) => {
     );
 };
 
-const ExternalLink: React.FC<ExternalLinkProps> = ({ href, children }) => (
+const ExternalLink = ({ href, children }: ExternalLinkProps) => (
     <a
         href={href}
         rel="noreferrer"
@@ -67,7 +68,7 @@ const ExternalLink: React.FC<ExternalLinkProps> = ({ href, children }) => (
     </a>
 );
 
-const RepoGrid: React.FC<RepoGridProps> = ({ libreRepo, topRepos, isLoading, isError }) => {
+const RepoGrid = ({ libreRepo, topRepos, isLoading, isError }: RepoGridProps) => {
     if (isError) {
         return (
             <motion.div
@@ -88,16 +89,16 @@ const RepoGrid: React.FC<RepoGridProps> = ({ libreRepo, topRepos, isLoading, isE
                     <div
                         key={i}
                         aria-hidden="true"
-                        className="animate-pulse rounded-xl p-6 bg-gray-50 dark:bg-gray-800/50 border dark:border-transparent"
+                        className="rounded-xl p-6 bg-white/40 dark:bg-white/5 border border-black/10 dark:border-white/5"
                     >
-                        <div className="h-6 w-1/3 bg-gray-200 dark:bg-gray-700 rounded mb-4" />
+                        <div className="h-6 w-1/3 loader-shimmer mb-4" />
                         <div className="space-y-2">
-                            <div className="h-4 w-full bg-gray-200 dark:bg-gray-700 rounded" />
-                            <div className="h-4 w-2/3 bg-gray-200 dark:bg-gray-700 rounded" />
+                            <div className="h-4 w-full loader-shimmer" />
+                            <div className="h-4 w-2/3 loader-shimmer" />
                         </div>
                         <div className="flex gap-4 mt-4">
-                            <div className="h-4 w-16 bg-gray-200 dark:bg-gray-700 rounded" />
-                            <div className="h-4 w-16 bg-gray-200 dark:bg-gray-700 rounded" />
+                            <div className="h-4 w-16 loader-shimmer" />
+                            <div className="h-4 w-16 loader-shimmer" />
                         </div>
                     </div>
                 ))}
@@ -138,11 +139,11 @@ const RepoGrid: React.FC<RepoGridProps> = ({ libreRepo, topRepos, isLoading, isE
                     </p>
                     <div className="flex items-center gap-4 text-sm">
                         <span className="flex items-center gap-1">
-                            <Star aria-hidden="true" className="w-4 h-4" />
+                            <FaStar aria-hidden="true" className="w-4 h-4" />
                             <span className="sr-only">Stars:</span> {formatNumber(repo.stargazers_count)}
                         </span>
                         <span className="flex items-center gap-1">
-                            <GitFork aria-hidden="true" className="w-4 h-4" />
+                            <FaCodeBranch aria-hidden="true" className="w-4 h-4" />
                             <span className="sr-only">Forks:</span> {formatNumber(repo.forks_count)}
                         </span>
                         {repo.language && (
@@ -164,7 +165,7 @@ const RepoGrid: React.FC<RepoGridProps> = ({ libreRepo, topRepos, isLoading, isE
     );
 };
 
-const Home: React.FC = () => {
+const Home = () => {
     const { repos, isLoading, isError } = useRepos();
 
     return (
@@ -206,7 +207,7 @@ const Home: React.FC = () => {
                         hardware projects. My focus is on creating seamless, accessible, and performant
                         applications that leverage cutting-edge AI technologies that actually works
                     </p>
-                    <Suspense fallback={<div className="w-full h-32 animate-pulse bg-gray-200 dark:bg-gray-800 rounded-md" />}>
+                    <Suspense fallback={<div className="w-full h-32 loader-shimmer" />}>
                         <TechIcons />
                     </Suspense>
                 </Section>
@@ -222,6 +223,12 @@ const Home: React.FC = () => {
                         I've worked on the Agent Builder and built most of the frontend components. My goal is to make sure LibreChat
                         actually feels good to use, not just powerful.
                     </p>
+                </Section>
+
+                <Section title="GitHub activity" emoji={"\u{1F4C8}"}>
+                    <Suspense fallback={<div className="w-full h-[110px] loader-shimmer" />}>
+                        <ContributionGraph />
+                    </Suspense>
                 </Section>
 
                 <Section title="Featured Projects" emoji={"\u{2B50}"}>

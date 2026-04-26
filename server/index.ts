@@ -1,9 +1,10 @@
-import { Elysia, t } from "elysia";
+import { Elysia } from "elysia";
 import { cors } from "@elysiajs/cors";
 import { staticPlugin } from "@elysiajs/static";
 import { reposRoute } from "./routes/repos";
 import { sendRoute } from "./routes/send";
 import { awakeRoute } from "./routes/awake";
+import { contributionsRoute } from "./routes/contributions";
 
 // Fail fast if critical env vars are missing
 const requiredEnvVars = ["WEBHOOK_URL", "GITHUB_TOKEN"];
@@ -14,7 +15,13 @@ for (const envVar of requiredEnvVars) {
     }
 }
 
-const indexHtml = await Bun.file("dist/index.html").text();
+let cachedIndexHtml: string | null = null;
+const getIndexHtml = async (): Promise<string> => {
+    if (cachedIndexHtml === null) {
+        cachedIndexHtml = await Bun.file("dist/index.html").text();
+    }
+    return cachedIndexHtml;
+};
 
 const app = new Elysia()
     // CORS configuration
@@ -35,13 +42,14 @@ const app = new Elysia()
         set.headers["Permissions-Policy"] = "camera=(), microphone=(), geolocation=()";
         set.headers["X-XSS-Protection"] = "1; mode=block";
         set.headers["Content-Security-Policy"] =
-            "default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self' https://api.github.com; frame-ancestors 'none'";
+            "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self' https://api.github.com; frame-ancestors 'none'";
         set.headers["X-Request-ID"] = crypto.randomUUID();
     })
     // API routes
     .use(reposRoute)
     .use(sendRoute)
     .use(awakeRoute)
+    .use(contributionsRoute)
     // Redirects
     .get("/github", ({ redirect }) => redirect("https://github.com/berry-13", 301))
     .get("/x", ({ redirect }) => redirect("https://x.com/Berry13000", 301))
@@ -56,9 +64,9 @@ const app = new Elysia()
         })
     )
     // SPA fallback - serve index.html for all non-API routes
-    .get("*", ({ set }) => {
+    .get("*", async ({ set }) => {
         set.headers["Content-Type"] = "text/html; charset=utf-8";
-        return indexHtml;
+        return await getIndexHtml();
     })
     .listen(process.env.PORT || 3000);
 

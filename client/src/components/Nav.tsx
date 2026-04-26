@@ -1,11 +1,12 @@
 import { useState, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { FiMail, FiHome } from "react-icons/fi";
+import { useBodyLock } from "~/hooks/useBodyLock";
+import { FiMail, FiHome, FiActivity } from "react-icons/fi";
 import { BsTwitterX } from "react-icons/bs";
 import { HiMenu, HiX } from "react-icons/hi";
 import { RiContactsLine } from "react-icons/ri";
 import { SiGithub } from "react-icons/si";
-import { Linkedin } from "lucide-react";
+import { FaLinkedin } from "react-icons/fa";
 import { AnimatePresence, motion, LayoutGroup } from "framer-motion";
 import { Button } from "~/components/ui";
 import ThemeToggle from "./ThemeToggle";
@@ -55,6 +56,7 @@ const LandingButton = ({ name, link, icon, selected }: LandingButtonProps) => (
     <motion.div variants={itemVariants}>
         <Link
             to={link}
+            viewTransition
             aria-current={selected ? "page" : undefined}
             className={cn(
                 "relative flex items-center gap-2 px-5 py-2.5 text-sm font-medium rounded-xl transition-all duration-300",
@@ -93,6 +95,7 @@ const MobileNavButton = ({ name, link, icon, selected, onClick, index }: MobileN
     >
         <Link
             to={link}
+            viewTransition
             onClick={onClick}
             aria-current={selected ? "page" : undefined}
             className={cn(
@@ -121,23 +124,14 @@ const Nav = () => {
         return () => window.removeEventListener("scroll", handleScroll);
     }, []);
 
-    useEffect(() => {
-        if (mobileMenuOpen) {
-            document.body.style.overflow = "hidden";
-        } else {
-            document.body.style.overflow = "unset";
-        }
-        return () => {
-            document.body.style.overflow = "unset";
-        };
-    }, [mobileMenuOpen]);
+    useBodyLock(mobileMenuOpen);
 
     const socialLinks = [
         { href: "https://github.com/berry-13", icon: <SiGithub className="w-5 h-5" />, title: "GitHub" },
         { href: "https://x.com/berry13000", icon: <BsTwitterX className="w-5 h-5" />, title: "X (Twitter)" },
         {
             href: "https://linkedin.com/in/marco-beretta-berry",
-            icon: <Linkedin className="w-5 h-5" />,
+            icon: <FaLinkedin className="w-5 h-5" />,
             title: "LinkedIn",
         },
         { href: "mailto:berry@librechat.ai", icon: <FiMail className="w-5 h-5" />, title: "Email" },
@@ -169,6 +163,7 @@ const Nav = () => {
                             <ThemeToggle disabled={isTelevomunicazioni} />
                         </motion.div>
                         <LandingButton name="Home" link="/" icon={<FiHome className="w-4 h-4" />} selected={location.pathname === "/"} />
+                        <LandingButton name="Now" link="/now" icon={<FiActivity className="w-4 h-4" />} selected={location.pathname === "/now"} />
                         <LandingButton name="Contact" link="/contact" icon={<RiContactsLine className="w-4 h-4" />} selected={location.pathname === "/contact"} />
                     </div>
                 </LayoutGroup>
@@ -260,12 +255,20 @@ const Nav = () => {
                                         index={0}
                                     />
                                     <MobileNavButton
+                                        name="Now"
+                                        link="/now"
+                                        icon={<FiActivity className="w-5 h-5" />}
+                                        selected={location.pathname === "/now"}
+                                        onClick={() => setMenuOpen(false)}
+                                        index={1}
+                                    />
+                                    <MobileNavButton
                                         name="Contact"
                                         link="/contact"
                                         icon={<RiContactsLine className="w-5 h-5" />}
                                         selected={location.pathname === "/contact"}
                                         onClick={() => setMenuOpen(false)}
-                                        index={1}
+                                        index={2}
                                     />
                                 </div>
                                 <motion.div
