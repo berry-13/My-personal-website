@@ -15,4 +15,5 @@ COPY --from=build /app/server ./server
 COPY --from=build /app/package.json ./
 ENV NODE_ENV=production
 EXPOSE 3000
+USER bun
 CMD ["bun", "server/index.ts"]
