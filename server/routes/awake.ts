@@ -8,7 +8,7 @@ const GLOBAL_KEY = "__global__";
 
 export const awakeRoute = new Elysia({ prefix: "/api" }).get(
     "/awake",
-    async ({ request, set }) => {
+    async ({ request, set, server }) => {
         const { AWAKE_BASE_URL, AWAKE_TOKEN, DEVICE, SENSOR_AWAKE } = process.env;
         if (!AWAKE_BASE_URL || !AWAKE_TOKEN || !DEVICE || !SENSOR_AWAKE) {
             console.error("Missing required environment variables for awake API");
@@ -21,7 +21,7 @@ export const awakeRoute = new Elysia({ prefix: "/api" }).get(
             return { result: "GLOBAL_RATE_LIMIT_EXCEEDED" };
         }
 
-        const ip = getClientIP(request);
+        const ip = getClientIP(request, server?.requestIP(request)?.address);
         if (!ipRateLimiter.check(ip)) {
             set.status = 429;
             return { result: "RATE_LIMIT_EXCEEDED" };

@@ -77,11 +77,16 @@ export class RateLimiter {
 
 /**
  * Extract client IP from the request.
- * Trusts proxy headers only when TRUSTED_PROXY=true (i.e. behind nginx/Cloudflare).
- * Falls back to the server-provided header or "unknown".
+ *
+ * When TRUSTED_PROXY=true (i.e. behind nginx/Cloudflare) the proxy headers are
+ * trusted. Otherwise those headers are attacker-controlled and ignored, and we
+ * fall back to `directIp` — the real TCP peer address, which cannot be spoofed
+ * via headers — so direct deployments keep per-client rate-limit buckets
+ * instead of bucketing every visitor under a single "unknown" key. Pass the
+ * value of `server?.requestIP(request)?.address` from the route handler.
  */
-export function getClientIP(request: Request): string {
-    const parseIp = (value: string | null): string | null => {
+export function getClientIP(request: Request, directIp?: string | null): string {
+    const parseIp = (value: string | null | undefined): string | null => {
         if (!value) return null;
 
         const candidate = value.split(",")[0].trim();
@@ -101,7 +106,7 @@ export function getClientIP(request: Request): string {
         if (realIp) return realIp;
     }
 
-    return "unknown";
+    return parseIp(directIp) ?? "unknown";
 }
 
 const FETCH_TIMEOUT_MS = 10_000;

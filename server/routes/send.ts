@@ -6,14 +6,14 @@ const rateLimiter = new RateLimiter(5, 15 * 60 * 1000); // 5 requests per 15 min
 
 export const sendRoute = new Elysia({ prefix: "/api" }).post(
     "/send",
-    async ({ body, request, set }) => {
+    async ({ body, request, set, server }) => {
         if (!process.env.WEBHOOK_URL) {
             console.error("WEBHOOK_URL environment variable is not set");
             set.status = 500;
             return { result: "SERVER_CONFIGURATION_ERROR" };
         }
 
-        const ip = getClientIP(request);
+        const ip = getClientIP(request, server?.requestIP(request)?.address);
 
         if (!rateLimiter.check(ip)) {
             set.status = 429;

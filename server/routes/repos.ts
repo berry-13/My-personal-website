@@ -33,8 +33,8 @@ const rateLimiter = new RateLimiter(30, 60 * 1000); // 30 requests per 1 minute
 
 export const reposRoute = new Elysia({ prefix: "/api" }).get(
     "/repos",
-    async ({ request, set }) => {
-        const ip = getClientIP(request);
+    async ({ request, set, server }) => {
+        const ip = getClientIP(request, server?.requestIP(request)?.address);
 
         if (!rateLimiter.check(ip)) {
             set.status = 429;
