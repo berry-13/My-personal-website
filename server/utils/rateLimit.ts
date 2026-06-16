@@ -3,6 +3,21 @@ interface RateLimitInfo {
     timestamp: number;
 }
 
+const MAX_TRACKED_IPS = 1_000;
+const TRUST_PROXY = process.env.TRUSTED_PROXY === "true";
+
+function normalizeIP(ip: string | null): string {
+    if (!ip) return "unknown";
+
+    const value = ip.trim();
+    // Avoid unbounded attacker-controlled keys while keeping valid IPv4/IPv6 values.
+    if (/^[0-9a-fA-F:.]{1,45}$/.test(value)) {
+        return value;
+    }
+
+    return "unknown";
+}
+
 export class RateLimiter {
     private limits = new Map<string, RateLimitInfo>();
 
@@ -15,9 +30,15 @@ export class RateLimiter {
         const now = Date.now();
         this.cleanup(now);
 
-        const info = this.limits.get(ip);
+        const key = normalizeIP(ip);
+
+        if (!this.limits.has(key) && this.limits.size >= MAX_TRACKED_IPS) {
+            return false;
+        }
+
+        const info = this.limits.get(key);
         if (!info) {
-            this.limits.set(ip, { count: 1, timestamp: now });
+            this.limits.set(key, { count: 1, timestamp: now });
             return true;
         }
 
@@ -50,18 +71,16 @@ export class RateLimiter {
  * Falls back to the server-provided header or "unknown".
  */
 export function getClientIP(request: Request): string {
-    if (process.env.TRUSTED_PROXY === "true") {
+    if (TRUST_PROXY) {
         const forwarded = request.headers.get("x-forwarded-for");
-        if (forwarded) return forwarded.split(",")[0].trim();
+        if (forwarded) return normalizeIP(forwarded.split(",")[0]);
+
+        const cfIp = request.headers.get("cf-connecting-ip");
+        if (cfIp) return normalizeIP(cfIp);
+
+        const realIp = request.headers.get("x-real-ip");
+        if (realIp) return normalizeIP(realIp);
     }
-
-    // Cloudflare
-    const cfIp = request.headers.get("cf-connecting-ip");
-    if (cfIp) return cfIp.trim();
-
-    // nginx
-    const realIp = request.headers.get("x-real-ip");
-    if (realIp) return realIp.trim();
 
     return "unknown";
 }
