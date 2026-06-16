@@ -51,6 +51,7 @@ const app = new Elysia()
         await staticPlugin({
             assets: "dist",
             prefix: "/",
+            alwaysStatic: true,
             indexHTML: false,
             ignorePatterns: ["*.html"],
         })
