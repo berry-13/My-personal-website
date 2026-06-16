@@ -9,6 +9,7 @@ export class RateLimiter {
     constructor(
         private maxRequests: number,
         private windowMs: number,
+        private maxEntries: number = 10_000,
     ) {}
 
     check(ip: string): boolean {
@@ -17,6 +18,9 @@ export class RateLimiter {
 
         const info = this.limits.get(ip);
         if (!info) {
+            if (this.limits.size >= this.maxEntries) {
+                this.evictOldestEntry();
+            }
             this.limits.set(ip, { count: 1, timestamp: now });
             return true;
         }
@@ -42,6 +46,22 @@ export class RateLimiter {
             }
         }
     }
+
+    private evictOldestEntry() {
+        let oldestKey: string | null = null;
+        let oldestTimestamp = Infinity;
+
+        for (const [key, value] of this.limits) {
+            if (value.timestamp < oldestTimestamp) {
+                oldestTimestamp = value.timestamp;
+                oldestKey = key;
+            }
+        }
+
+        if (oldestKey) {
+            this.limits.delete(oldestKey);
+        }
+    }
 }
 
 /**
@@ -50,18 +70,25 @@ export class RateLimiter {
  * Falls back to the server-provided header or "unknown".
  */
 export function getClientIP(request: Request): string {
+    const parseIp = (value: string | null): string | null => {
+        if (!value) return null;
+
+        const candidate = value.split(",")[0].trim();
+        if (!candidate || candidate.length > 64) return null;
+
+        return /^[0-9a-fA-F:.]+$/.test(candidate) ? candidate : null;
+    };
+
     if (process.env.TRUSTED_PROXY === "true") {
-        const forwarded = request.headers.get("x-forwarded-for");
-        if (forwarded) return forwarded.split(",")[0].trim();
+        const forwardedIp = parseIp(request.headers.get("x-forwarded-for"));
+        if (forwardedIp) return forwardedIp;
+
+        const cfIp = parseIp(request.headers.get("cf-connecting-ip"));
+        if (cfIp) return cfIp;
+
+        const realIp = parseIp(request.headers.get("x-real-ip"));
+        if (realIp) return realIp;
     }
-
-    // Cloudflare
-    const cfIp = request.headers.get("cf-connecting-ip");
-    if (cfIp) return cfIp.trim();
-
-    // nginx
-    const realIp = request.headers.get("x-real-ip");
-    if (realIp) return realIp.trim();
 
     return "unknown";
 }
