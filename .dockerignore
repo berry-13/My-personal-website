@@ -14,3 +14,4 @@ LICENSE
 .DS_Store
 coverage
 .nyc_output
+node_modules
