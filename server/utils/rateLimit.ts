@@ -17,6 +17,7 @@ export class RateLimiter {
     constructor(
         private maxRequests: number,
         private windowMs: number,
+        private maxEntries: number = 10_000,
     ) {}
 
     check(ip: string): boolean {
@@ -28,6 +29,9 @@ export class RateLimiter {
 
         const info = this.limits.get(ip);
         if (!info) {
+            if (this.limits.size >= this.maxEntries) {
+                this.evictOldestEntry();
+            }
             this.limits.set(ip, { count: 1, timestamp: now });
             return true;
         }
@@ -53,28 +57,56 @@ export class RateLimiter {
             }
         }
     }
+
+    private evictOldestEntry() {
+        let oldestKey: string | null = null;
+        let oldestTimestamp = Infinity;
+
+        for (const [key, value] of this.limits) {
+            if (value.timestamp < oldestTimestamp) {
+                oldestTimestamp = value.timestamp;
+                oldestKey = key;
+            }
+        }
+
+        if (oldestKey) {
+            this.limits.delete(oldestKey);
+        }
+    }
 }
 
 /**
  * Extract client IP from the request.
- * Trusts proxy headers only when TRUSTED_PROXY=true (i.e. behind nginx/Cloudflare).
- * Falls back to the server-provided header or "unknown".
+ *
+ * When TRUSTED_PROXY=true (i.e. behind nginx/Cloudflare) the proxy headers are
+ * trusted. Otherwise those headers are attacker-controlled and ignored, and we
+ * fall back to `directIp` — the real TCP peer address, which cannot be spoofed
+ * via headers — so direct deployments keep per-client rate-limit buckets
+ * instead of bucketing every visitor under a single "unknown" key. Pass the
+ * value of `server?.requestIP(request)?.address` from the route handler.
  */
-export function getClientIP(request: Request): string {
+export function getClientIP(request: Request, directIp?: string | null): string {
+    const parseIp = (value: string | null | undefined): string | null => {
+        if (!value) return null;
+
+        const candidate = value.split(",")[0].trim();
+        if (!candidate || candidate.length > 64) return null;
+
+        return /^[0-9a-fA-F:.]+$/.test(candidate) ? candidate : null;
+    };
+
     if (process.env.TRUSTED_PROXY === "true") {
-        const forwarded = request.headers.get("x-forwarded-for");
-        if (forwarded) return forwarded.split(",")[0].trim();
+        const forwardedIp = parseIp(request.headers.get("x-forwarded-for"));
+        if (forwardedIp) return forwardedIp;
+
+        const cfIp = parseIp(request.headers.get("cf-connecting-ip"));
+        if (cfIp) return cfIp;
+
+        const realIp = parseIp(request.headers.get("x-real-ip"));
+        if (realIp) return realIp;
     }
 
-    // Cloudflare
-    const cfIp = request.headers.get("cf-connecting-ip");
-    if (cfIp) return cfIp.trim();
-
-    // nginx
-    const realIp = request.headers.get("x-real-ip");
-    if (realIp) return realIp.trim();
-
-    return "unknown";
+    return parseIp(directIp) ?? "unknown";
 }
 
 const FETCH_TIMEOUT_MS = 10_000;

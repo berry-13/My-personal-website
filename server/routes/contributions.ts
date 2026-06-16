@@ -66,8 +66,8 @@ interface ContributionPayload {
 
 export const contributionsRoute = new Elysia({ prefix: "/api" }).get(
     "/contributions",
-    async ({ request, set }) => {
-        const ip = getClientIP(request);
+    async ({ request, set, server }) => {
+        const ip = getClientIP(request, server?.requestIP(request)?.address);
         if (!rateLimiter.check(ip)) {
             set.status = 429;
             return { error: "RATE_LIMIT_EXCEEDED", total: 0, weeks: [] };
