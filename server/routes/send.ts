@@ -20,6 +20,15 @@ export const sendRoute = new Elysia({ prefix: "/api" }).post(
             return { result: "RATE_LIMIT_EXCEEDED" };
         }
 
+        const allowedOrigin = process.env.ALLOWED_ORIGIN;
+        if (allowedOrigin) {
+            const origin = request.headers.get("origin");
+            if (origin !== allowedOrigin) {
+                set.status = 403;
+                return { result: "FORBIDDEN_ORIGIN" };
+            }
+        }
+
         const { email, message } = body;
 
         const validation = validateContactMessage(email, message);
@@ -35,6 +44,9 @@ export const sendRoute = new Elysia({ prefix: "/api" }).post(
                     "Content-Type": "application/json",
                 },
                 body: JSON.stringify({
+                    allowed_mentions: {
+                        parse: [],
+                    },
                     embeds: [
                         {
                             color: 3108090,
