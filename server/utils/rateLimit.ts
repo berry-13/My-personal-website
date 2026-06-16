@@ -3,8 +3,16 @@ interface RateLimitInfo {
     timestamp: number;
 }
 
+const CLEANUP_INTERVAL = 256;
+
+/**
+ * In-memory token-bucket rate limiter, keyed by an arbitrary string (typically
+ * a client IP). NOT distributed-safe: each replica has its own bucket, so
+ * scaling horizontally requires moving to Redis or a CDN-level limiter.
+ */
 export class RateLimiter {
     private limits = new Map<string, RateLimitInfo>();
+    private opCount = 0;
 
     constructor(
         private maxRequests: number,
@@ -14,7 +22,10 @@ export class RateLimiter {
 
     check(ip: string): boolean {
         const now = Date.now();
-        this.cleanup(now);
+        if (++this.opCount >= CLEANUP_INTERVAL) {
+            this.opCount = 0;
+            this.cleanup(now);
+        }
 
         const info = this.limits.get(ip);
         if (!info) {

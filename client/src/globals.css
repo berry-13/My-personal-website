@@ -39,48 +39,134 @@ button:focus-visible {
     outline: none;
 }
 
-.spinner {
-    display: none !important;
+/* Contribution graph color levels */
+:root {
+    --cgraph-0: rgba(0, 0, 0, 0.06);
+    --cgraph-1: rgba(139, 92, 246, 0.25);
+    --cgraph-2: rgba(139, 92, 246, 0.45);
+    --cgraph-3: rgba(139, 92, 246, 0.7);
+    --cgraph-4: rgba(124, 58, 237, 1);
 }
 
-.dark .enter {
-    background: rgb(29, 32, 44) !important;
-    color: #fff;
-    border: none;
+:where(.dark, .dark *) {
+    --cgraph-0: rgba(255, 255, 255, 0.06);
+    --cgraph-1: rgba(167, 139, 250, 0.35);
+    --cgraph-2: rgba(167, 139, 250, 0.55);
+    --cgraph-3: rgba(167, 139, 250, 0.8);
+    --cgraph-4: rgba(139, 92, 246, 1);
 }
 
-.enter {
-    background: rgb(245, 245, 245) !important;
-    border: 1px solid rgb(0, 0, 0, 0.1);
+/* View Transitions API — cross-fade route changes */
+@view-transition {
+    navigation: auto;
 }
 
-.dark .tippy-tooltip-content {
-    color: #fff;
+::view-transition-old(page),
+::view-transition-new(page) {
+    animation-duration: 0.35s;
+    animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
 }
 
-.tippy-tooltip-content {
-    color: #000;
+::view-transition-old(page) {
+    animation-name: vt-fade-out;
 }
 
-.tooltip {
-    z-index: 50;
-    cursor: pointer;
-    border-radius: 0.275rem;
-    background-color: var(--surface-primary);
-    padding-top: 0.25rem;
-    padding-bottom: 0.25rem;
-    padding-left: 0.5rem;
-    padding-right: 0.5rem;
-    font-size: 1rem;
-    line-height: 1.5rem;
-    color: black;
-    box-shadow: 0 2px 4px 0 rgb(0 0 0 / 0.25);
+::view-transition-new(page) {
+    animation-name: vt-fade-in;
 }
 
-.tooltip:where(.dark, .dark *) {
-    background-color: var(--surface-primary);
-    color: white;
-    box-shadow: 0 1px 2px 0 rgb(0 0 0 / 0.35);
+@keyframes vt-fade-out {
+    to {
+        opacity: 0;
+        transform: translateY(-8px);
+    }
+}
+
+@keyframes vt-fade-in {
+    from {
+        opacity: 0;
+        transform: translateY(8px);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    ::view-transition-old(page),
+    ::view-transition-new(page) {
+        animation: none;
+    }
+}
+
+/* Page loader — three-dot violet wave */
+@keyframes loader-wave {
+    0%,
+    80%,
+    100% {
+        transform: scale(0.6);
+        opacity: 0.4;
+    }
+    40% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+.loader-dots {
+    display: inline-flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.loader-dots > span {
+    width: 10px;
+    height: 10px;
+    border-radius: 9999px;
+    background: linear-gradient(135deg, #a78bfa, #6366f1);
+    box-shadow: 0 0 12px rgba(139, 92, 246, 0.5);
+    animation: loader-wave 1.2s ease-in-out infinite both;
+    will-change: transform, opacity;
+}
+
+.loader-dots > span:nth-child(1) {
+    animation-delay: -0.32s;
+}
+.loader-dots > span:nth-child(2) {
+    animation-delay: -0.16s;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .loader-dots > span {
+        animation: none;
+        opacity: 0.7;
+    }
+}
+
+/* Shimmer for content skeletons */
+@keyframes loader-shimmer {
+    0% {
+        background-position: -200% 0;
+    }
+    100% {
+        background-position: 200% 0;
+    }
+}
+
+.loader-shimmer {
+    background: linear-gradient(
+        90deg,
+        rgba(139, 92, 246, 0.04) 0%,
+        rgba(139, 92, 246, 0.18) 50%,
+        rgba(139, 92, 246, 0.04) 100%
+    );
+    background-size: 200% 100%;
+    animation: loader-shimmer 1.6s ease-in-out infinite;
+    border-radius: 8px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .loader-shimmer {
+        animation: none;
+        background: rgba(139, 92, 246, 0.08);
+    }
 }
 
 /* NProgress styles */

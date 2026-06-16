@@ -15,17 +15,36 @@
         <meta name="twitter:description" content="Full-stack software engineer specializing in TypeScript, React, and modern web technologies." />
         <meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)" />
         <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)" />
+        <meta property="og:url" content="https://marcoberetta.com/" />
+        <meta property="og:image" content="https://marcoberetta.com/og.png" />
+        <meta property="og:image:width" content="1200" />
+        <meta property="og:image:height" content="630" />
+        <meta property="og:image:alt" content="Marco Beretta — Software Engineer" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:image" content="https://marcoberetta.com/og.png" />
+        <meta name="twitter:creator" content="@Berry13000" />
+        <link rel="canonical" href="https://marcoberetta.com/" />
         <link rel="icon" href="/favicon.ico" />
         <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
         <title>Marco Beretta - Software Engineer</title>
-        <script>
-            // Prevent flash of wrong theme
-            (function() {
-                const theme = localStorage.getItem('theme') || 'dark';
-                if (theme === 'dark') {
-                    document.documentElement.classList.add('dark');
-                }
-            })();
+        <script src="/theme-init.js"></script>
+        <script type="application/ld+json">
+            {
+                "@context": "https://schema.org",
+                "@type": "Person",
+                "name": "Marco Beretta",
+                "alternateName": "Berry",
+                "url": "https://marcoberetta.com/",
+                "image": "https://marcoberetta.com/og.png",
+                "jobTitle": "Software Engineer",
+                "description": "Full-stack software engineer specializing in TypeScript, React, and modern web technologies. Core contributor to LibreChat.",
+                "knowsAbout": ["TypeScript", "React", "Node.js", "Java", "Rust", "AI", "LibreChat"],
+                "sameAs": [
+                    "https://github.com/berry-13",
+                    "https://x.com/Berry13000",
+                    "https://linkedin.com/in/marco-beretta-berry"
+                ]
+            }
         </script>
     </head>
     <body>
