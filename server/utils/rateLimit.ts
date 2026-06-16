@@ -47,19 +47,19 @@ export class RateLimiter {
 /**
  * Extract client IP from the request.
  * Trusts proxy headers only when TRUSTED_PROXY=true (i.e. behind nginx/Cloudflare).
- * Falls back to the server-provided header or "unknown".
+ * Falls back to a static key when not trusted so spoofed headers can't bypass limits.
  */
 export function getClientIP(request: Request): string {
-    if (process.env.TRUSTED_PROXY === "true") {
-        const forwarded = request.headers.get("x-forwarded-for");
-        if (forwarded) return forwarded.split(",")[0].trim();
+    if (process.env.TRUSTED_PROXY !== "true") {
+        return "direct";
     }
 
-    // Cloudflare
+    const forwarded = request.headers.get("x-forwarded-for");
+    if (forwarded) return forwarded.split(",")[0].trim();
+
     const cfIp = request.headers.get("cf-connecting-ip");
     if (cfIp) return cfIp.trim();
 
-    // nginx
     const realIp = request.headers.get("x-real-ip");
     if (realIp) return realIp.trim();
 
