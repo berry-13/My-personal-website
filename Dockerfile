@@ -1,4 +1,4 @@
-FROM oven/bun:1.3.14-debian AS build
+FROM oven/bun:1.4.0-debian AS build
 WORKDIR /app
 RUN echo "precedence ::ffff:0:0/96 100" >> /etc/gai.conf
 COPY package.json bun.lock ./
@@ -7,7 +7,7 @@ COPY . .
 ENV NODE_ENV=production
 RUN bun run build
 
-FROM oven/bun:1.3.14-debian
+FROM oven/bun:1.4.0-debian
 WORKDIR /app
 COPY --from=build --chown=bun:bun /app/dist ./dist
 USER bun
