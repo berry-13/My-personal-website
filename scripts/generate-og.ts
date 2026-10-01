@@ -2,13 +2,31 @@ import satori from "satori";
 import { Resvg } from "@resvg/resvg-js";
 import { writeFile } from "node:fs/promises";
 
-const fontUrl = "https://fonts.gstatic.com/s/inter/v19/UcCO3FwrK3iLTeHuS_nVMrMxCp50ojIw2boKoduKmMEVuLyfMZhrib2Bg-4.ttf";
-const fontBoldUrl = "https://fonts.gstatic.com/s/inter/v19/UcCO3FwrK3iLTeHuS_nVMrMxCp50ojIw2boKoduKmMEVuGKYMZhrib2Bg-4.ttf";
+// Old user agent makes Google Fonts serve TTF, which satori can read
+async function loadFont(family: string): Promise<ArrayBuffer> {
+    const css = await fetch(`https://fonts.googleapis.com/css2?family=${family}`, {
+        headers: { "User-Agent": "Mozilla/4.0" },
+    }).then(r => r.text());
+    const url = css.match(/url\((https:[^)]+\.ttf)\)/)?.[1];
+    if (!url) throw new Error(`No TTF found for ${family}`);
+    return fetch(url).then(r => r.arrayBuffer());
+}
 
-const [interRegular, interBold] = await Promise.all([
-    fetch(fontUrl).then(r => r.arrayBuffer()),
-    fetch(fontBoldUrl).then(r => r.arrayBuffer()),
+const [newsreader, mono] = await Promise.all([
+    loadFont("Newsreader:opsz,wght@72,400"),
+    loadFont("JetBrains+Mono:wght@400"),
 ]);
+
+const PAPER = "#f4f1ea";
+const INK = "#1c1b18";
+const MUTED = "#6a655b";
+const RULE = "#ddd7ca";
+const ACCENT = "#b4410e";
+
+const monoText = (text: string, color = MUTED) => ({
+    type: "div",
+    props: { style: { fontFamily: "JetBrains Mono", fontSize: "24px", color }, children: text },
+});
 
 const svg = await satori(
     {
@@ -19,11 +37,10 @@ const svg = await satori(
                 height: "630px",
                 display: "flex",
                 flexDirection: "column",
-                justifyContent: "center",
-                padding: "80px",
-                background: "linear-gradient(135deg, #0a0a14 0%, #1a1530 50%, #0f1024 100%)",
-                color: "white",
-                fontFamily: "Inter",
+                padding: "72px 80px",
+                background: PAPER,
+                color: INK,
+                fontFamily: "Newsreader",
             },
             children: [
                 {
@@ -31,53 +48,11 @@ const svg = await satori(
                     props: {
                         style: {
                             display: "flex",
-                            alignItems: "center",
-                            gap: "16px",
-                            marginBottom: "32px",
-                            color: "#a78bfa",
-                            fontSize: "24px",
-                            fontWeight: 500,
+                            justifyContent: "space-between",
+                            paddingBottom: "20px",
+                            borderBottom: `2px solid ${RULE}`,
                         },
-                        children: [
-                            {
-                                type: "div",
-                                props: {
-                                    style: {
-                                        width: "12px",
-                                        height: "12px",
-                                        borderRadius: "999px",
-                                        background: "#a78bfa",
-                                    },
-                                },
-                            },
-                            "me.berry13.com",
-                        ],
-                    },
-                },
-                {
-                    type: "div",
-                    props: {
-                        style: {
-                            fontSize: "104px",
-                            fontWeight: 700,
-                            lineHeight: 1,
-                            letterSpacing: "-0.04em",
-                            marginBottom: "24px",
-                        },
-                        children: "Marco Beretta",
-                    },
-                },
-                {
-                    type: "div",
-                    props: {
-                        style: {
-                            fontSize: "40px",
-                            color: "#cbd5e1",
-                            fontWeight: 400,
-                            lineHeight: 1.2,
-                            maxWidth: "920px",
-                        },
-                        children: "Full-stack engineer · TypeScript, React, AI · Core contributor to LibreChat",
+                        children: [monoText("Marco Beretta", INK), monoText("me.berry13.com")],
                     },
                 },
                 {
@@ -85,12 +60,29 @@ const svg = await satori(
                     props: {
                         style: {
                             display: "flex",
-                            marginTop: "auto",
-                            paddingTop: "48px",
-                            color: "#64748b",
-                            fontSize: "22px",
+                            marginTop: "64px",
+                            fontSize: "64px",
+                            lineHeight: 1.15,
+                            letterSpacing: "-0.01em",
+                            maxWidth: "980px",
                         },
-                        children: "github.com/berry-13",
+                        children: "I build interfaces for AI tools. 440+ pull requests merged into LibreChat.",
+                    },
+                },
+                {
+                    type: "div",
+                    props: {
+                        style: { display: "flex", gap: "28px", marginTop: "auto", alignItems: "center" },
+                        children: [
+                            monoText("#13952", MUTED),
+                            monoText("feat  Redesign Agent Builder", INK),
+                            monoText("+10,645", "#2e7d32"),
+                            monoText("\u22125,125", "#b42318"),
+                            {
+                                type: "div",
+                                props: { style: { width: "14px", height: "28px", background: ACCENT } },
+                            },
+                        ],
                     },
                 },
             ],
@@ -100,8 +92,8 @@ const svg = await satori(
         width: 1200,
         height: 630,
         fonts: [
-            { name: "Inter", data: interRegular, weight: 400, style: "normal" },
-            { name: "Inter", data: interBold, weight: 700, style: "normal" },
+            { name: "Newsreader", data: newsreader, weight: 400, style: "normal" },
+            { name: "JetBrains Mono", data: mono, weight: 400, style: "normal" },
         ],
     },
 );

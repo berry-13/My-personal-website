@@ -1,63 +1,41 @@
-import { useEffect, useState } from "react";
-import { FiSun, FiMoon } from "react-icons/fi";
-import { Button } from "~/components/ui";
-
-interface ThemeToggleProps {
-    disabled?: boolean;
-}
+import { useSyncExternalStore } from "react";
 
 type Theme = "light" | "dark";
 
-const ThemeToggle = ({ disabled }: ThemeToggleProps) => {
-    const [theme, setTheme] = useState<Theme | null>(null);
-    const [mounted, setMounted] = useState(false);
+const CHANGE_EVENT = "theme-change";
 
-    useEffect(() => {
-        setMounted(true);
-        const storedTheme = (localStorage.getItem("theme") as Theme) || "dark";
-        setTheme(storedTheme);
-        const html = document.querySelector("html");
-        if (html) {
-            html.setAttribute("lang", "en");
-            if (storedTheme === "light") {
-                html.classList.remove("dark");
-            } else {
-                html.classList.add("dark");
-            }
-        }
-    }, []);
+function getTheme(): Theme {
+    return document.documentElement.classList.contains("dark") ? "dark" : "light";
+}
 
-    const changeTheme = () => {
-        if (disabled || !theme) return;
-
-        const newTheme: Theme = theme === "light" ? "dark" : "light";
-        const html = document.querySelector("html");
-
-        localStorage.setItem("theme", newTheme);
-        setTheme(newTheme);
-
-        if (html) {
-            if (newTheme === "light") {
-                html.classList.remove("dark");
-            } else {
-                html.classList.add("dark");
-            }
-        }
-    };
-
-    if (!mounted) {
-        return <Button title="Toggle theme" icon={<div className="w-5 h-5" />} disabled={disabled} />;
+function setTheme(theme: Theme) {
+    document.documentElement.classList.toggle("dark", theme === "dark");
+    try {
+        localStorage.setItem("theme", theme);
+    } catch {
+        // Storage unavailable (private mode); the class change still applies for this visit
     }
+    window.dispatchEvent(new Event(CHANGE_EVENT));
+}
+
+function subscribe(callback: () => void) {
+    window.addEventListener(CHANGE_EVENT, callback);
+    return () => window.removeEventListener(CHANGE_EVENT, callback);
+}
+
+const ThemeToggle = () => {
+    const theme = useSyncExternalStore(subscribe, getTheme, () => "dark" as Theme);
+    const next: Theme = theme === "dark" ? "light" : "dark";
 
     return (
-        <Button
-            title={theme === "light" ? "Switch to dark theme" : "Switch to light theme"}
-            icon={
-                theme === "light" ? <FiSun className="text-black w-5 h-5" /> : <FiMoon className="text-white w-5 h-5" />
-            }
-            onClick={changeTheme}
-            disabled={disabled}
-        />
+        <button
+            type="button"
+            onClick={() => setTheme(next)}
+            aria-label={`Switch to ${next} theme`}
+            className="cursor-pointer text-muted hover:text-ink transition-colors"
+        >
+            [{theme}]
+        </button>
     );
 };
 

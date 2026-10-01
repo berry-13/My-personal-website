@@ -1,6 +1,4 @@
 import { useSyncExternalStore } from "react";
-import { FiVolume2, FiVolumeX } from "react-icons/fi";
-import { Button } from "~/components/ui";
 
 const STORAGE_KEY = "sound";
 const CHANGE_EVENT = "sound-preference-change";
@@ -35,11 +33,14 @@ const SoundToggle = () => {
     const enabled = useSyncExternalStore(subscribe, isSoundEnabled, () => true);
 
     return (
-        <Button
-            title={enabled ? "Mute navigation sounds" : "Unmute navigation sounds"}
-            icon={enabled ? <FiVolume2 className="w-5 h-5" /> : <FiVolumeX className="w-5 h-5" />}
+        <button
+            type="button"
             onClick={() => setSoundEnabled(!enabled)}
-        />
+            aria-label={enabled ? "Mute navigation sounds" : "Unmute navigation sounds"}
+            className="cursor-pointer text-muted hover:text-ink transition-colors"
+        >
+            [sound {enabled ? "on" : "off"}]
+        </button>
     );
 };
 

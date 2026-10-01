@@ -1,96 +1,24 @@
-import { useEffect, useRef, useState, lazy, Suspense } from "react";
+import { useEffect, useRef, lazy, Suspense } from "react";
 import { Routes, Route, useLocation } from "react-router-dom";
-import NProgress from "nprogress";
-import Lenis from "lenis";
-import Nav from "./components/Nav";
+import Header from "./components/Header";
 import Footer from "./components/Footer";
 import { isSoundEnabled } from "./components/SoundToggle";
 
-const DarkVeil = lazy(() => import("./components/DarkVeil"));
 const Home = lazy(() => import("./pages/Home"));
 const Contact = lazy(() => import("./pages/Contact"));
 const Now = lazy(() => import("./pages/Now"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
-NProgress.configure({
-    showSpinner: false,
-    trickleSpeed: 200,
-    minimum: 0.08,
-    easing: "ease",
-    speed: 200,
-});
-
-const PageLoader = () => (
-    <div className="flex items-center justify-center min-h-[50vh]" role="status" aria-label="Loading page">
-        <div className="loader-dots" aria-hidden="true">
-            <span />
-            <span />
-            <span />
-        </div>
-        <span className="sr-only">Loading…</span>
-    </div>
-);
+const TITLES: Record<string, string> = {
+    "/": "Marco Beretta, Software Engineer",
+    "/now": "Now · Marco Beretta",
+    "/contact": "Contact · Marco Beretta",
+};
 
 function App() {
     const location = useLocation();
     const audioRef = useRef<HTMLAudioElement | null>(null);
-    const rafIdRef = useRef<number | null>(null);
-    const [isDarkMode, setIsDarkMode] = useState(true);
-    const [reduceMotion, setReduceMotion] = useState(
-        typeof window !== "undefined" &&
-            window.matchMedia("(prefers-reduced-motion: reduce)").matches
-    );
     const prevPathRef = useRef(location.pathname);
-
-    useEffect(() => {
-        const checkTheme = () => {
-            setIsDarkMode(document.documentElement.classList.contains("dark"));
-        };
-
-        checkTheme();
-
-        const observer = new MutationObserver(checkTheme);
-        observer.observe(document.documentElement, {
-            attributes: true,
-            attributeFilter: ["class"],
-        });
-
-        return () => observer.disconnect();
-    }, []);
-
-    useEffect(() => {
-        const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
-        const handler = (e: MediaQueryListEvent) => setReduceMotion(e.matches);
-        mq.addEventListener("change", handler);
-        return () => mq.removeEventListener("change", handler);
-    }, []);
-
-    useEffect(() => {
-        if (reduceMotion) return;
-        const lenis = new Lenis({
-            duration: 1.2,
-            easing: (t: number) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
-            orientation: "vertical",
-            smoothWheel: true,
-            wheelMultiplier: 1,
-            touchMultiplier: 2,
-            infinite: false,
-        });
-
-        function raf(time: number) {
-            lenis.raf(time);
-            rafIdRef.current = requestAnimationFrame(raf);
-        }
-
-        rafIdRef.current = requestAnimationFrame(raf);
-
-        return () => {
-            if (rafIdRef.current) {
-                cancelAnimationFrame(rafIdRef.current);
-            }
-            lenis.destroy();
-        };
-    }, [reduceMotion]);
 
     useEffect(() => {
         const audio = new Audio("/pop.mp3");
@@ -99,58 +27,45 @@ function App() {
         audioRef.current = audio;
     }, []);
 
-    const playNavigationSound = (): void => {
-        if (!isSoundEnabled()) return;
-        if (audioRef.current) {
+    useEffect(() => {
+        document.title = TITLES[location.pathname] ?? "Not found · Marco Beretta";
+        if (prevPathRef.current === location.pathname) return;
+        prevPathRef.current = location.pathname;
+        window.scrollTo(0, 0);
+        if (isSoundEnabled() && audioRef.current) {
             audioRef.current.currentTime = 0;
             audioRef.current.play().catch(() => {
-                // Audio playback failed - ignore (autoplay restrictions)
+                // Autoplay restrictions; ignore
             });
-        }
-    };
-
-    useEffect(() => {
-        if (prevPathRef.current !== location.pathname) {
-            NProgress.start();
-            NProgress.done();
-            playNavigationSound();
-            prevPathRef.current = location.pathname;
         }
     }, [location.pathname]);
 
     return (
-        <div className="min-h-screen transition-colors duration-300">
+        <div className="mx-auto min-h-screen max-w-[46rem] px-5 pt-8 sm:pt-12">
             <a
                 href="#main-content"
-                className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-[100] focus:px-4 focus:py-2 focus:bg-violet-500 focus:text-white focus:rounded-lg focus:text-sm focus:font-medium"
+                className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-50 focus:bg-ink focus:px-3 focus:py-2 focus:font-mono focus:text-sm focus:text-paper"
             >
-                Skip to main content
+                Skip to content
             </a>
-            {!reduceMotion && (
-                <div className="fixed inset-0 z-0 h-screen pointer-events-none" aria-hidden="true">
-                    <Suspense fallback={null}>
-                        <DarkVeil hueShift={isDarkMode ? 0 : 180} speed={0.5} scanlineFrequency={0.5} scrollSync lightMode={!isDarkMode} />
-                    </Suspense>
-                </div>
-            )}
-            <div className="fixed top-0 left-0 right-0 z-50 flex justify-center">
-                <Nav />
-            </div>
-            <main id="main-content" className="relative z-10 w-full flex justify-center px-4">
-                <div className="w-full max-w-4xl text-black dark:text-white">
-                    <div className="pt-32 pb-24 lg:pt-36" style={{ viewTransitionName: "page" }}>
-                        <Suspense fallback={<PageLoader />}>
-                            <Routes location={location}>
-                                <Route path="/" element={<Home />} />
-                                <Route path="/now" element={<Now />} />
-                                <Route path="/contact" element={<Contact />} />
-                                <Route path="*" element={<NotFound />} />
-                            </Routes>
-                        </Suspense>
-                    </div>
-                    <Footer />
-                </div>
+            <Header />
+            <main id="main-content" className="pt-16 sm:pt-20" style={{ viewTransitionName: "page" }}>
+                <Suspense
+                    fallback={
+                        <p role="status" className="font-mono text-[13px] text-muted">
+                            loading&hellip;
+                        </p>
+                    }
+                >
+                    <Routes location={location}>
+                        <Route path="/" element={<Home />} />
+                        <Route path="/now" element={<Now />} />
+                        <Route path="/contact" element={<Contact />} />
+                        <Route path="*" element={<NotFound />} />
+                    </Routes>
+                </Suspense>
             </main>
+            <Footer />
         </div>
     );
 }

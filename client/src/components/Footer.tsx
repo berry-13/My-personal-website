@@ -1,25 +1,27 @@
-const Footer = () => {
-    const currentYear = new Date().getFullYear();
+const LINKS = [
+    { href: "https://github.com/berry-13", label: "github" },
+    { href: "https://x.com/Berry13000", label: "x" },
+    { href: "https://linkedin.com/in/marco-beretta-berry", label: "linkedin" },
+    { href: "mailto:berry@librechat.ai", label: "email" },
+];
 
-    return (
-        <footer className="w-full flex flex-col items-start border-t-2 border-black/10 dark:border-white/10 px-4 py-8 dark:border-opacity-50 mb-20">
-            <p className="text-black dark:text-white/50 text-2xl font-semibold">Marco Beretta</p>
-            <p className="text-black/60 dark:text-white/30 text-base">
-                Software Engineer &bull; {currentYear}
-            </p>
-            <p className="mt-4 text-sm text-black/60 dark:text-white/40">
-                Design inspired by{" "}
-                <a
-                    href="https://cnrad.dev"
-                    target="_blank"
-                    rel="noreferrer"
-                    className="underline decoration-violet-500/40 hover:decoration-violet-500"
-                >
-                    cnrad.dev
-                </a>
-            </p>
-        </footer>
-    );
-};
+const Footer = () => (
+    <footer className="mt-24 border-t border-rule pt-4 pb-16 font-mono text-[13px] leading-6 text-muted">
+        <ul className="flex flex-wrap gap-x-5">
+            {LINKS.map(link => (
+                <li key={link.label}>
+                    <a
+                        href={link.href}
+                        {...(link.href.startsWith("http") ? { target: "_blank", rel: "noreferrer" } : {})}
+                        className="hover:text-ink"
+                    >
+                        {link.label}
+                    </a>
+                </li>
+            ))}
+        </ul>
+        <p className="mt-2">&copy; {new Date().getFullYear()} Marco Beretta. Set in Newsreader and JetBrains Mono.</p>
+    </footer>
+);
 
 export default Footer;

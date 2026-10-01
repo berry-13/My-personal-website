@@ -5,6 +5,7 @@ import { reposRoute } from "./routes/repos";
 import { sendRoute } from "./routes/send";
 import { awakeRoute } from "./routes/awake";
 import { contributionsRoute } from "./routes/contributions";
+import { changelogRoute } from "./routes/changelog";
 
 // Fail fast if critical env vars are missing
 const requiredEnvVars = ["WEBHOOK_URL", "GITHUB_TOKEN"];
@@ -52,6 +53,7 @@ const app = new Elysia()
     .use(sendRoute)
     .use(awakeRoute)
     .use(contributionsRoute)
+    .use(changelogRoute)
     // Redirects
     .get("/github", ({ redirect }) => redirect("https://github.com/berry-13", 301))
     .get("/x", ({ redirect }) => redirect("https://x.com/Berry13000", 301))

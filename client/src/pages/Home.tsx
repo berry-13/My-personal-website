@@ -1,309 +1,165 @@
 import { lazy, Suspense } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { useInView } from "react-intersection-observer";
-import { FaStar, FaCodeBranch } from "react-icons/fa";
-import type { SectionProps, ExternalLinkProps, RepoGridProps } from "~/types/types";
-import { getLanguageColor, formatNumber } from "~/utils";
+import Section from "~/components/Section";
+import Changelog from "~/components/Changelog";
 import { useRepos } from "~/hooks/useRepo";
+import { cleanDescription, formatNumber } from "~/utils";
 
-const TechIcons = lazy(() => import("~/components/TechIcons"));
 const ContributionGraph = lazy(() => import("~/components/ContributionGraph"));
-
-const fadeInUp = {
-    hidden: { opacity: 0, y: 20 },
-    visible: {
-        opacity: 1,
-        y: 0,
-        transition: { duration: 0.6, ease: [0.22, 1, 0.36, 1] as const },
-    },
-};
-
-const staggerContainer = {
-    hidden: { opacity: 0 },
-    visible: {
-        opacity: 1,
-        transition: {
-            staggerChildren: 0.2,
-            delayChildren: 0.1,
-        },
-    },
-};
-
-const Section = ({ title, children, emoji }: SectionProps) => {
-    const [ref, inView] = useInView({
-        threshold: 0.1,
-        triggerOnce: true,
-    });
-
-    return (
-        <motion.section
-            ref={ref}
-            initial="hidden"
-            animate={inView ? "visible" : "hidden"}
-            variants={fadeInUp}
-            className="mb-16"
-        >
-            <h2 className="font-medium text-3xl md:text-4xl mb-6 flex items-center gap-3">
-                {title}
-                <span className="text-2xl" aria-hidden="true">{emoji}</span>
-            </h2>
-            <div className="text-gray-800 dark:text-gray-300 leading-7 tracking-wide">{children}</div>
-        </motion.section>
-    );
-};
-
-const ExternalLink = ({ href, children }: ExternalLinkProps) => (
-    <a
-        href={href}
-        rel="noreferrer"
-        className="inline-flex items-center font-semibold text-blue-500 hover:text-blue-600 dark:hover:text-blue-400 transition-colors duration-200"
-        target="_blank"
-    >
-        {children}
-        <svg className="w-4 h-4 ml-1" viewBox="0 0 24 24" fill="none" stroke="currentColor" aria-hidden="true">
-            <path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6" strokeWidth="2" strokeLinecap="round" />
-            <path d="M15 3h6v6" strokeWidth="2" strokeLinecap="round" />
-            <path d="M10 14L21 3" strokeWidth="2" strokeLinecap="round" />
-        </svg>
-    </a>
-);
 
 const PR_BASE = "https://github.com/LibreChat-AI/LibreChat/pull/";
 
-const caseStudies = [
+const selectedWork = [
     {
+        date: "2026-07",
         title: "Agent Builder redesign",
         summary:
             "Rebuilt LibreChat's Agent Builder around a unified tools marketplace, skills, and multi-agent orchestration, so an agent is configured in one place instead of across scattered panels. Agent cards later gained an expandable detail view.",
         prs: [
-            { number: 13952, label: "Agent Builder redesign" },
-            { number: 15798, label: "Agent detail dialog" },
+            { number: 13952, label: "redesign" },
+            { number: 15798, label: "detail dialog" },
         ],
     },
     {
+        date: "2025-2026",
         title: "Accessibility",
         summary:
             "Over 30 merged pull requests focused on accessibility, including high-contrast light and dark modes, a full keyboard shortcut system, and an accessible rebuild of the MCP server UI.",
         prs: [
-            { number: 15178, label: "High-contrast modes" },
-            { number: 12425, label: "Keyboard shortcuts" },
-            { number: 11118, label: "Accessible MCP UI" },
+            { number: 15178, label: "high contrast" },
+            { number: 12425, label: "keyboard shortcuts" },
+            { number: 11118, label: "MCP UI" },
         ],
     },
     {
+        date: "2026-08/09",
         title: "Design system and Tailwind v4",
         summary:
             "Moved the client onto the shared @librechat/client design system with semantic color tokens, upgraded it to Tailwind v4, and added lint rules that keep new code on the system.",
         prs: [
-            { number: 13879, label: "Design system adoption" },
-            { number: 15996, label: "Tailwind v4 upgrade" },
-            { number: 15981, label: "Design-system lint rules" },
+            { number: 13879, label: "design system" },
+            { number: 15996, label: "Tailwind v4" },
+            { number: 15981, label: "lint rules" },
         ],
     },
 ];
 
-const CaseStudies = () => (
-    <ul className="grid grid-cols-1 gap-4">
-        {caseStudies.map(study => (
-            <li key={study.title}>
-                <article className="rounded-xl p-6 bg-gray-50 border border-black/15 dark:border-white/5 dark:bg-white/5 backdrop-blur-lg">
-                    <h3 className="text-xl font-semibold mb-2 text-gray-900 dark:text-gray-100">{study.title}</h3>
-                    <p className="text-gray-700 dark:text-gray-300 mb-4">{study.summary}</p>
-                    <ul className="flex flex-wrap gap-2" aria-label={`Pull requests for ${study.title}`}>
-                        {study.prs.map(pr => (
-                            <li key={pr.number}>
-                                <a
-                                    href={`${PR_BASE}${pr.number}`}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="inline-flex items-center gap-1 rounded-lg px-3 py-1 text-sm font-medium bg-violet-500/10 text-violet-700 dark:text-violet-300 hover:bg-violet-500/20 transition-colors duration-200"
-                                >
-                                    {pr.label}
-                                    <span className="text-violet-600/70 dark:text-violet-300/60">#{pr.number}</span>
-                                    <span className="sr-only">(opens in a new tab)</span>
-                                </a>
-                            </li>
-                        ))}
-                    </ul>
-                </article>
-            </li>
-        ))}
-    </ul>
-);
+const STACK = [
+    ["languages", "TypeScript, JavaScript, Java; learning Rust"],
+    ["frontend", "React, Next.js, Tailwind"],
+    ["backend", "Node.js, Bun, Elysia, MongoDB"],
+    ["infra", "Docker, Nginx, Cloudflare, Linux"],
+    ["hardware", "Arduino, Raspberry Pi, Home Assistant"],
+];
 
-const RepoGrid = ({ libreRepo, topRepos, isLoading, isError }: RepoGridProps) => {
-    if (isError) {
-        return (
-            <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                className="rounded-xl p-6 bg-red-500/10 border border-red-500/20 text-red-600 dark:text-red-400"
-            >
-                Failed to load repositories. Please try again later.
-            </motion.div>
-        );
-    }
-
-    if (isLoading) {
-        return (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4" role="status" aria-label="Loading repositories">
-                <span className="sr-only">Loading repositories...</span>
-                {[1, 2, 3, 4].map(i => (
-                    <div
-                        key={i}
-                        aria-hidden="true"
-                        className="rounded-xl p-6 bg-white/40 dark:bg-white/5 border border-black/10 dark:border-white/5"
-                    >
-                        <div className="h-6 w-1/3 loader-shimmer mb-4" />
-                        <div className="space-y-2">
-                            <div className="h-4 w-full loader-shimmer" />
-                            <div className="h-4 w-2/3 loader-shimmer" />
-                        </div>
-                        <div className="flex gap-4 mt-4">
-                            <div className="h-4 w-16 loader-shimmer" />
-                            <div className="h-4 w-16 loader-shimmer" />
-                        </div>
-                    </div>
-                ))}
-            </div>
-        );
-    }
-
-    return (
-        <motion.div
-            variants={staggerContainer}
-            initial="hidden"
-            animate="visible"
-            className="grid grid-cols-1 md:grid-cols-2 gap-4"
-        >
-            {[...libreRepo, ...topRepos].map(repo => (
-                <motion.a
-                    key={repo.name}
-                    href={repo.html_url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    variants={fadeInUp}
-                    whileHover={{ scale: 1.02, y: -2, boxShadow: "0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1)" }}
-                    transition={{ duration: 0.2, ease: "easeOut" }}
-                    className="group bg-gray-50 border border-black/15 dark:border-white/5 dark:bg-white/5
-                     dark:hover:bg-white/10 backdrop-blur-lg rounded-xl p-6"
-                >
-                    <h3
-                        className="text-xl font-semibold mb-2 text-gray-900 dark:text-gray-100
-                         group-hover:text-violet-500 dark:group-hover:text-violet-400
-                         transition-colors duration-300"
-                    >
-                        {repo.name}
-                    </h3>
-                    <p className="text-gray-600 dark:text-gray-400 mb-4">
-                        {repo.description
-                            ? `${repo.description.slice(0, 100)}${repo.description.length > 100 ? "..." : ""}`
-                            : "No description available"}
-                    </p>
-                    <div className="flex items-center gap-4 text-sm">
-                        <span className="flex items-center gap-1">
-                            <FaStar aria-hidden="true" className="w-4 h-4" />
-                            <span className="sr-only">Stars:</span> {formatNumber(repo.stargazers_count)}
-                        </span>
-                        <span className="flex items-center gap-1">
-                            <FaCodeBranch aria-hidden="true" className="w-4 h-4" />
-                            <span className="sr-only">Forks:</span> {formatNumber(repo.forks_count)}
-                        </span>
-                        {repo.language && (
-                            <span className="flex items-center gap-1">
-                                <span
-                                    className="w-3 h-3 rounded-full"
-                                    aria-hidden="true"
-                                    style={{
-                                        backgroundColor: getLanguageColor(repo.language),
-                                    }}
-                                />
-                                {repo.language}
-                            </span>
-                        )}
-                    </div>
-                </motion.a>
-            ))}
-        </motion.div>
-    );
-};
-
-const Home = () => {
+const Projects = () => {
     const { repos, isLoading, isError } = useRepos();
 
+    if (isError) {
+        return <p className="font-mono text-[13px] text-muted">Couldn&apos;t load repositories just now.</p>;
+    }
+    if (isLoading || !repos) {
+        return (
+            <p role="status" className="font-mono text-[13px] text-muted">
+                fetching repositories&hellip;
+            </p>
+        );
+    }
+
     return (
-        <AnimatePresence>
-            <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                className="max-w-4xl mx-auto px-2 sm:px-6"
-            >
-                <motion.div
-                    initial={{ opacity: 0, y: 30 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] as const }}
-                    className="mb-16"
-                >
-                    <h1 className="text-5xl md:text-6xl font-bold mb-6">Hey, I'm Marco!</h1>
-                    <p className="text-xl text-gray-600 dark:text-gray-300">
-                        A core contributor to{" "}
-                        <ExternalLink href="https://librechat.ai">LibreChat</ExternalLink>, specializing in AI
-                        interfaces, accessibility, and full-stack development.
-                    </p>
-                </motion.div>
-
-                <Section title="What I Do" emoji={"\u{1F4BB}"}>
-                    <p>
-                        LibreChat is an open-source AI chat platform with over 45,000 stars on GitHub. Since 2023
-                        I&apos;ve merged more than 440 pull requests there, mostly on the frontend: the Agent Builder,
-                        the design system, accessibility, and audio features like speech-to-text and text-to-speech. I
-                        enjoy problems that cross the stack, and I care about AI tools that are pleasant to use, not
-                        just powerful.
-                    </p>
-                </Section>
-
-                <Section title="Selected Work" emoji={"\u{1F680}"}>
-                    <CaseStudies />
-                </Section>
-
-                <Section title="Technical Expertise" emoji={"\u{1F6E0}\uFE0F"}>
-                    <p className="mb-8">
-                        I work mainly in TypeScript, React, and Node.js, with Next.js and Tailwind on the frontend and
-                        Bun on the backend. I also write Java, I&apos;m learning Rust for systems programming, and I
-                        build hardware projects with Arduino. Whatever the stack, I aim for interfaces that are
-                        accessible, fast, and predictable.
-                    </p>
-                    <Suspense fallback={<div className="w-full h-32 loader-shimmer" />}>
-                        <TechIcons />
-                    </Suspense>
-                </Section>
-
-                <Section title="Before LibreChat" emoji={"\u{1F3AE}"}>
-                    <p>
-                        In early 2023, two months after ChatGPT launched, I built &ldquo;Banfi Zombi&rdquo; in Unreal
-                        Engine 5: a game whose AI-driven NPCs changed their behavior based on the player&apos;s
-                        choices, so no two playthroughs felt the same.
-                    </p>
-                </Section>
-
-                <Section title="GitHub Activity" emoji={"\u{1F4C8}"}>
-                    <Suspense fallback={<div className="w-full h-[110px] loader-shimmer" />}>
-                        <ContributionGraph />
-                    </Suspense>
-                </Section>
-
-                <Section title="Featured Projects" emoji={"\u{2B50}"}>
-                    <RepoGrid
-                        libreRepo={repos?.libreChatRepos ?? []}
-                        topRepos={repos?.berryRepos ?? []}
-                        isLoading={isLoading}
-                        isError={isError}
-                    />
-                </Section>
-            </motion.div>
-        </AnimatePresence>
+        <ul className="divide-y divide-rule/70">
+            {[...repos.libreChatRepos, ...repos.berryRepos].map(repo => (
+                <li key={repo.name} className="grid gap-x-6 gap-y-1 py-4 sm:grid-cols-[11rem_1fr]">
+                    <a href={repo.html_url} target="_blank" rel="noreferrer" className="link self-baseline text-lg">
+                        {repo.name}
+                    </a>
+                    <div>
+                        <p className="leading-snug">{cleanDescription(repo.description)}</p>
+                        <p className="mt-1 font-mono text-xs text-muted">
+                            {repo.language && <span className="mr-4">{repo.language}</span>}
+                            <span>
+                                {formatNumber(repo.stargazers_count)} star{repo.stargazers_count === 1 ? "" : "s"}
+                            </span>
+                        </p>
+                    </div>
+                </li>
+            ))}
+        </ul>
     );
 };
+
+const Home = () => (
+    <>
+        <h1 className="sr-only">Marco Beretta, software engineer</h1>
+        <p className="cursor max-w-[34rem] text-[clamp(1.6rem,4.2vw,2.35rem)] leading-[1.18] tracking-[-0.01em]">
+            I build interfaces for AI tools. Since 2023 I&apos;ve merged 440+ pull requests into{" "}
+            <a href="https://librechat.ai" target="_blank" rel="noreferrer" className="link">
+                LibreChat
+            </a>
+            , mostly the parts people touch: the Agent Builder, the design system, accessibility, and audio.
+        </p>
+
+        <Section index="01" title="Selected work">
+            <ol className="space-y-10">
+                {selectedWork.map(work => (
+                    <li key={work.title} className="grid gap-x-6 gap-y-2 sm:grid-cols-[6.5rem_1fr]">
+                        <span className="font-mono text-xs text-muted tabular-nums sm:pt-1.5">{work.date}</span>
+                        <article>
+                            <h3 className="text-[22px] leading-tight">{work.title}</h3>
+                            <p className="mt-2 max-w-[38rem] text-[17px] leading-relaxed text-ink/85">
+                                {work.summary}
+                            </p>
+                            <p className="mt-3 flex flex-wrap items-baseline gap-x-4 gap-y-1 font-mono text-xs text-muted">
+                                {work.prs.map(pr => (
+                                    <a
+                                        key={pr.number}
+                                        href={`${PR_BASE}${pr.number}`}
+                                        target="_blank"
+                                        rel="noreferrer"
+                                        className="hover:text-accent"
+                                    >
+                                        #{pr.number} {pr.label}
+                                    </a>
+                                ))}
+                            </p>
+                        </article>
+                    </li>
+                ))}
+            </ol>
+        </Section>
+
+        <Section index="02" title="Log">
+            <Changelog />
+        </Section>
+
+        <Section index="03" title="Activity">
+            <Suspense fallback={<p className="h-[98px] font-mono text-[13px] text-muted">fetching activity&hellip;</p>}>
+                <ContributionGraph />
+            </Suspense>
+        </Section>
+
+        <Section index="04" title="Projects">
+            <Projects />
+        </Section>
+
+        <Section index="05" title="Stack">
+            <dl className="grid grid-cols-[6.5rem_1fr] gap-x-6 gap-y-2 text-[17px]">
+                {STACK.map(([term, detail]) => (
+                    <div key={term} className="contents">
+                        <dt className="font-mono text-xs leading-[1.7rem] text-muted">{term}</dt>
+                        <dd>{detail}</dd>
+                    </div>
+                ))}
+            </dl>
+        </Section>
+
+        <Section index="06" title="Before LibreChat">
+            <p className="max-w-[38rem] text-[17px] leading-relaxed">
+                In early 2023, two months after ChatGPT launched, I built &ldquo;Banfi Zombi&rdquo; in Unreal Engine 5:
+                a game whose AI-driven NPCs changed their behavior based on the player&apos;s choices, so no two
+                playthroughs felt the same.
+            </p>
+        </Section>
+    </>
+);
 
 export default Home;

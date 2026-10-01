@@ -1,0 +1,83 @@
+import { useState } from "react";
+import { useChangelog } from "~/hooks/useChangelog";
+import { isoDate } from "~/utils";
+import DiffStat from "./DiffStat";
+
+const INITIAL = 12;
+const ALL_PRS_URL = "https://github.com/LibreChat-AI/LibreChat/pulls?q=is%3Apr+author%3Aberry-13+is%3Amerged";
+
+const Changelog = () => {
+    const { data, isLoading, isError } = useChangelog();
+    const [expanded, setExpanded] = useState(false);
+
+    if (isError) {
+        return (
+            <p className="font-mono text-[13px] text-muted">
+                Couldn&apos;t reach GitHub just now.{" "}
+                <a href={ALL_PRS_URL} target="_blank" rel="noreferrer" className="link">
+                    See the pull requests on GitHub
+                </a>
+                .
+            </p>
+        );
+    }
+
+    if (isLoading || !data) {
+        return (
+            <p role="status" className="font-mono text-[13px] text-muted">
+                fetching log&hellip;
+            </p>
+        );
+    }
+
+    const entries = expanded ? data.entries : data.entries.slice(0, INITIAL);
+
+    return (
+        <div>
+            <ol className="divide-y divide-rule/70">
+                {entries.map(entry => (
+                    <li
+                        key={entry.number}
+                        className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-1 py-3 sm:grid-cols-[6.5rem_4rem_1fr_auto] sm:items-baseline"
+                    >
+                        <time dateTime={entry.mergedAt} className="font-mono text-xs text-muted tabular-nums">
+                            {isoDate(entry.mergedAt)}
+                        </time>
+                        <span className="font-mono text-xs text-muted tabular-nums">#{entry.number}</span>
+                        <a
+                            href={entry.url}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="col-span-2 text-[17px] leading-snug hover:text-accent sm:col-span-1"
+                        >
+                            {entry.type && (
+                                <span className="mr-2 font-mono text-xs text-muted">{entry.type}</span>
+                            )}
+                            {entry.title}
+                        </a>
+                        <span className="col-span-2 sm:col-span-1">
+                            <DiffStat additions={entry.additions} deletions={entry.deletions} />
+                        </span>
+                    </li>
+                ))}
+            </ol>
+            <p className="mt-4 flex flex-wrap gap-x-5 font-mono text-[13px] text-muted">
+                {data.entries.length > INITIAL && (
+                    <button
+                        type="button"
+                        onClick={() => setExpanded(e => !e)}
+                        aria-expanded={expanded}
+                        className="cursor-pointer hover:text-ink"
+                    >
+                        {expanded ? "show less" : `show ${data.entries.length - INITIAL} more`}
+                    </button>
+                )}
+                <a href={ALL_PRS_URL} target="_blank" rel="noreferrer" className="hover:text-ink">
+                    all {data.total} merged on GitHub &rarr;
+                </a>
+            </p>
+        </div>
+    );
+};
+
+export default Changelog;

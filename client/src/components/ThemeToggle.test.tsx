@@ -1,12 +1,7 @@
 import { describe, it, expect, beforeEach } from "bun:test";
 import { render, fireEvent } from "@testing-library/react";
-import * as Tooltip from "@radix-ui/react-tooltip";
 import ThemeToggle from "./ThemeToggle";
 
-const renderWithProviders = (ui: React.ReactElement) =>
-    render(<Tooltip.Provider>{ui}</Tooltip.Provider>);
-
-// Mock localStorage
 const localStorageMock = (() => {
     let store: Record<string, string> = {};
     return {
@@ -26,56 +21,31 @@ describe("ThemeToggle", () => {
     beforeEach(() => {
         localStorageMock.clear();
         document.documentElement.classList.remove("dark");
-        document.documentElement.removeAttribute("lang");
     });
 
-    it("renders without crashing", () => {
-        const { getByRole } = renderWithProviders(<ThemeToggle />);
-        expect(getByRole("button")).toBeInTheDocument();
+    it("renders a button labelled with the theme it switches to", () => {
+        const { getByRole } = render(<ThemeToggle />);
+        expect(getByRole("button", { name: "Switch to dark theme" })).toBeInTheDocument();
     });
 
-    it("renders a button element", () => {
-        const { getByRole } = renderWithProviders(<ThemeToggle />);
-        const button = getByRole("button");
-        expect(button.tagName.toLowerCase()).toBe("button");
+    it("shows the current theme", () => {
+        document.documentElement.classList.add("dark");
+        const { getByRole } = render(<ThemeToggle />);
+        expect(getByRole("button").textContent).toBe("[dark]");
     });
 
-    it("respects disabled prop", () => {
-        const { getByRole } = renderWithProviders(<ThemeToggle disabled />);
-        const button = getByRole("button");
-        expect(button).toBeDisabled();
-        expect(button).toHaveClass("cursor-not-allowed");
-    });
-
-    it("initializes with dark theme by default", () => {
-        renderWithProviders(<ThemeToggle />);
-        // The component defaults to dark theme and adds the dark class to html
-        expect(document.documentElement.classList.contains("dark")).toBe(true);
-    });
-
-    it("toggles theme on click", () => {
-        localStorageMock.setItem("theme", "dark");
-        const { getByRole } = renderWithProviders(<ThemeToggle />);
+    it("toggles the html class and persists the choice", () => {
+        document.documentElement.classList.add("dark");
+        const { getByRole } = render(<ThemeToggle />);
         const button = getByRole("button");
 
         fireEvent.click(button);
+        expect(document.documentElement.classList.contains("dark")).toBe(false);
         expect(localStorageMock.getItem("theme")).toBe("light");
+        expect(button.textContent).toBe("[light]");
 
         fireEvent.click(button);
+        expect(document.documentElement.classList.contains("dark")).toBe(true);
         expect(localStorageMock.getItem("theme")).toBe("dark");
-    });
-
-    it("does not toggle when disabled", () => {
-        localStorageMock.setItem("theme", "dark");
-        const { getByRole } = renderWithProviders(<ThemeToggle disabled />);
-        const button = getByRole("button");
-
-        fireEvent.click(button);
-        expect(localStorageMock.getItem("theme")).toBe("dark");
-    });
-
-    it("sets html lang attribute to en", () => {
-        renderWithProviders(<ThemeToggle />);
-        expect(document.documentElement.getAttribute("lang")).toBe("en");
     });
 });

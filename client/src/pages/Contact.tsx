@@ -1,48 +1,26 @@
-import { motion } from "framer-motion";
-import { SiDiscord } from "react-icons/si";
-import { FiMail } from "react-icons/fi";
-import MessageComponent from "~/components/talk/MessageComponent";
-import ContactLink from "~/components/talk/ContactLink";
-import TimeStatus from "~/components/talk/TimeStatus";
+import MessageForm from "~/components/MessageForm";
 
-const Contact = () => {
-    return (
-        <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.95 }}
-            transition={{ ease: "easeOut", duration: 0.15 }}
-            className="w-full"
-        >
-            <h1 className="text-black dark:text-white font-bold text-3xl mb-3">Let's chat</h1>
-            <p className="text-gray-800 dark:text-gray-200 mb-6">
-                Have an inquiry, or want to connect? Feel free to leave a message below, or get in touch via Discord or
-                email.
-            </p>
-
-            <TimeStatus />
-
-            <div className="grid grid-cols-1 md:grid-cols-3 md:gap-4 mb-20">
-                <MessageComponent />
-
-                <div className="row-start-1 md:row-auto">
-                    <ContactLink
-                        name="@berry_13"
-                        icon={<SiDiscord className="w-6 h-6 text-[#5865F2]" />}
-                        link="https://discord.com/users/777604723435896843"
-                        borderColor="hover:border-[#5865F2]/50"
-                    />
-
-                    <ContactLink
-                        name="berry@librechat.ai"
-                        icon={<FiMail className="w-6 h-6 text-gray-400" />}
-                        link="mailto:berry@librechat.ai"
-                        borderColor="hover:border-gray-400/50"
-                    />
-                </div>
-            </div>
-        </motion.div>
-    );
-};
+const Contact = () => (
+    <>
+        <h1 className="text-[clamp(1.6rem,4.2vw,2.35rem)] leading-tight">Let&apos;s talk</h1>
+        <p className="mt-3 max-w-[34rem] text-[17px] leading-relaxed text-ink/85">
+            Questions, collaborations, or something you&apos;d like built. Leave a message here, or reach me on{" "}
+            <a
+                href="https://discord.com/users/777604723435896843"
+                target="_blank"
+                rel="noreferrer"
+                className="link"
+            >
+                Discord (@berry_13)
+            </a>{" "}
+            or at{" "}
+            <a href="mailto:berry@librechat.ai" className="link">
+                berry@librechat.ai
+            </a>
+            .
+        </p>
+        <MessageForm />
+    </>
+);
 
 export default Contact;

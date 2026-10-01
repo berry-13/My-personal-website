@@ -20,10 +20,9 @@ const Cell = ({ day, x, y }: { day: ContributionDay; x: number; y: number }) => 
             y={y}
             width={CELL_SIZE}
             height={CELL_SIZE}
-            rx={2}
-            ry={2}
+            rx={0}
+            ry={0}
             fill={`var(--cgraph-${day.level})`}
-            className="transition-colors"
         >
             <title>{label}</title>
         </rect>
@@ -35,7 +34,7 @@ const ContributionGraph = () => {
 
     if (isError) {
         return (
-            <p className="text-sm text-gray-500 dark:text-gray-400">
+            <p className="font-mono text-[13px] text-muted">
                 Couldn't load contributions right now.
             </p>
         );
@@ -43,11 +42,9 @@ const ContributionGraph = () => {
 
     if (isLoading || !data) {
         return (
-            <div
-                className="w-full h-[110px] loader-shimmer"
-                role="status"
-                aria-label="Loading contribution graph"
-            />
+            <p role="status" className="h-[98px] font-mono text-[13px] text-muted">
+                fetching activity&hellip;
+            </p>
         );
     }
 
@@ -56,15 +53,14 @@ const ContributionGraph = () => {
     const height = 7 * STEP;
 
     return (
-        <figure
-            className="w-full overflow-x-auto"
-            aria-label={`${data.total.toLocaleString()} GitHub contributions in the last year`}
-        >
+        <figure className="w-full">
             <svg
                 viewBox={`0 0 ${width} ${height}`}
-                width={width}
-                height={height}
+                width="100%"
+                preserveAspectRatio="xMinYMin meet"
+                className="block h-auto max-w-full"
                 role="img"
+                aria-label={`Contribution heatmap: ${data.total.toLocaleString()} contributions in the last year`}
                 xmlns="http://www.w3.org/2000/svg"
             >
                 {weeks.map((week, weekIdx) =>
@@ -73,19 +69,19 @@ const ContributionGraph = () => {
                     )),
                 )}
             </svg>
-            <figcaption className="mt-3 flex items-center justify-between text-xs text-gray-600 dark:text-gray-400">
+            <figcaption className="mt-3 flex items-center justify-between font-mono text-xs text-muted">
                 <span>{data.total.toLocaleString()} contributions in the last year</span>
                 <span className="flex items-center gap-1.5">
-                    <span>Less</span>
+                    <span>less</span>
                     {[0, 1, 2, 3, 4].map(level => (
                         <span
                             key={level}
-                            className="inline-block w-2.5 h-2.5 rounded-[2px]"
+                            className="inline-block size-2.5"
                             style={{ background: `var(--cgraph-${level})` }}
                             aria-hidden="true"
                         />
                     ))}
-                    <span>More</span>
+                    <span>more</span>
                 </span>
             </figcaption>
         </figure>
