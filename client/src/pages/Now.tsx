@@ -5,7 +5,7 @@ const lastUpdated = "2026-10";
 const WORKING_ON = [
     {
         lead: "LibreChat",
-        href: "https://librechat.ai",
+        href: "https://github.com/LibreChat-AI/LibreChat",
         text: "core contributor: the chat UI redesign, projects, accessibility, and the Agent Builder.",
     },
     { lead: "librechat.ai", href: "https://librechat.ai", text: "improving and maintaining the docs and website." },
@@ -24,9 +24,9 @@ const WORKING_ON = [
 
 const Now = () => (
     <>
-        <Reveal>
-            <h1 className="text-[clamp(2.6rem,7.2vw,6.75rem)] leading-[1.02] tracking-[-0.025em]">What I&apos;m doing now</h1>
-        </Reveal>
+        <h1 id="page-title" tabIndex={-1} className="text-[clamp(2.6rem,7.2vw,6.75rem)] leading-[1.02] tracking-[-0.025em] outline-none">
+            What I&apos;m doing now
+        </h1>
         <p className="mt-6 font-mono text-[13px] text-muted">
             updated {lastUpdated} &middot; a{" "}
             <a href="https://nownownow.com/about" target="_blank" rel="noreferrer" className="hover:text-ink underline">
@@ -39,6 +39,7 @@ const Now = () => (
             {WORKING_ON.map((item, i) => (
                 <Reveal
                     as="li"
+                    lite
                     key={item.lead}
                     index={i}
                     className="grid gap-x-10 gap-y-1 py-6 md:grid-cols-[16rem_1fr] md:items-baseline"
@@ -50,7 +51,7 @@ const Now = () => (
                     ) : (
                         <span className="text-xl lg:text-2xl">{item.lead}</span>
                     )}
-                    <span className="text-lg leading-snug text-ink/85 lg:text-xl">{item.text}</span>
+                    <span className="min-w-0 text-lg leading-snug text-ink/85 lg:text-xl">{item.text}</span>
                 </Reveal>
             ))}
         </ul>

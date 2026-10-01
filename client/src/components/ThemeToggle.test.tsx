@@ -23,9 +23,10 @@ describe("ThemeToggle", () => {
         document.documentElement.classList.remove("dark");
     });
 
-    it("renders a button labelled with the theme it switches to", () => {
+    it("renders a toggle button that reports its pressed state", () => {
         const { getByRole } = render(<ThemeToggle />);
-        expect(getByRole("button", { name: "Switch to dark theme" })).toBeInTheDocument();
+        const button = getByRole("button", { name: "Dark theme" });
+        expect(button).toHaveAttribute("aria-pressed", "false");
     });
 
     it("shows the current theme", () => {
@@ -43,6 +44,7 @@ describe("ThemeToggle", () => {
         expect(document.documentElement.classList.contains("dark")).toBe(false);
         expect(localStorageMock.getItem("theme")).toBe("light");
         expect(button.textContent).toBe("[light]");
+        expect(button).toHaveAttribute("aria-pressed", "false");
 
         fireEvent.click(button);
         expect(document.documentElement.classList.contains("dark")).toBe(true);

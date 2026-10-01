@@ -52,11 +52,13 @@
     --font-mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
 }
 
+html {
+    /* Same width whether or not a page scrolls, so the header never jumps sideways */
+    scrollbar-gutter: stable;
+}
+
 html,
 body {
-    transition:
-        background-color 400ms ease,
-        color 400ms ease;
     margin: 0;
     padding: 0;
     background: var(--paper);
@@ -72,9 +74,12 @@ body {
     color: var(--paper);
 }
 
-:focus-visible {
-    outline: 2px solid var(--accent);
-    outline-offset: 3px;
+/* In the base layer so component utilities (e.g. underlined inputs) can override it */
+@layer base {
+    :focus-visible {
+        outline: 2px solid var(--accent);
+        outline-offset: 3px;
+    }
 }
 
 /* Wide stage shared by header, main, and footer */
@@ -140,13 +145,19 @@ body {
 /* Scroll reveal: rise, sharpen, fade in. --i staggers siblings. */
 .reveal {
     opacity: 0;
-    transform: translate3d(0, 28px, 0);
-    filter: blur(6px);
+    transform: translate3d(0, 24px, 0);
+    filter: blur(5px);
     transition:
-        opacity 900ms var(--ease-out),
-        transform 1100ms var(--ease-out),
-        filter 900ms var(--ease-out);
-    transition-delay: calc(var(--i, 0) * 70ms);
+        opacity 650ms var(--ease-out),
+        transform 800ms var(--ease-out),
+        filter 650ms var(--ease-out);
+    transition-delay: calc(var(--i, 0) * 45ms);
+}
+
+/* List rows: same rise without the blur, which is costly across dozens of rows */
+.reveal.lite {
+    filter: none;
+    transform: translate3d(0, 14px, 0);
 }
 
 .reveal[data-in="true"] {
@@ -160,7 +171,7 @@ body {
     transform: scaleX(0);
     transform-origin: left center;
     transition: transform 1200ms var(--ease-soft);
-    transition-delay: calc(var(--i, 0) * 70ms + 250ms);
+    transition-delay: calc(var(--i, 0) * 45ms + 200ms);
 }
 
 [data-in="true"] .grow-x {
@@ -183,15 +194,47 @@ body {
     display: inline-block;
     overflow: hidden;
     vertical-align: top;
-    padding-bottom: 0.08em;
-    margin-bottom: -0.08em;
+    padding-bottom: 0.2em;
+    margin-bottom: -0.2em;
 }
 
+/* Words wait below their masks until the display font has loaded, so the headline never reflows */
 .word > span {
     display: inline-block;
-    transform: translate3d(0, 105%, 0);
-    animation: word-rise 1100ms var(--ease-out) forwards;
-    animation-delay: calc(120ms + var(--w, 0) * 38ms);
+    transform: translate3d(0, 110%, 0);
+}
+
+.fonts-ready .word > span {
+    animation: word-rise 900ms var(--ease-out) forwards;
+    animation-delay: calc(60ms + var(--w, 0) * 26ms);
+}
+
+.hero-sub,
+.hero .cursor::after {
+    opacity: 0;
+}
+
+/* The cursor arrives once the sentence has finished rising, then blinks */
+.fonts-ready .hero .cursor::after {
+    animation:
+        fade-in 300ms ease-out 1000ms forwards,
+        blink 1.1s steps(1) 1300ms infinite;
+}
+
+.fonts-ready .hero-sub {
+    animation: fade-in 700ms ease-out 650ms forwards;
+}
+
+/* Each route fades up as it mounts */
+.page-enter {
+    animation: page-enter 520ms var(--ease-out) both;
+}
+
+@keyframes page-enter {
+    from {
+        opacity: 0;
+        transform: translate3d(0, 10px, 0);
+    }
 }
 
 @keyframes fade-in {
@@ -257,19 +300,15 @@ button:active,
 
 @keyframes hero-exit {
     to {
-        opacity: 0.15;
+        opacity: 0.3;
         transform: translate3d(0, -60px, 0) scale(0.97);
     }
 }
 
-/* View Transitions API: cross-fade route changes */
-@view-transition {
-    navigation: auto;
-}
-
-::view-transition-old(page),
-::view-transition-new(page) {
-    animation-duration: 180ms;
+/* Theme switch cross-fades the whole page (document.startViewTransition in ThemeToggle) */
+::view-transition-old(root),
+::view-transition-new(root) {
+    animation-duration: 350ms;
     animation-timing-function: ease;
 }
 
@@ -293,7 +332,8 @@ button:active,
         transition: none;
     }
 
-    .word > span {
+    .word > span,
+    .fonts-ready .word > span {
         transform: none;
         animation: none;
     }
@@ -308,9 +348,25 @@ button:active,
         transform: none;
     }
 
-    ::view-transition-old(page),
-    ::view-transition-new(page) {
+    ::view-transition-old(root),
+    ::view-transition-new(root) {
         animation: none;
+    }
+
+    .hero .cursor::after,
+    .fonts-ready .hero .cursor::after {
+        opacity: 1;
+        animation: none;
+    }
+
+    .page-enter,
+    .fonts-ready .hero-sub {
+        animation: none;
+        opacity: 1;
+    }
+
+    .hero-sub {
+        opacity: 1;
     }
 
     .link {

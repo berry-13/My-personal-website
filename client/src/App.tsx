@@ -1,13 +1,12 @@
-import { useEffect, useRef, lazy, Suspense } from "react";
-import { Routes, Route, useLocation } from "react-router-dom";
+import { useEffect, useLayoutEffect, useRef } from "react";
+import { Routes, Route, useLocation, useNavigationType } from "react-router-dom";
 import Header from "./components/Header";
 import Footer from "./components/Footer";
 import { isSoundEnabled } from "./components/SoundToggle";
-
-const Home = lazy(() => import("./pages/Home"));
-const Contact = lazy(() => import("./pages/Contact"));
-const Now = lazy(() => import("./pages/Now"));
-const NotFound = lazy(() => import("./pages/NotFound"));
+import Home from "./pages/Home";
+import Now from "./pages/Now";
+import Contact from "./pages/Contact";
+import NotFound from "./pages/NotFound";
 
 const TITLES: Record<string, string> = {
     "/": "Marco Beretta, Software Engineer",
@@ -15,33 +14,70 @@ const TITLES: Record<string, string> = {
     "/contact": "Contact · Marco Beretta",
 };
 
+const normalize = (path: string) => (path.length > 1 ? path.replace(/\/+$/, "") : path);
+
+// The router restores scroll ourselves: top on new pages, saved position on back/forward
+if (typeof window !== "undefined" && "scrollRestoration" in history) {
+    history.scrollRestoration = "manual";
+}
+const scrollPositions = new Map<string, number>();
+
 function App() {
     const location = useLocation();
+    const navigationType = useNavigationType();
     const audioRef = useRef<HTMLAudioElement | null>(null);
-    const prevPathRef = useRef(location.pathname);
+    const isFirstRender = useRef(true);
+    const path = normalize(location.pathname);
 
+    // Track the last scroll position as it happens. By the time a navigation commits, the old page is already
+    // gone from the DOM and window.scrollY has been clamped, so reading it then would always give 0.
+    const lastScrollY = useRef(0);
     useEffect(() => {
-        const audio = new Audio("/pop.mp3");
-        audio.preload = "auto";
-        audio.volume = 0.4;
-        audioRef.current = audio;
+        const track = () => {
+            lastScrollY.current = window.scrollY;
+        };
+        window.addEventListener("scroll", track, { passive: true });
+        return () => window.removeEventListener("scroll", track);
     }, []);
 
-    useEffect(() => {
-        document.title = TITLES[location.pathname] ?? "Not found · Marco Beretta";
-        if (prevPathRef.current === location.pathname) return;
-        prevPathRef.current = location.pathname;
-        window.scrollTo(0, 0);
-        if (isSoundEnabled() && audioRef.current) {
-            audioRef.current.currentTime = 0;
-            audioRef.current.play().catch(() => {
-                // Autoplay restrictions; ignore
-            });
+    useLayoutEffect(() => {
+        const key = location.key;
+        return () => {
+            scrollPositions.set(key, lastScrollY.current);
+        };
+    }, [location.key]);
+
+    // Before paint: reset or restore scroll, so the old position never flashes
+    useLayoutEffect(() => {
+        document.title = TITLES[path] ?? "Not found · Marco Beretta";
+        if (isFirstRender.current) {
+            isFirstRender.current = false;
+            return;
         }
-    }, [location.pathname]);
+        if (navigationType === "POP") {
+            window.scrollTo(0, scrollPositions.get(location.key) ?? 0);
+            return;
+        }
+        window.scrollTo(0, 0);
+        // Move focus to the new page's heading so keyboard and screen reader users land on it
+        document.getElementById("page-title")?.focus({ preventScroll: true });
+    }, [location.key, navigationType, path]);
+
+    // Navigation sound only for link clicks, never for back/forward or the first load
+    useEffect(() => {
+        if (navigationType !== "PUSH" || !isSoundEnabled()) return;
+        if (!audioRef.current) {
+            audioRef.current = new Audio("/pop.mp3");
+            audioRef.current.volume = 0.4;
+        }
+        audioRef.current.currentTime = 0;
+        audioRef.current.play().catch(() => {
+            // Autoplay restrictions; ignore
+        });
+    }, [location.key, navigationType]);
 
     return (
-        <div className="min-h-screen">
+        <div className="flex min-h-dvh flex-col">
             <a
                 href="#main-content"
                 className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-50 focus:bg-ink focus:px-3 focus:py-2 focus:font-mono focus:text-sm focus:text-paper"
@@ -51,23 +87,17 @@ function App() {
             <Header />
             <main
                 id="main-content"
-                className="stage pt-14 sm:pt-20 lg:pt-28"
-                style={{ viewTransitionName: "page" }}
+                tabIndex={-1}
+                className="stage flex-1 overflow-x-clip pt-12 pb-20 outline-none sm:pt-16 lg:pt-16 lg:pb-24"
             >
-                <Suspense
-                    fallback={
-                        <p role="status" className="font-mono text-[13px] text-muted">
-                            loading&hellip;
-                        </p>
-                    }
-                >
+                <div key={location.key} className="page-enter">
                     <Routes location={location}>
                         <Route path="/" element={<Home />} />
                         <Route path="/now" element={<Now />} />
                         <Route path="/contact" element={<Contact />} />
                         <Route path="*" element={<NotFound />} />
                     </Routes>
-                </Suspense>
+                </div>
             </main>
             <Footer />
         </div>

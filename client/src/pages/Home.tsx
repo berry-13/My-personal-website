@@ -1,4 +1,5 @@
-import { Fragment, lazy, Suspense, type CSSProperties, type ReactNode } from "react";
+import { Fragment, type CSSProperties, type ReactNode } from "react";
+import ContributionGraph from "~/components/ContributionGraph";
 import Section from "~/components/Section";
 import Changelog from "~/components/Changelog";
 import Reveal from "~/components/motion/Reveal";
@@ -8,7 +9,7 @@ import { useContributions } from "~/hooks/useContributions";
 import { useRepos } from "~/hooks/useRepo";
 import { cleanDescription, formatNumber } from "~/utils";
 
-const ContributionGraph = lazy(() => import("~/components/ContributionGraph"));
+
 
 const PR_BASE = "https://github.com/LibreChat-AI/LibreChat/pull/";
 
@@ -66,8 +67,10 @@ const Word = ({ children, index }: { children: ReactNode; index: number }) => (
 );
 
 const Hero = () => (
-    <div className="hero-exit">
-        <h1 className="sr-only">Marco Beretta, software engineer</h1>
+    <div className="hero hero-exit">
+        <h1 id="page-title" tabIndex={-1} className="sr-only">
+            Marco Beretta, software engineer
+        </h1>
         <p className="max-w-[18ch] text-[clamp(2.6rem,7.2vw,6.75rem)] leading-[1.02] tracking-[-0.025em] sm:max-w-[20ch]">
             {HERO_WORDS.map((word, i) => (
                 <Fragment key={i}>
@@ -88,37 +91,48 @@ const Hero = () => (
             ))}
             <span className="cursor" aria-hidden="true" />
         </p>
-        <p
-            className="mt-10 max-w-[40rem] font-mono text-[13px] leading-6 text-muted opacity-0 motion-safe:animate-[fade-in_900ms_ease-out_1.3s_forwards] motion-reduce:opacity-100"
-        >
+        <p className="hero-sub mt-10 max-w-[40rem] font-mono text-[13px] leading-6 text-muted">
             Core contributor to LibreChat. Agent Builder, design system, accessibility, audio. Based in Italy.
         </p>
     </div>
 );
 
 const Stats = () => {
-    const { data: changelog } = useChangelog();
-    const { repos } = useRepos();
-    const { data: contributions } = useContributions();
-    const stars = repos?.libreChatRepos[0]?.stargazers_count;
+    const changelog = useChangelog();
+    const repos = useRepos();
+    const contributions = useContributions();
 
     const stats = [
-        { value: changelog?.total, suffix: "", label: "pull requests merged into LibreChat" },
-        { value: stars, suffix: "", label: "stars on the project I help build" },
-        { value: contributions?.total, suffix: "", label: "contributions in the last year" },
+        {
+            value: changelog.data?.total,
+            failed: changelog.isError,
+            label: "pull requests merged into LibreChat",
+        },
+        {
+            value: repos.repos?.libreChatRepos[0]?.stargazers_count,
+            failed: repos.isError,
+            label: "stars on the project I help build",
+        },
+        {
+            value: contributions.data?.total,
+            failed: contributions.isError,
+            label: "contributions in the last year",
+        },
     ];
 
     return (
         <div className="mt-28 grid gap-y-14 border-t border-rule pt-10 sm:grid-cols-3 sm:gap-x-10 lg:mt-40">
             {stats.map((stat, i) => (
                 <Reveal key={stat.label} index={i}>
-                    <p className="text-[clamp(3rem,7vw,6rem)] leading-none tracking-[-0.03em]">
-                        {stat.value === undefined ? (
-                            <span className="text-faint" aria-label="loading">
-                                &middot;&middot;&middot;
-                            </span>
+                    <p className="h-[1em] text-[clamp(3rem,7vw,6rem)] leading-none tracking-[-0.03em]">
+                        {stat.value !== undefined && stat.value > 0 ? (
+                            <CountUp value={stat.value} />
+                        ) : stat.failed ? (
+                            <span className="text-muted">n/a</span>
                         ) : (
-                            <CountUp value={stat.value} suffix={stat.suffix} />
+                            <span className="block h-full w-[3ch] motion-safe:animate-pulse bg-rule/60" role="status">
+                                <span className="sr-only">Loading</span>
+                            </span>
                         )}
                     </p>
                     <p className="mt-3 max-w-[16rem] font-mono text-[13px] text-muted">{stat.label}</p>
@@ -136,20 +150,28 @@ const Projects = () => {
     }
     if (isLoading || !repos) {
         return (
-            <p role="status" className="font-mono text-[13px] text-muted">
-                fetching repositories&hellip;
-            </p>
+            <ul role="status" aria-label="Loading repositories" className="divide-y divide-rule/70">
+                {[0, 1, 2, 3].map(i => (
+                    <li key={i} className="grid gap-x-10 gap-y-2 py-6 md:grid-cols-[14rem_1fr]">
+                        <span className="h-7 w-32 motion-safe:animate-pulse bg-rule/60" />
+                        <span className="space-y-2">
+                            <span className="block h-5 w-full max-w-[34rem] motion-safe:animate-pulse bg-rule/60" />
+                            <span className="block h-3 w-28 motion-safe:animate-pulse bg-rule/40" />
+                        </span>
+                    </li>
+                ))}
+            </ul>
         );
     }
 
     return (
         <ul className="divide-y divide-rule/70">
             {[...repos.libreChatRepos, ...repos.berryRepos].map((repo, i) => (
-                <Reveal as="li" key={repo.name} index={i} className="grid gap-x-10 gap-y-1 py-6 md:grid-cols-[14rem_1fr]">
-                    <a href={repo.html_url} target="_blank" rel="noreferrer" className="link self-baseline text-xl lg:text-2xl">
+                <Reveal as="li" lite key={repo.name} index={i} className="grid gap-x-10 gap-y-1 py-6 md:grid-cols-[14rem_1fr]">
+                    <a href={repo.html_url} target="_blank" rel="noreferrer" className="link min-w-0 self-baseline text-xl break-words lg:text-2xl">
                         {repo.name}
                     </a>
-                    <div>
+                    <div className="min-w-0">
                         <p className="text-lg leading-snug">{cleanDescription(repo.description)}</p>
                         <p className="mt-1 font-mono text-xs text-muted">
                             {repo.language && <span className="mr-4">{repo.language}</span>}
@@ -207,9 +229,7 @@ const Home = () => (
         </Section>
 
         <Section index="03" title="Activity">
-            <Suspense fallback={<p className="h-[120px] font-mono text-[13px] text-muted">fetching activity&hellip;</p>}>
-                <ContributionGraph />
-            </Suspense>
+            <ContributionGraph />
         </Section>
 
         <Section index="04" title="Projects">
@@ -217,9 +237,9 @@ const Home = () => (
         </Section>
 
         <Section index="05" title="Stack">
-            <dl className="grid grid-cols-[7rem_1fr] gap-x-10 gap-y-4 text-lg lg:text-xl">
+            <dl className="grid gap-y-5 text-lg sm:grid-cols-[7rem_1fr] sm:gap-x-10 sm:gap-y-4 lg:text-xl">
                 {STACK.map(([term, detail], i) => (
-                    <Reveal key={term} index={i} className="col-span-2 grid grid-cols-subgrid">
+                    <Reveal key={term} lite index={i} className="grid sm:col-span-2 sm:grid-cols-subgrid">
                         <dt className="font-mono text-xs leading-[1.9rem] text-muted">{term}</dt>
                         <dd>{detail}</dd>
                     </Reveal>

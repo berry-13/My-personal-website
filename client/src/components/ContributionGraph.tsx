@@ -1,4 +1,4 @@
-import type { CSSProperties } from "react";
+import { useCallback, type CSSProperties } from "react";
 import { useContributions, type ContributionDay } from "~/hooks/useContributions";
 import { useInView } from "~/hooks/useInView";
 
@@ -35,20 +35,21 @@ const Cell = ({ day, x, y, col }: { day: ContributionDay; x: number; y: number; 
 const ContributionGraph = () => {
     const { data, isLoading, isError } = useContributions();
     const [ref, inView] = useInView<HTMLElement>();
+    // On narrow screens the graph scrolls sideways at full size; start at the most recent weeks
+    const scrollToLatest = useCallback((el: HTMLDivElement | null) => {
+        if (el) el.scrollLeft = el.scrollWidth;
+    }, []);
 
     if (isError) {
-        return (
-            <p className="font-mono text-[13px] text-muted">
-                Couldn't load contributions right now.
-            </p>
-        );
+        return <p className="font-mono text-[13px] text-muted">Couldn't load contributions right now.</p>;
     }
 
     if (isLoading || !data) {
         return (
-            <p role="status" className="h-[98px] font-mono text-[13px] text-muted">
-                fetching activity&hellip;
-            </p>
+            <div role="status" aria-label="Loading contributions">
+                <div className="aspect-[742/98] min-h-[86px] w-full bg-rule/40 motion-safe:animate-pulse" />
+                <div className="mt-3 h-[18px]" />
+            </div>
         );
     }
 
@@ -58,22 +59,29 @@ const ContributionGraph = () => {
 
     return (
         <figure ref={ref} data-in={inView} className="heatmap w-full">
-            <svg
-                viewBox={`0 0 ${width} ${height}`}
-                width="100%"
-                preserveAspectRatio="xMinYMin meet"
-                className="block h-auto max-w-full"
-                role="img"
-                aria-label={`Contribution heatmap: ${data.total.toLocaleString()} contributions in the last year`}
-                xmlns="http://www.w3.org/2000/svg"
+            <div
+                ref={scrollToLatest}
+                tabIndex={0}
+                aria-label="Contribution heatmap, scrollable"
+                className="overflow-x-auto overscroll-x-contain"
             >
-                {weeks.map((week, weekIdx) =>
-                    week.map((day, dayIdx) => (
-                        <Cell key={day.date} day={day} x={weekIdx * STEP} y={dayIdx * STEP} col={weekIdx} />
-                    )),
-                )}
-            </svg>
-            <figcaption className="mt-3 flex items-center justify-between font-mono text-xs text-muted">
+                <svg
+                    viewBox={`0 0 ${width} ${height}`}
+                    width="100%"
+                    preserveAspectRatio="xMinYMin meet"
+                    className="block h-auto min-w-[640px] sm:min-w-0"
+                    role="img"
+                    aria-label={`Contribution heatmap: ${data.total.toLocaleString()} contributions in the last year`}
+                    xmlns="http://www.w3.org/2000/svg"
+                >
+                    {weeks.map((week, weekIdx) =>
+                        week.map((day, dayIdx) => (
+                            <Cell key={day.date} day={day} x={weekIdx * STEP} y={dayIdx * STEP} col={weekIdx} />
+                        )),
+                    )}
+                </svg>
+            </div>
+            <figcaption className="mt-3 flex flex-wrap items-center justify-between gap-x-6 gap-y-1 font-mono text-xs text-muted">
                 <span>{data.total.toLocaleString()} contributions in the last year</span>
                 <span className="flex items-center gap-1.5">
                     <span>less</span>

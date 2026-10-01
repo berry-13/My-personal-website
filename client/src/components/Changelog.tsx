@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useChangelog } from "~/hooks/useChangelog";
 import { isoDate } from "~/utils";
 import DiffStat from "./DiffStat";
@@ -10,6 +10,15 @@ const ALL_PRS_URL = "https://github.com/LibreChat-AI/LibreChat/pulls?q=is%3Apr+a
 const Changelog = () => {
     const { data, isLoading, isError } = useChangelog();
     const [expanded, setExpanded] = useState(false);
+    const listRef = useRef<HTMLOListElement>(null);
+
+    const toggle = () => {
+        if (expanded) {
+            // Collapsing removes ~28 rows; keep the reader at the list instead of stranding them below it
+            listRef.current?.scrollIntoView({ block: "start", behavior: "smooth" });
+        }
+        setExpanded(e => !e);
+    };
 
     if (isError) {
         return (
@@ -25,9 +34,19 @@ const Changelog = () => {
 
     if (isLoading || !data) {
         return (
-            <p role="status" className="font-mono text-[13px] text-muted">
-                fetching log&hellip;
-            </p>
+            <ol role="status" aria-label="Loading pull requests" className="divide-y divide-rule/70">
+                {Array.from({ length: INITIAL }, (_, i) => (
+                    <li
+                        key={i}
+                        className="grid grid-cols-[auto_1fr] items-center gap-x-4 gap-y-2 py-4 sm:grid-cols-[7rem_4.5rem_1fr_auto]"
+                    >
+                        <span className="h-3 w-20 bg-rule/60 motion-safe:animate-pulse" />
+                        <span className="h-3 w-12 bg-rule/60 motion-safe:animate-pulse" />
+                        <span className="col-span-2 h-5 w-full max-w-[30rem] bg-rule/60 motion-safe:animate-pulse sm:col-span-1" />
+                        <span className="col-span-2 h-3 w-24 bg-rule/40 motion-safe:animate-pulse sm:col-span-1" />
+                    </li>
+                ))}
+            </ol>
         );
     }
 
@@ -35,10 +54,11 @@ const Changelog = () => {
 
     return (
         <div>
-            <ol className="divide-y divide-rule/70">
+            <ol ref={listRef} className="scroll-mt-24 divide-y divide-rule/70">
                 {entries.map((entry, i) => (
                     <Reveal
                         as="li"
+                        lite
                         key={entry.number}
                         index={i}
                         className="group grid grid-cols-[auto_1fr] gap-x-4 gap-y-1 py-4 sm:grid-cols-[7rem_4.5rem_1fr_auto] sm:items-baseline"
@@ -51,7 +71,7 @@ const Changelog = () => {
                             href={entry.url}
                             target="_blank"
                             rel="noreferrer"
-                            className="col-span-2 text-lg leading-snug transition-colors duration-300 group-hover:text-accent sm:col-span-1 lg:text-xl"
+                            className="col-span-2 min-w-0 text-lg leading-snug break-words transition-colors duration-300 group-hover:text-accent sm:col-span-1 lg:text-xl"
                         >
                             {entry.type && (
                                 <span className="mr-2 font-mono text-xs text-muted">{entry.type}</span>
@@ -68,14 +88,14 @@ const Changelog = () => {
                 {data.entries.length > INITIAL && (
                     <button
                         type="button"
-                        onClick={() => setExpanded(e => !e)}
+                        onClick={toggle}
                         aria-expanded={expanded}
-                        className="cursor-pointer hover:text-ink"
+                        className="-my-3 cursor-pointer py-3 transition-colors hover:text-ink"
                     >
                         {expanded ? "show less" : `show ${data.entries.length - INITIAL} more`}
                     </button>
                 )}
-                <a href={ALL_PRS_URL} target="_blank" rel="noreferrer" className="hover:text-ink">
+                <a href={ALL_PRS_URL} target="_blank" rel="noreferrer" className="-my-3 py-3 transition-colors hover:text-ink">
                     all {data.total} merged on GitHub &rarr;
                 </a>
             </p>

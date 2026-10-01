@@ -1,4 +1,4 @@
-import { useState, useId, type FormEvent } from "react";
+import { useState, useId, useRef, useLayoutEffect, type FormEvent } from "react";
 import { isValidEmail } from "~/utils/validation";
 
 const ERROR_MESSAGES: Record<string, string> = {
@@ -11,26 +11,46 @@ const ERROR_MESSAGES: Record<string, string> = {
 const GENERIC_ERROR = "Something went wrong sending your message. Please try again, or email me directly.";
 const MAX_MESSAGE = 1000;
 
+type Field = "email" | "message";
+
 const fieldClasses =
-    "w-full border-0 border-b border-rule bg-transparent px-0 py-3 text-lg transition-colors duration-300 text-ink placeholder:text-muted/70 focus:border-accent focus:outline-none focus:ring-0";
+    "w-full border-0 border-b border-rule bg-transparent px-0 py-3 text-lg text-ink transition-colors duration-300 placeholder:text-muted focus:border-accent focus:shadow-[inset_0_-1px_0_var(--accent)] focus:outline-none focus:ring-0 aria-invalid:border-del aria-invalid:shadow-[inset_0_-1px_0_var(--del)]";
 
 const MessageForm = () => {
     const [email, setEmail] = useState("");
     const [message, setMessage] = useState("");
     const [sending, setSending] = useState(false);
     const [sent, setSent] = useState(false);
-    const [error, setError] = useState("");
+    const [error, setError] = useState<{ text: string; field: Field | null } | null>(null);
+    const [formHeight, setFormHeight] = useState<number>();
+    const formRef = useRef<HTMLFormElement>(null);
+    const emailRef = useRef<HTMLInputElement>(null);
+    const messageRef = useRef<HTMLTextAreaElement>(null);
+    const statusRef = useRef<HTMLDivElement>(null);
     const emailId = useId();
     const messageId = useId();
     const errorId = useId();
 
+    // After a successful send, move focus to the confirmation so it is announced and keyboard users are not lost
+    useLayoutEffect(() => {
+        if (sent) statusRef.current?.focus();
+    }, [sent]);
+
+    const fail = (text: string, field: Field | null) => {
+        setError({ text, field });
+        if (field === "email") emailRef.current?.focus();
+        if (field === "message") messageRef.current?.focus();
+    };
+
     const handleSubmit = async (e: FormEvent) => {
         e.preventDefault();
-        if (!email || !message) return setError(ERROR_MESSAGES.FIELD_EMPTY);
-        if (!isValidEmail(email)) return setError(ERROR_MESSAGES.INVALID_EMAIL);
+        if (sending) return;
+        if (!email) return fail("Please enter your email address.", "email");
+        if (!isValidEmail(email)) return fail(ERROR_MESSAGES.INVALID_EMAIL, "email");
+        if (!message.trim()) return fail("Please write a message.", "message");
 
         setSending(true);
-        setError("");
+        setError(null);
         try {
             const response = await fetch("/api/send", {
                 method: "POST",
@@ -39,15 +59,18 @@ const MessageForm = () => {
             });
             const data = (await response.json()) as { result: string };
             if (response.ok && data.result === "Success") {
+                setFormHeight(formRef.current?.offsetHeight);
                 setSent(true);
             } else {
-                setError(ERROR_MESSAGES[data.result] ?? GENERIC_ERROR);
+                const field = data.result === "INVALID_EMAIL" || data.result === "EMAIL_TOO_LONG" ? "email" : null;
+                fail(ERROR_MESSAGES[data.result] ?? GENERIC_ERROR, field);
             }
         } catch (err) {
-            setError(
+            fail(
                 err instanceof TypeError && err.message === "Failed to fetch"
-                    ? "Network error. Please check your connection."
+                    ? "Network error. Please check your connection and try again."
                     : GENERIC_ERROR,
+                null,
             );
         } finally {
             setSending(false);
@@ -56,29 +79,46 @@ const MessageForm = () => {
 
     if (sent) {
         return (
-            <p role="status" className="border-l-2 border-accent pl-4 text-[17px]">
-                Message sent. I&apos;ll get back to you at <span className="font-mono text-sm">{email}</span>.
-            </p>
+            // Same height as the form it replaces, so the page does not collapse
+            <div
+                ref={statusRef}
+                role="status"
+                tabIndex={-1}
+                style={{ minHeight: formHeight }}
+                className="page-enter flex flex-col justify-center border-l-2 border-accent pl-6 outline-none"
+            >
+                <p className="text-2xl leading-snug">Message sent.</p>
+                <p className="mt-2 text-lg text-ink/85">
+                    I&apos;ll reply to <span className="font-mono text-base">{email}</span>.
+                </p>
+            </div>
         );
     }
 
+    const invalid = (field: Field) => error?.field === field;
+
     return (
-        <form onSubmit={handleSubmit} noValidate className="space-y-10">
+        <form ref={formRef} onSubmit={handleSubmit} noValidate className="space-y-9">
             <div>
                 <label htmlFor={emailId} className="font-mono text-xs text-muted">
                     your email
                 </label>
                 <input
+                    ref={emailRef}
                     id={emailId}
                     type="email"
+                    inputMode="email"
                     autoComplete="email"
+                    autoCapitalize="none"
+                    spellCheck={false}
                     placeholder="you@example.com"
                     value={email}
                     onChange={e => {
                         setEmail(e.target.value);
-                        setError("");
+                        if (invalid("email")) setError(null);
                     }}
-                    aria-describedby={error ? errorId : undefined}
+                    aria-invalid={invalid("email") || undefined}
+                    aria-describedby={invalid("email") ? errorId : undefined}
                     className={fieldClasses}
                 />
             </div>
@@ -90,31 +130,34 @@ const MessageForm = () => {
                     </span>
                 </div>
                 <textarea
+                    ref={messageRef}
                     id={messageId}
-                    rows={6}
+                    rows={5}
                     maxLength={MAX_MESSAGE}
                     placeholder="Hi Marco, ..."
                     value={message}
                     onChange={e => {
                         setMessage(e.target.value);
-                        setError("");
+                        if (invalid("message")) setError(null);
                     }}
-                    aria-describedby={error ? errorId : undefined}
+                    aria-invalid={invalid("message") || undefined}
+                    aria-describedby={invalid("message") ? errorId : undefined}
                     className={`${fieldClasses} resize-y`}
                 />
             </div>
-            {error && (
-                <p id={errorId} role="alert" className="font-mono text-[13px] text-del">
-                    {error}
+            <div className="flex flex-wrap items-center gap-x-6 gap-y-3">
+                <button
+                    type="submit"
+                    aria-disabled={sending}
+                    className="min-h-11 cursor-pointer border border-ink px-6 font-mono text-[13px] text-ink transition-colors duration-300 hover:bg-ink hover:text-paper aria-disabled:cursor-wait aria-disabled:opacity-60"
+                >
+                    {sending ? "sending..." : "send message →"}
+                </button>
+                {/* Always rendered so announcements are reliable; empty until there is an error */}
+                <p id={errorId} role="alert" className="min-w-0 font-mono text-[13px] text-del">
+                    {error?.text}
                 </p>
-            )}
-            <button
-                type="submit"
-                disabled={sending}
-                className="cursor-pointer border border-ink px-6 py-3 font-mono text-[13px] text-ink transition-colors duration-300 hover:bg-ink hover:text-paper disabled:cursor-wait disabled:opacity-60"
-            >
-                {sending ? "sending..." : "send message →"}
-            </button>
+            </div>
         </form>
     );
 };

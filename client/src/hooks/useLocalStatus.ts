@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import useSWR from "swr";
 
 const TIME_ZONE = "Europe/Rome";
 
@@ -19,36 +20,41 @@ interface SensorState {
     doNotDisturb: boolean;
 }
 
-/** Local time in Rome plus awake status from the Home Assistant sensor, guessed from the hour if it is unreachable. */
+const guessFromHour = (date: Date): SensorState => ({
+    awake: Number(hourFormatter.format(date)) >= 8,
+    doNotDisturb: false,
+});
+
+const fetchSensor = async (url: string): Promise<SensorState> => {
+    const response = await fetch(url);
+    const data = await response.json();
+    if (data.result !== "Success") throw new Error(data.result);
+    return { awake: data.isAwake ?? true, doNotDisturb: data.isDoNotDisturb ?? false };
+};
+
+/**
+ * Local time in Rome plus awake status from the Home Assistant sensor.
+ * Status is null until the sensor answers; if it cannot be reached, it falls back to a guess from the hour.
+ * The sensor request is shared through SWR, so header and footer make one call.
+ */
 export function useLocalStatus() {
     const [now, setNow] = useState(() => new Date());
-    const [sensor, setSensor] = useState<SensorState | null>(null);
+    const { data, error } = useSWR("/api/awake", fetchSensor, {
+        revalidateOnFocus: false,
+        shouldRetryOnError: false,
+        dedupingInterval: 5 * 60 * 1000,
+    });
 
     useEffect(() => {
         const interval = setInterval(() => setNow(new Date()), 30_000);
         return () => clearInterval(interval);
     }, []);
 
-    useEffect(() => {
-        const controller = new AbortController();
-        fetch("/api/awake", { signal: controller.signal })
-            .then(res => res.json())
-            .then(data => {
-                if (data.result === "Success") {
-                    setSensor({ awake: data.isAwake ?? true, doNotDisturb: data.isDoNotDisturb ?? false });
-                }
-            })
-            .catch(() => {
-                // Sensor unreachable; fall back to the hour-based guess
-            });
-        return () => controller.abort();
-    }, []);
-
-    const hour = Number(hourFormatter.format(now));
+    const sensor = data ?? (error ? guessFromHour(now) : null);
 
     return {
         time: timeFormatter.format(now),
-        awake: sensor ? sensor.awake : hour >= 8,
+        awake: sensor ? sensor.awake : null,
         doNotDisturb: sensor?.doNotDisturb ?? false,
     };
 }

@@ -29,15 +29,16 @@ function subscribe(callback: () => void) {
     return () => window.removeEventListener(CHANGE_EVENT, callback);
 }
 
-const SoundToggle = () => {
+const SoundToggle = ({ className = "" }: { className?: string }) => {
     const enabled = useSyncExternalStore(subscribe, isSoundEnabled, () => true);
 
     return (
         <button
             type="button"
             onClick={() => setSoundEnabled(!enabled)}
-            aria-label={enabled ? "Mute navigation sounds" : "Unmute navigation sounds"}
-            className="cursor-pointer text-muted hover:text-ink transition-colors"
+            aria-label="Navigation sounds"
+            aria-pressed={enabled}
+            className={`cursor-pointer text-muted transition-colors hover:text-ink ${className}`}
         >
             [sound {enabled ? "on" : "off"}]
         </button>
