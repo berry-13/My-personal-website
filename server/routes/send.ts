@@ -30,6 +30,8 @@ export const sendRoute = new Elysia({ prefix: "/api" }).post(
         }
 
         const { email, message } = body;
+        // Short hash is enough to spot repeat senders without storing raw IPs in Discord
+        const senderId = new Bun.CryptoHasher("sha256").update(ip).digest("hex").slice(0, 12);
 
         const validation = validateContactMessage(email, message);
         if (!validation.isValid) {
@@ -52,7 +54,7 @@ export const sendRoute = new Elysia({ prefix: "/api" }).post(
                             color: 3108090,
                             title: email,
                             author: {
-                                name: ip,
+                                name: `sender ${senderId}`,
                             },
                             description: message,
                         },

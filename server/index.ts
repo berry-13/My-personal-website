@@ -1,6 +1,6 @@
 import { Elysia } from "elysia";
 import { cors } from "@elysiajs/cors";
-import { staticPlugin } from "@elysiajs/static";
+import { resolve, sep } from "node:path";
 import { reposRoute } from "./routes/repos";
 import { sendRoute } from "./routes/send";
 import { awakeRoute } from "./routes/awake";
@@ -15,10 +15,12 @@ for (const envVar of requiredEnvVars) {
     }
 }
 
+const DIST_DIR = resolve("dist");
+
 let cachedIndexHtml: string | null = null;
 const getIndexHtml = async (): Promise<string> => {
     if (cachedIndexHtml === null) {
-        cachedIndexHtml = await Bun.file("dist/index.html").text();
+        cachedIndexHtml = await Bun.file(resolve(DIST_DIR, "index.html")).text();
     }
     return cachedIndexHtml;
 };
@@ -42,7 +44,7 @@ const app = new Elysia()
         set.headers["Permissions-Policy"] = "camera=(), microphone=(), geolocation=()";
         set.headers["X-XSS-Protection"] = "1; mode=block";
         set.headers["Content-Security-Policy"] =
-            "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self' https://api.github.com; frame-ancestors 'none'";
+            "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: https:; font-src 'self' data: https://fonts.gstatic.com; connect-src 'self' https://api.github.com; frame-ancestors 'none'";
         set.headers["X-Request-ID"] = crypto.randomUUID();
     })
     // API routes
@@ -54,18 +56,26 @@ const app = new Elysia()
     .get("/github", ({ redirect }) => redirect("https://github.com/berry-13", 301))
     .get("/x", ({ redirect }) => redirect("https://x.com/Berry13000", 301))
     .get("/linkedin", ({ redirect }) => redirect("https://linkedin.com/in/marco-beretta-berry/", 301))
-    // Serve static assets from dist (CSS, JS, images)
-    .use(
-        await staticPlugin({
-            assets: "dist",
-            prefix: "/",
-            alwaysStatic: true,
-            indexHTML: false,
-            ignorePatterns: ["*.html"],
-        })
-    )
-    // SPA fallback - serve index.html for all non-API routes
-    .get("*", async ({ set }) => {
+    // Static assets from dist, with an SPA fallback to index.html for client-side routes
+    .get("/*", async ({ params, set }) => {
+        const relativePath = params["*"] ?? "";
+        const filePath = resolve(DIST_DIR, relativePath);
+
+        if (relativePath && filePath.startsWith(DIST_DIR + sep) && !filePath.endsWith(".html")) {
+            const file = Bun.file(filePath);
+            if (await file.exists()) {
+                set.headers["Cache-Control"] = relativePath.startsWith("assets/")
+                    ? "public, max-age=31536000, immutable"
+                    : "public, max-age=3600";
+                return file;
+            }
+        }
+
+        if (relativePath.startsWith("api/") || relativePath.startsWith("assets/")) {
+            set.status = 404;
+            return "Not found";
+        }
+
         set.headers["Content-Type"] = "text/html; charset=utf-8";
         return await getIndexHtml();
     })
