@@ -1,6 +1,10 @@
-import { lazy, Suspense } from "react";
+import { Fragment, lazy, Suspense, type CSSProperties, type ReactNode } from "react";
 import Section from "~/components/Section";
 import Changelog from "~/components/Changelog";
+import Reveal from "~/components/motion/Reveal";
+import CountUp from "~/components/motion/CountUp";
+import { useChangelog } from "~/hooks/useChangelog";
+import { useContributions } from "~/hooks/useContributions";
 import { useRepos } from "~/hooks/useRepo";
 import { cleanDescription, formatNumber } from "~/utils";
 
@@ -51,6 +55,79 @@ const STACK = [
     ["hardware", "Arduino, Raspberry Pi, Home Assistant"],
 ];
 
+const HERO_WORDS = "I build interfaces for AI tools. Since 2023 I've merged 440+ pull requests into".split(" ");
+const HERO_TAIL = "mostly the parts people touch.".split(" ");
+
+/** Each word rises out of its own mask; --w staggers them */
+const Word = ({ children, index }: { children: ReactNode; index: number }) => (
+    <span className="word" style={{ "--w": index } as CSSProperties}>
+        <span>{children}</span>
+    </span>
+);
+
+const Hero = () => (
+    <div className="hero-exit">
+        <h1 className="sr-only">Marco Beretta, software engineer</h1>
+        <p className="max-w-[18ch] text-[clamp(2.6rem,7.2vw,6.75rem)] leading-[1.02] tracking-[-0.025em] sm:max-w-[20ch]">
+            {HERO_WORDS.map((word, i) => (
+                <Fragment key={i}>
+                    <Word index={i}>{word}</Word>{" "}
+                </Fragment>
+            ))}
+            <Word index={HERO_WORDS.length}>
+                <a href="https://librechat.ai" target="_blank" rel="noreferrer" className="link">
+                    LibreChat
+                </a>
+                ,
+            </Word>
+            {HERO_TAIL.map((word, i) => (
+                <Fragment key={`t${i}`}>
+                    {" "}
+                    <Word index={HERO_WORDS.length + 1 + i}>{word}</Word>
+                </Fragment>
+            ))}
+            <span className="cursor" aria-hidden="true" />
+        </p>
+        <p
+            className="mt-10 max-w-[40rem] font-mono text-[13px] leading-6 text-muted opacity-0 motion-safe:animate-[fade-in_900ms_ease-out_1.3s_forwards] motion-reduce:opacity-100"
+        >
+            Core contributor to LibreChat. Agent Builder, design system, accessibility, audio. Based in Italy.
+        </p>
+    </div>
+);
+
+const Stats = () => {
+    const { data: changelog } = useChangelog();
+    const { repos } = useRepos();
+    const { data: contributions } = useContributions();
+    const stars = repos?.libreChatRepos[0]?.stargazers_count;
+
+    const stats = [
+        { value: changelog?.total, suffix: "", label: "pull requests merged into LibreChat" },
+        { value: stars, suffix: "", label: "stars on the project I help build" },
+        { value: contributions?.total, suffix: "", label: "contributions in the last year" },
+    ];
+
+    return (
+        <div className="mt-28 grid gap-y-14 border-t border-rule pt-10 sm:grid-cols-3 sm:gap-x-10 lg:mt-40">
+            {stats.map((stat, i) => (
+                <Reveal key={stat.label} index={i}>
+                    <p className="text-[clamp(3rem,7vw,6rem)] leading-none tracking-[-0.03em]">
+                        {stat.value === undefined ? (
+                            <span className="text-faint" aria-label="loading">
+                                &middot;&middot;&middot;
+                            </span>
+                        ) : (
+                            <CountUp value={stat.value} suffix={stat.suffix} />
+                        )}
+                    </p>
+                    <p className="mt-3 max-w-[16rem] font-mono text-[13px] text-muted">{stat.label}</p>
+                </Reveal>
+            ))}
+        </div>
+    );
+};
+
 const Projects = () => {
     const { repos, isLoading, isError } = useRepos();
 
@@ -67,13 +144,13 @@ const Projects = () => {
 
     return (
         <ul className="divide-y divide-rule/70">
-            {[...repos.libreChatRepos, ...repos.berryRepos].map(repo => (
-                <li key={repo.name} className="grid gap-x-6 gap-y-1 py-4 sm:grid-cols-[11rem_1fr]">
-                    <a href={repo.html_url} target="_blank" rel="noreferrer" className="link self-baseline text-lg">
+            {[...repos.libreChatRepos, ...repos.berryRepos].map((repo, i) => (
+                <Reveal as="li" key={repo.name} index={i} className="grid gap-x-10 gap-y-1 py-6 md:grid-cols-[14rem_1fr]">
+                    <a href={repo.html_url} target="_blank" rel="noreferrer" className="link self-baseline text-xl lg:text-2xl">
                         {repo.name}
                     </a>
                     <div>
-                        <p className="leading-snug">{cleanDescription(repo.description)}</p>
+                        <p className="text-lg leading-snug">{cleanDescription(repo.description)}</p>
                         <p className="mt-1 font-mono text-xs text-muted">
                             {repo.language && <span className="mr-4">{repo.language}</span>}
                             <span>
@@ -81,7 +158,7 @@ const Projects = () => {
                             </span>
                         </p>
                     </div>
-                </li>
+                </Reveal>
             ))}
         </ul>
     );
@@ -89,40 +166,38 @@ const Projects = () => {
 
 const Home = () => (
     <>
-        <h1 className="sr-only">Marco Beretta, software engineer</h1>
-        <p className="cursor max-w-[34rem] text-[clamp(1.6rem,4.2vw,2.35rem)] leading-[1.18] tracking-[-0.01em]">
-            I build interfaces for AI tools. Since 2023 I&apos;ve merged 440+ pull requests into{" "}
-            <a href="https://librechat.ai" target="_blank" rel="noreferrer" className="link">
-                LibreChat
-            </a>
-            , mostly the parts people touch: the Agent Builder, the design system, accessibility, and audio.
-        </p>
+        <Hero />
+        <Stats />
 
         <Section index="01" title="Selected work">
-            <ol className="space-y-10">
-                {selectedWork.map(work => (
-                    <li key={work.title} className="grid gap-x-6 gap-y-2 sm:grid-cols-[6.5rem_1fr]">
-                        <span className="font-mono text-xs text-muted tabular-nums sm:pt-1.5">{work.date}</span>
-                        <article>
-                            <h3 className="text-[22px] leading-tight">{work.title}</h3>
-                            <p className="mt-2 max-w-[38rem] text-[17px] leading-relaxed text-ink/85">
-                                {work.summary}
-                            </p>
-                            <p className="mt-3 flex flex-wrap items-baseline gap-x-4 gap-y-1 font-mono text-xs text-muted">
-                                {work.prs.map(pr => (
-                                    <a
-                                        key={pr.number}
-                                        href={`${PR_BASE}${pr.number}`}
-                                        target="_blank"
-                                        rel="noreferrer"
-                                        className="hover:text-accent"
-                                    >
-                                        #{pr.number} {pr.label}
-                                    </a>
-                                ))}
-                            </p>
+            <ol className="space-y-16 lg:space-y-24">
+                {selectedWork.map((work, i) => (
+                    <Reveal as="li" key={work.title} index={i % 2}>
+                        <article className="grid gap-x-10 gap-y-3 md:grid-cols-[7rem_1fr]">
+                            <span className="font-mono text-xs text-muted tabular-nums md:pt-3">{work.date}</span>
+                            <div>
+                                <h3 className="text-[clamp(1.75rem,3.4vw,2.75rem)] leading-[1.08] tracking-[-0.015em]">
+                                    {work.title}
+                                </h3>
+                                <p className="mt-4 max-w-[46rem] text-lg leading-relaxed text-ink/85 lg:text-xl lg:leading-relaxed">
+                                    {work.summary}
+                                </p>
+                                <p className="mt-5 flex flex-wrap items-baseline gap-x-5 gap-y-1 font-mono text-xs text-muted">
+                                    {work.prs.map(pr => (
+                                        <a
+                                            key={pr.number}
+                                            href={`${PR_BASE}${pr.number}`}
+                                            target="_blank"
+                                            rel="noreferrer"
+                                            className="transition-colors hover:text-accent"
+                                        >
+                                            #{pr.number} {pr.label} &rarr;
+                                        </a>
+                                    ))}
+                                </p>
+                            </div>
                         </article>
-                    </li>
+                    </Reveal>
                 ))}
             </ol>
         </Section>
@@ -132,7 +207,7 @@ const Home = () => (
         </Section>
 
         <Section index="03" title="Activity">
-            <Suspense fallback={<p className="h-[98px] font-mono text-[13px] text-muted">fetching activity&hellip;</p>}>
+            <Suspense fallback={<p className="h-[120px] font-mono text-[13px] text-muted">fetching activity&hellip;</p>}>
                 <ContributionGraph />
             </Suspense>
         </Section>
@@ -142,22 +217,24 @@ const Home = () => (
         </Section>
 
         <Section index="05" title="Stack">
-            <dl className="grid grid-cols-[6.5rem_1fr] gap-x-6 gap-y-2 text-[17px]">
-                {STACK.map(([term, detail]) => (
-                    <div key={term} className="contents">
-                        <dt className="font-mono text-xs leading-[1.7rem] text-muted">{term}</dt>
+            <dl className="grid grid-cols-[7rem_1fr] gap-x-10 gap-y-4 text-lg lg:text-xl">
+                {STACK.map(([term, detail], i) => (
+                    <Reveal key={term} index={i} className="col-span-2 grid grid-cols-subgrid">
+                        <dt className="font-mono text-xs leading-[1.9rem] text-muted">{term}</dt>
                         <dd>{detail}</dd>
-                    </div>
+                    </Reveal>
                 ))}
             </dl>
         </Section>
 
         <Section index="06" title="Before LibreChat">
-            <p className="max-w-[38rem] text-[17px] leading-relaxed">
-                In early 2023, two months after ChatGPT launched, I built &ldquo;Banfi Zombi&rdquo; in Unreal Engine 5:
-                a game whose AI-driven NPCs changed their behavior based on the player&apos;s choices, so no two
-                playthroughs felt the same.
-            </p>
+            <Reveal>
+                <p className="max-w-[46rem] text-lg leading-relaxed lg:text-xl lg:leading-relaxed">
+                    In early 2023, two months after ChatGPT launched, I built &ldquo;Banfi Zombi&rdquo; in Unreal
+                    Engine 5: a game whose AI-driven NPCs changed their behavior based on the player&apos;s choices, so
+                    no two playthroughs felt the same.
+                </p>
+            </Reveal>
         </Section>
     </>
 );

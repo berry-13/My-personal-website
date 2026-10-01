@@ -54,6 +54,9 @@
 
 html,
 body {
+    transition:
+        background-color 400ms ease,
+        color 400ms ease;
     margin: 0;
     padding: 0;
     background: var(--paper);
@@ -72,6 +75,26 @@ body {
 :focus-visible {
     outline: 2px solid var(--accent);
     outline-offset: 3px;
+}
+
+/* Wide stage shared by header, main, and footer */
+.stage {
+    width: 100%;
+    max-width: 80rem;
+    margin-inline: auto;
+    padding-inline: 1.25rem;
+}
+
+@media (min-width: 640px) {
+    .stage {
+        padding-inline: 2rem;
+    }
+}
+
+@media (min-width: 1024px) {
+    .stage {
+        padding-inline: 3rem;
+    }
 }
 
 /* Links: ink text, accent underline that thickens on hover */
@@ -107,6 +130,138 @@ body {
     }
 }
 
+/* ---------- Motion ----------
+   Eases approximate a critically damped spring: quick departure, long soft settle, no overshoot. */
+:root {
+    --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+    --ease-soft: cubic-bezier(0.32, 0.72, 0, 1);
+}
+
+/* Scroll reveal: rise, sharpen, fade in. --i staggers siblings. */
+.reveal {
+    opacity: 0;
+    transform: translate3d(0, 28px, 0);
+    filter: blur(6px);
+    transition:
+        opacity 900ms var(--ease-out),
+        transform 1100ms var(--ease-out),
+        filter 900ms var(--ease-out);
+    transition-delay: calc(var(--i, 0) * 70ms);
+}
+
+.reveal[data-in="true"] {
+    opacity: 1;
+    transform: none;
+    filter: none;
+}
+
+/* Diff bars grow from the left once their row is visible */
+.grow-x {
+    transform: scaleX(0);
+    transform-origin: left center;
+    transition: transform 1200ms var(--ease-soft);
+    transition-delay: calc(var(--i, 0) * 70ms + 250ms);
+}
+
+[data-in="true"] .grow-x {
+    transform: scaleX(1);
+}
+
+/* Heatmap fills in column by column */
+.heatmap rect {
+    opacity: 0;
+    transition: opacity 500ms ease;
+    transition-delay: calc(var(--col, 0) * 14ms);
+}
+
+.heatmap[data-in="true"] rect {
+    opacity: 1;
+}
+
+/* Hero words rise out of a mask on load */
+.word {
+    display: inline-block;
+    overflow: hidden;
+    vertical-align: top;
+    padding-bottom: 0.08em;
+    margin-bottom: -0.08em;
+}
+
+.word > span {
+    display: inline-block;
+    transform: translate3d(0, 105%, 0);
+    animation: word-rise 1100ms var(--ease-out) forwards;
+    animation-delay: calc(120ms + var(--w, 0) * 38ms);
+}
+
+@keyframes fade-in {
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes word-rise {
+    to {
+        transform: none;
+    }
+}
+
+/* Press feedback lives on pointer-down */
+button:active,
+.press:active {
+    transform: scale(0.97);
+    transition: transform 100ms ease-out;
+}
+
+/* Frosted header; solid when transparency is reduced */
+.material {
+    background: color-mix(in srgb, var(--paper) 78%, transparent);
+    backdrop-filter: blur(18px) saturate(160%);
+    -webkit-backdrop-filter: blur(18px) saturate(160%);
+}
+
+@media (prefers-reduced-transparency: reduce) {
+    .material {
+        background: var(--paper);
+        backdrop-filter: none;
+        -webkit-backdrop-filter: none;
+    }
+}
+
+/* Scroll-linked effects, where the browser supports scroll timelines */
+.scroll-progress {
+    display: none;
+}
+
+@supports (animation-timeline: scroll()) {
+    .scroll-progress {
+        display: block;
+        transform: scaleX(0);
+        transform-origin: left center;
+        animation: progress linear both;
+        animation-timeline: scroll(root);
+    }
+
+    .hero-exit {
+        animation: hero-exit linear both;
+        animation-timeline: view();
+        animation-range: exit 0% exit 90%;
+    }
+}
+
+@keyframes progress {
+    to {
+        transform: scaleX(1);
+    }
+}
+
+@keyframes hero-exit {
+    to {
+        opacity: 0.15;
+        transform: translate3d(0, -60px, 0) scale(0.97);
+    }
+}
+
 /* View Transitions API: cross-fade route changes */
 @view-transition {
     navigation: auto;
@@ -121,6 +276,36 @@ body {
 @media (prefers-reduced-motion: reduce) {
     .cursor::after {
         animation: none;
+    }
+
+    /* Keep a gentle cross-fade; drop movement, blur, and scroll-linked motion */
+    .reveal {
+        transform: none;
+        filter: none;
+        transition: opacity 300ms ease;
+        transition-delay: 0ms;
+    }
+
+    .grow-x,
+    .heatmap rect {
+        transform: none;
+        opacity: 1;
+        transition: none;
+    }
+
+    .word > span {
+        transform: none;
+        animation: none;
+    }
+
+    .hero-exit,
+    .scroll-progress {
+        animation: none;
+    }
+
+    button:active,
+    .press:active {
+        transform: none;
     }
 
     ::view-transition-old(page),

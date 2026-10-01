@@ -12,7 +12,7 @@ const GENERIC_ERROR = "Something went wrong sending your message. Please try aga
 const MAX_MESSAGE = 1000;
 
 const fieldClasses =
-    "w-full border-0 border-b border-rule bg-transparent px-0 py-2 text-[17px] text-ink placeholder:text-muted/70 focus:border-accent focus:outline-none focus:ring-0";
+    "w-full border-0 border-b border-rule bg-transparent px-0 py-3 text-lg transition-colors duration-300 text-ink placeholder:text-muted/70 focus:border-accent focus:outline-none focus:ring-0";
 
 const MessageForm = () => {
     const [email, setEmail] = useState("");
@@ -56,14 +56,14 @@ const MessageForm = () => {
 
     if (sent) {
         return (
-            <p role="status" className="mt-12 border-l-2 border-accent pl-4 text-[17px]">
+            <p role="status" className="border-l-2 border-accent pl-4 text-[17px]">
                 Message sent. I&apos;ll get back to you at <span className="font-mono text-sm">{email}</span>.
             </p>
         );
     }
 
     return (
-        <form onSubmit={handleSubmit} noValidate className="mt-12 max-w-[34rem] space-y-8">
+        <form onSubmit={handleSubmit} noValidate className="space-y-10">
             <div>
                 <label htmlFor={emailId} className="font-mono text-xs text-muted">
                     your email
@@ -111,7 +111,7 @@ const MessageForm = () => {
             <button
                 type="submit"
                 disabled={sending}
-                className="cursor-pointer border border-ink px-5 py-2 font-mono text-[13px] text-ink transition-colors hover:bg-ink hover:text-paper disabled:cursor-wait disabled:opacity-60"
+                className="cursor-pointer border border-ink px-6 py-3 font-mono text-[13px] text-ink transition-colors duration-300 hover:bg-ink hover:text-paper disabled:cursor-wait disabled:opacity-60"
             >
                 {sending ? "sending..." : "send message →"}
             </button>

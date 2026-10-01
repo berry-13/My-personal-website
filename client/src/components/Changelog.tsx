@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useChangelog } from "~/hooks/useChangelog";
 import { isoDate } from "~/utils";
 import DiffStat from "./DiffStat";
+import Reveal from "./motion/Reveal";
 
 const INITIAL = 12;
 const ALL_PRS_URL = "https://github.com/LibreChat-AI/LibreChat/pulls?q=is%3Apr+author%3Aberry-13+is%3Amerged";
@@ -35,10 +36,12 @@ const Changelog = () => {
     return (
         <div>
             <ol className="divide-y divide-rule/70">
-                {entries.map(entry => (
-                    <li
+                {entries.map((entry, i) => (
+                    <Reveal
+                        as="li"
                         key={entry.number}
-                        className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-1 py-3 sm:grid-cols-[6.5rem_4rem_1fr_auto] sm:items-baseline"
+                        index={i}
+                        className="group grid grid-cols-[auto_1fr] gap-x-4 gap-y-1 py-4 sm:grid-cols-[7rem_4.5rem_1fr_auto] sm:items-baseline"
                     >
                         <time dateTime={entry.mergedAt} className="font-mono text-xs text-muted tabular-nums">
                             {isoDate(entry.mergedAt)}
@@ -48,7 +51,7 @@ const Changelog = () => {
                             href={entry.url}
                             target="_blank"
                             rel="noreferrer"
-                            className="col-span-2 text-[17px] leading-snug hover:text-accent sm:col-span-1"
+                            className="col-span-2 text-lg leading-snug transition-colors duration-300 group-hover:text-accent sm:col-span-1 lg:text-xl"
                         >
                             {entry.type && (
                                 <span className="mr-2 font-mono text-xs text-muted">{entry.type}</span>
@@ -58,7 +61,7 @@ const Changelog = () => {
                         <span className="col-span-2 sm:col-span-1">
                             <DiffStat additions={entry.additions} deletions={entry.deletions} />
                         </span>
-                    </li>
+                    </Reveal>
                 ))}
             </ol>
             <p className="mt-4 flex flex-wrap gap-x-5 font-mono text-[13px] text-muted">

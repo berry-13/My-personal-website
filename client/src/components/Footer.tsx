@@ -6,7 +6,7 @@ const LINKS = [
 ];
 
 const Footer = () => (
-    <footer className="mt-24 border-t border-rule pt-4 pb-16 font-mono text-[13px] leading-6 text-muted">
+    <footer className="stage mt-32 border-t border-rule pt-5 pb-16 font-mono text-[13px] leading-6 text-muted lg:mt-48">
         <ul className="flex flex-wrap gap-x-5">
             {LINKS.map(link => (
                 <li key={link.label}>

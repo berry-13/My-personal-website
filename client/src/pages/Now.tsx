@@ -1,3 +1,5 @@
+import Reveal from "~/components/motion/Reveal";
+
 const lastUpdated = "2026-10";
 
 const WORKING_ON = [
@@ -22,32 +24,39 @@ const WORKING_ON = [
 
 const Now = () => (
     <>
-        <h1 className="text-[clamp(1.6rem,4.2vw,2.35rem)] leading-tight">What I&apos;m doing now</h1>
-        <p className="mt-2 font-mono text-xs text-muted">
+        <Reveal>
+            <h1 className="text-[clamp(2.6rem,7.2vw,6.75rem)] leading-[1.02] tracking-[-0.025em]">What I&apos;m doing now</h1>
+        </Reveal>
+        <p className="mt-6 font-mono text-[13px] text-muted">
             updated {lastUpdated} &middot; a{" "}
             <a href="https://nownownow.com/about" target="_blank" rel="noreferrer" className="hover:text-ink underline">
                 now page
             </a>
         </p>
 
-        <h2 className="mt-14 mb-4 border-b border-rule pb-2 font-mono text-[13px] text-ink">working on</h2>
+        <h2 className="mt-24 mb-2 border-b border-rule pb-3 font-mono text-[13px] text-ink lg:mt-32">working on</h2>
         <ul className="divide-y divide-rule/70">
-            {WORKING_ON.map(item => (
-                <li key={item.lead} className="grid gap-x-6 gap-y-1 py-3 sm:grid-cols-[11rem_1fr] sm:items-baseline">
+            {WORKING_ON.map((item, i) => (
+                <Reveal
+                    as="li"
+                    key={item.lead}
+                    index={i}
+                    className="grid gap-x-10 gap-y-1 py-6 md:grid-cols-[16rem_1fr] md:items-baseline"
+                >
                     {item.href ? (
-                        <a href={item.href} target="_blank" rel="noreferrer" className="link text-lg">
+                        <a href={item.href} target="_blank" rel="noreferrer" className="link text-xl lg:text-2xl">
                             {item.lead}
                         </a>
                     ) : (
-                        <span className="text-lg">{item.lead}</span>
+                        <span className="text-xl lg:text-2xl">{item.lead}</span>
                     )}
-                    <span className="text-[17px] leading-snug text-ink/85">{item.text}</span>
-                </li>
+                    <span className="text-lg leading-snug text-ink/85 lg:text-xl">{item.text}</span>
+                </Reveal>
             ))}
         </ul>
 
-        <h2 className="mt-14 mb-4 border-b border-rule pb-2 font-mono text-[13px] text-ink">reading</h2>
-        <p className="text-[17px]">
+        <h2 className="mt-24 mb-6 border-b border-rule pb-3 font-mono text-[13px] text-ink lg:mt-32">reading</h2>
+        <p className="text-lg lg:text-xl">
             Whatever interesting drops on{" "}
             <a href="https://x.com/Berry13000" target="_blank" rel="noreferrer" className="link">
                 X

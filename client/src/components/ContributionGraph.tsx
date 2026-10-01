@@ -1,4 +1,6 @@
+import type { CSSProperties } from "react";
 import { useContributions, type ContributionDay } from "~/hooks/useContributions";
+import { useInView } from "~/hooks/useInView";
 
 const CELL_SIZE = 11;
 const CELL_GAP = 3;
@@ -9,7 +11,7 @@ const formatDate = (iso: string) => {
     return d.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
 };
 
-const Cell = ({ day, x, y }: { day: ContributionDay; x: number; y: number }) => {
+const Cell = ({ day, x, y, col }: { day: ContributionDay; x: number; y: number; col: number }) => {
     const label =
         day.count === 0
             ? `No contributions on ${formatDate(day.date)}`
@@ -23,6 +25,7 @@ const Cell = ({ day, x, y }: { day: ContributionDay; x: number; y: number }) => 
             rx={0}
             ry={0}
             fill={`var(--cgraph-${day.level})`}
+            style={{ "--col": col } as CSSProperties}
         >
             <title>{label}</title>
         </rect>
@@ -31,6 +34,7 @@ const Cell = ({ day, x, y }: { day: ContributionDay; x: number; y: number }) => 
 
 const ContributionGraph = () => {
     const { data, isLoading, isError } = useContributions();
+    const [ref, inView] = useInView<HTMLElement>();
 
     if (isError) {
         return (
@@ -53,7 +57,7 @@ const ContributionGraph = () => {
     const height = 7 * STEP;
 
     return (
-        <figure className="w-full">
+        <figure ref={ref} data-in={inView} className="heatmap w-full">
             <svg
                 viewBox={`0 0 ${width} ${height}`}
                 width="100%"
@@ -65,7 +69,7 @@ const ContributionGraph = () => {
             >
                 {weeks.map((week, weekIdx) =>
                     week.map((day, dayIdx) => (
-                        <Cell key={day.date} day={day} x={weekIdx * STEP} y={dayIdx * STEP} />
+                        <Cell key={day.date} day={day} x={weekIdx * STEP} y={dayIdx * STEP} col={weekIdx} />
                     )),
                 )}
             </svg>

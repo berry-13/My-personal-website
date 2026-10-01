@@ -41,7 +41,7 @@ function App() {
     }, [location.pathname]);
 
     return (
-        <div className="mx-auto min-h-screen max-w-[46rem] px-5 pt-8 sm:pt-12">
+        <div className="min-h-screen">
             <a
                 href="#main-content"
                 className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-50 focus:bg-ink focus:px-3 focus:py-2 focus:font-mono focus:text-sm focus:text-paper"
@@ -49,7 +49,11 @@ function App() {
                 Skip to content
             </a>
             <Header />
-            <main id="main-content" className="pt-16 sm:pt-20" style={{ viewTransitionName: "page" }}>
+            <main
+                id="main-content"
+                className="stage pt-14 sm:pt-20 lg:pt-28"
+                style={{ viewTransitionName: "page" }}
+            >
                 <Suspense
                     fallback={
                         <p role="status" className="font-mono text-[13px] text-muted">
