@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { useBodyLock } from "~/hooks/useBodyLock";
 import { FiMail, FiHome, FiActivity } from "react-icons/fi";
@@ -10,6 +10,7 @@ import { FaLinkedin } from "react-icons/fa";
 import { AnimatePresence, motion, LayoutGroup } from "framer-motion";
 import { Button } from "~/components/ui";
 import ThemeToggle from "./ThemeToggle";
+import SoundToggle from "./SoundToggle";
 import { cn } from "~/utils";
 
 interface LandingButtonProps {
@@ -114,8 +115,9 @@ const MobileNavButton = ({ name, link, icon, selected, onClick, index }: MobileN
 
 const Nav = () => {
     const location = useLocation();
-    const isTelevomunicazioni = location.pathname === "/scuola/telecomunicazioni";
     const [mobileMenuOpen, setMenuOpen] = useState(false);
+    const menuButtonRef = useRef<HTMLButtonElement>(null);
+    const menuPanelRef = useRef<HTMLDivElement>(null);
     const [scrolled, setScrolled] = useState(false);
 
     useEffect(() => {
@@ -125,6 +127,20 @@ const Nav = () => {
     }, []);
 
     useBodyLock(mobileMenuOpen);
+
+    // Move focus into the menu when it opens; close on Escape and return focus to the toggle
+    useEffect(() => {
+        if (!mobileMenuOpen) return;
+        menuPanelRef.current?.querySelector<HTMLElement>("a")?.focus();
+        const handleKeyDown = (e: KeyboardEvent) => {
+            if (e.key === "Escape") {
+                setMenuOpen(false);
+                menuButtonRef.current?.focus();
+            }
+        };
+        document.addEventListener("keydown", handleKeyDown);
+        return () => document.removeEventListener("keydown", handleKeyDown);
+    }, [mobileMenuOpen]);
 
     const socialLinks = [
         { href: "https://github.com/berry-13", icon: <SiGithub className="w-5 h-5" />, title: "GitHub" },
@@ -160,7 +176,10 @@ const Nav = () => {
                 <LayoutGroup>
                     <div className="flex items-center space-x-1 relative z-10">
                         <motion.div variants={itemVariants}>
-                            <ThemeToggle disabled={isTelevomunicazioni} />
+                            <ThemeToggle />
+                        </motion.div>
+                        <motion.div variants={itemVariants}>
+                            <SoundToggle />
                         </motion.div>
                         <LandingButton name="Home" link="/" icon={<FiHome className="w-4 h-4" />} selected={location.pathname === "/"} />
                         <LandingButton name="Now" link="/now" icon={<FiActivity className="w-4 h-4" />} selected={location.pathname === "/now"} />
@@ -187,8 +206,13 @@ const Nav = () => {
                 )}
             >
                 <div className="flex items-center justify-between px-4 py-4">
-                    <ThemeToggle />
+                    <div className="flex items-center gap-1">
+                        <ThemeToggle />
+                        <SoundToggle />
+                    </div>
                     <motion.button
+                        ref={menuButtonRef}
+                        aria-controls="mobile-menu"
                         onClick={() => setMenuOpen(prev => !prev)}
                         aria-label={mobileMenuOpen ? "Close menu" : "Open menu"}
                         aria-expanded={mobileMenuOpen}
@@ -235,6 +259,8 @@ const Nav = () => {
                                 aria-hidden="true"
                             />
                             <motion.div
+                                id="mobile-menu"
+                                ref={menuPanelRef}
                                 initial={{ opacity: 0, y: -20, scale: 0.95 }}
                                 animate={{ opacity: 1, y: 0, scale: 1 }}
                                 exit={{ opacity: 0, y: -20, scale: 0.95 }}

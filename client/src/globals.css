@@ -1,4 +1,3 @@
-@import url("https://fonts.googleapis.com/css2?family=Roboto:wght@100;200;300;400;500;600;700&display=swap");
 @import "tailwindcss";
 
 @source "./**/*.{js,ts,jsx,tsx}";
@@ -15,8 +14,13 @@ body {
     padding: 0;
     margin: 0;
     font-family: Roboto, sans-serif;
-    background: #000;
+    background: #fff;
     overscroll-behavior-y: none;
+}
+
+html.dark,
+html.dark body {
+    background: #000;
 }
 
 a {
@@ -56,7 +60,7 @@ button:focus-visible {
     --cgraph-4: rgba(139, 92, 246, 1);
 }
 
-/* View Transitions API — cross-fade route changes */
+/* View Transitions API: cross-fade route changes */
 @view-transition {
     navigation: auto;
 }
@@ -96,7 +100,7 @@ button:focus-visible {
     }
 }
 
-/* Page loader — three-dot violet wave */
+/* Page loader: three-dot violet wave */
 @keyframes loader-wave {
     0%,
     80%,

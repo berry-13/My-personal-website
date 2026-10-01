@@ -7,6 +7,17 @@ const Footer = () => {
             <p className="text-black/60 dark:text-white/30 text-base">
                 Software Engineer &bull; {currentYear}
             </p>
+            <p className="mt-4 text-sm text-black/60 dark:text-white/40">
+                Design inspired by{" "}
+                <a
+                    href="https://cnrad.dev"
+                    target="_blank"
+                    rel="noreferrer"
+                    className="underline decoration-violet-500/40 hover:decoration-violet-500"
+                >
+                    cnrad.dev
+                </a>
+            </p>
         </footer>
     );
 };

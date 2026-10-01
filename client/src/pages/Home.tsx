@@ -45,7 +45,7 @@ const Section = ({ title, children, emoji }: SectionProps) => {
         >
             <h2 className="font-medium text-3xl md:text-4xl mb-6 flex items-center gap-3">
                 {title}
-                <span className="text-2xl">{emoji}</span>
+                <span className="text-2xl" aria-hidden="true">{emoji}</span>
             </h2>
             <div className="text-gray-800 dark:text-gray-300 leading-7 tracking-wide">{children}</div>
         </motion.section>
@@ -66,6 +66,69 @@ const ExternalLink = ({ href, children }: ExternalLinkProps) => (
             <path d="M10 14L21 3" strokeWidth="2" strokeLinecap="round" />
         </svg>
     </a>
+);
+
+const PR_BASE = "https://github.com/LibreChat-AI/LibreChat/pull/";
+
+const caseStudies = [
+    {
+        title: "Agent Builder redesign",
+        summary:
+            "Rebuilt LibreChat's Agent Builder around a unified tools marketplace, skills, and multi-agent orchestration, so an agent is configured in one place instead of across scattered panels. Agent cards later gained an expandable detail view.",
+        prs: [
+            { number: 13952, label: "Agent Builder redesign" },
+            { number: 15798, label: "Agent detail dialog" },
+        ],
+    },
+    {
+        title: "Accessibility",
+        summary:
+            "Over 30 merged pull requests focused on accessibility, including high-contrast light and dark modes, a full keyboard shortcut system, and an accessible rebuild of the MCP server UI.",
+        prs: [
+            { number: 15178, label: "High-contrast modes" },
+            { number: 12425, label: "Keyboard shortcuts" },
+            { number: 11118, label: "Accessible MCP UI" },
+        ],
+    },
+    {
+        title: "Design system and Tailwind v4",
+        summary:
+            "Moved the client onto the shared @librechat/client design system with semantic color tokens, upgraded it to Tailwind v4, and added lint rules that keep new code on the system.",
+        prs: [
+            { number: 13879, label: "Design system adoption" },
+            { number: 15996, label: "Tailwind v4 upgrade" },
+            { number: 15981, label: "Design-system lint rules" },
+        ],
+    },
+];
+
+const CaseStudies = () => (
+    <ul className="grid grid-cols-1 gap-4">
+        {caseStudies.map(study => (
+            <li key={study.title}>
+                <article className="rounded-xl p-6 bg-gray-50 border border-black/15 dark:border-white/5 dark:bg-white/5 backdrop-blur-lg">
+                    <h3 className="text-xl font-semibold mb-2 text-gray-900 dark:text-gray-100">{study.title}</h3>
+                    <p className="text-gray-700 dark:text-gray-300 mb-4">{study.summary}</p>
+                    <ul className="flex flex-wrap gap-2" aria-label={`Pull requests for ${study.title}`}>
+                        {study.prs.map(pr => (
+                            <li key={pr.number}>
+                                <a
+                                    href={`${PR_BASE}${pr.number}`}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="inline-flex items-center gap-1 rounded-lg px-3 py-1 text-sm font-medium bg-violet-500/10 text-violet-700 dark:text-violet-300 hover:bg-violet-500/20 transition-colors duration-200"
+                                >
+                                    {pr.label}
+                                    <span className="text-violet-600/70 dark:text-violet-300/60">#{pr.number}</span>
+                                    <span className="sr-only">(opens in a new tab)</span>
+                                </a>
+                            </li>
+                        ))}
+                    </ul>
+                </article>
+            </li>
+        ))}
+    </ul>
 );
 
 const RepoGrid = ({ libreRepo, topRepos, isLoading, isError }: RepoGridProps) => {
@@ -174,7 +237,7 @@ const Home = () => {
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
-                className="max-w-4xl mx-auto px-6 py-24"
+                className="max-w-4xl mx-auto px-2 sm:px-6"
             >
                 <motion.div
                     initial={{ opacity: 0, y: 30 }}
@@ -186,46 +249,45 @@ const Home = () => {
                     <p className="text-xl text-gray-600 dark:text-gray-300">
                         A core contributor to{" "}
                         <ExternalLink href="https://librechat.ai">LibreChat</ExternalLink>, specializing in AI
-                        integration and full-stack development
+                        interfaces, accessibility, and full-stack development.
                     </p>
                 </motion.div>
 
                 <Section title="What I Do" emoji={"\u{1F4BB}"}>
                     <p>
-                        As a core contributor to LibreChat, I've shipped over 170 PRs working on everything from
-                        speech-to-text and text-to-speech features to accessibility fixes and UI improvements. I enjoy
-                        tackling problems across the full stack, whether it's refining the frontend experience or
-                        building reliable backend systems and I'm passionate about making AI tools that actually work
-                        well for people
+                        LibreChat is an open-source AI chat platform with over 45,000 stars on GitHub. Since 2023
+                        I&apos;ve merged more than 440 pull requests there, mostly on the frontend: the Agent Builder,
+                        the design system, accessibility, and audio features like speech-to-text and text-to-speech. I
+                        enjoy problems that cross the stack, and I care about AI tools that are pleasant to use, not
+                        just powerful.
                     </p>
+                </Section>
+
+                <Section title="Selected Work" emoji={"\u{1F680}"}>
+                    <CaseStudies />
                 </Section>
 
                 <Section title="Technical Expertise" emoji={"\u{1F6E0}\uFE0F"}>
                     <p className="mb-8">
-                        Proficient in TypeScript, JavaScript, React, and Next.js for frontend development, with strong
-                        capabilities in Java. Currently learning Rust for systems programming. Experienced with Arduino for
-                        hardware projects. My focus is on creating seamless, accessible, and performant
-                        applications that leverage cutting-edge AI technologies that actually works
+                        I work mainly in TypeScript, React, and Node.js, with Next.js and Tailwind on the frontend and
+                        Bun on the backend. I also write Java, I&apos;m learning Rust for systems programming, and I
+                        build hardware projects with Arduino. Whatever the stack, I aim for interfaces that are
+                        accessible, fast, and predictable.
                     </p>
                     <Suspense fallback={<div className="w-full h-32 loader-shimmer" />}>
                         <TechIcons />
                     </Suspense>
                 </Section>
 
-                <Section title="Notable Projects" emoji={"\u{1F680}"}>
-                    <p className="mb-4">
-                        In early 2023, just two months after ChatGPT's launch, I built "Banfi Zombi" in Unreal Engine 5
-                        with adaptive AI NPCs whose behaviors shifted based on player choices, making each playthrough feel different.
-                    </p>
+                <Section title="Before LibreChat" emoji={"\u{1F3AE}"}>
                     <p>
-                        Since then, I've been focused on improving LibreChat's day-to-day usability-adding audio features,
-                        tweaking the UI to feel more intuitive, and making sure keyboard navigation and screen readers work properly.
-                        I've worked on the Agent Builder and built most of the frontend components. My goal is to make sure LibreChat
-                        actually feels good to use, not just powerful.
+                        In early 2023, two months after ChatGPT launched, I built &ldquo;Banfi Zombi&rdquo; in Unreal
+                        Engine 5: a game whose AI-driven NPCs changed their behavior based on the player&apos;s
+                        choices, so no two playthroughs felt the same.
                     </p>
                 </Section>
 
-                <Section title="GitHub activity" emoji={"\u{1F4C8}"}>
+                <Section title="GitHub Activity" emoji={"\u{1F4C8}"}>
                     <Suspense fallback={<div className="w-full h-[110px] loader-shimmer" />}>
                         <ContributionGraph />
                     </Suspense>
@@ -239,13 +301,6 @@ const Home = () => {
                         isError={isError}
                     />
                 </Section>
-
-                <footer className="mt-24 text-center text-gray-600 dark:text-gray-400">
-                    <p>
-                        Built with inspiration from{" "}
-                        <ExternalLink href="https://cnrad.dev">cnrad.dev</ExternalLink>
-                    </p>
-                </footer>
             </motion.div>
         </AnimatePresence>
     );

@@ -4,6 +4,7 @@ import NProgress from "nprogress";
 import Lenis from "lenis";
 import Nav from "./components/Nav";
 import Footer from "./components/Footer";
+import { isSoundEnabled } from "./components/SoundToggle";
 
 const DarkVeil = lazy(() => import("./components/DarkVeil"));
 const Home = lazy(() => import("./pages/Home"));
@@ -99,6 +100,7 @@ function App() {
     }, []);
 
     const playNavigationSound = (): void => {
+        if (!isSoundEnabled()) return;
         if (audioRef.current) {
             audioRef.current.currentTime = 0;
             audioRef.current.play().catch(() => {
@@ -136,7 +138,7 @@ function App() {
             </div>
             <main id="main-content" className="relative z-10 w-full flex justify-center px-4">
                 <div className="w-full max-w-4xl text-black dark:text-white">
-                    <div className="py-24" style={{ viewTransitionName: "page" }}>
+                    <div className="pt-32 pb-24 lg:pt-36" style={{ viewTransitionName: "page" }}>
                         <Suspense fallback={<PageLoader />}>
                             <Routes location={location}>
                                 <Route path="/" element={<Home />} />

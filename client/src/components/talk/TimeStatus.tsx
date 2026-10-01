@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { formatInTimeZone } from "date-fns-tz";
 
@@ -14,14 +14,18 @@ const TimeStatus = () => {
         awake: true,
         doNotDisturb: false,
     });
+    // Until the sensor reports (or if it is unreachable), guess from the hour in Rome
+    const sensorReported = useRef(false);
 
     const updateTime = () => {
         const now = new Date();
         const formattedTime = formatInTimeZone(now, "Europe/Rome", "hh:mm a");
+        const hour = Number(formatInTimeZone(now, "Europe/Rome", "H"));
 
         setStatus(prev => ({
             ...prev,
             time: formattedTime,
+            awake: sensorReported.current ? prev.awake : hour >= 8,
         }));
     };
 
@@ -33,6 +37,7 @@ const TimeStatus = () => {
             .then(res => res.json())
             .then(data => {
                 if (data.result === "Success") {
+                    sensorReported.current = true;
                     setStatus(prev => ({
                         ...prev,
                         doNotDisturb: data.isDoNotDisturb ?? false,

@@ -1,6 +1,6 @@
 import { motion } from "framer-motion";
 
-const lastUpdated = "April 2026";
+const lastUpdated = "October 2026";
 
 const Now = () => {
     return (
@@ -8,8 +8,7 @@ const Now = () => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="max-w-3xl mx-auto px-6 py-24"
-            style={{ viewTransitionName: "page" }}
+            className="max-w-3xl mx-auto px-2 sm:px-6"
         >
             <header className="mb-12">
                 <h1 className="text-5xl md:text-6xl font-bold mb-4">What I'm doing now</h1>
@@ -40,7 +39,7 @@ const Now = () => {
                             >
                                 LibreChat
                             </a>
-                            — accessibility, audio features, agent builder UX.
+                            : the chat UI redesign, projects, accessibility, and the Agent Builder.
                         </li>
                         <li>
                             Improving and maintaining the{" "}
@@ -64,8 +63,8 @@ const Now = () => {
                                 className="underline decoration-violet-500/40 hover:decoration-violet-500"
                             >
                                 Railway LibreChat template
-                            </a>{" "}
-                            — one-click deploy for self-hosters.
+                            </a>
+                            , a one-click deploy for self-hosters.
                         </li>
                         <li>
                             Building{" "}
@@ -76,8 +75,8 @@ const Now = () => {
                                 className="underline decoration-violet-500/40 hover:decoration-violet-500"
                             >
                                 portainer-mcp
-                            </a>{" "}
-                            — a genuinely useful MCP server for Portainer.
+                            </a>
+                            , an MCP server that lets AI assistants manage Portainer.
                         </li>
                         <li>
                             Created the{" "}
@@ -91,7 +90,6 @@ const Now = () => {
                             </a>{" "}
                             website.
                         </li>
-                        <li>Modernizing this site (you're reading the result).</li>
                     </ul>
                 </div>
 

@@ -4,6 +4,15 @@ import { RiSendPlane2Fill } from "react-icons/ri";
 import { ImSpinner2 } from "react-icons/im";
 import { isValidEmail } from "~/utils/validation";
 
+const ERROR_MESSAGES: Record<string, string> = {
+    RATE_LIMIT_EXCEEDED: "You've sent a few messages already. Please wait a bit and try again.",
+    INVALID_EMAIL: "Please enter a valid email address.",
+    FIELD_EMPTY: "Please fill out both fields.",
+    EMAIL_TOO_LONG: "That email address is too long.",
+    MESSAGE_TOO_LONG: "Please keep your message under 1,000 characters.",
+};
+const GENERIC_ERROR = "Something went wrong sending your message. Please try again, or email me directly.";
+
 interface FormState {
     email: string;
     message: string;
@@ -19,7 +28,7 @@ const MessageComponent = () => {
         const { email, message } = formState;
 
         if (!email || !message) {
-            setStatus(prev => ({ ...prev, error: "Please fill out all fields!" }));
+            setStatus(prev => ({ ...prev, error: "Please fill out both fields." }));
             return;
         }
 
@@ -46,7 +55,7 @@ const MessageComponent = () => {
 
             setStatus({
                 sending: false,
-                error: `Error: ${data.result}`,
+                error: ERROR_MESSAGES[data.result] ?? GENERIC_ERROR,
                 sent: false,
             });
         } catch (error) {
@@ -130,9 +139,9 @@ const MessageComponent = () => {
                         <div className="space-y-1">
                             <label
                                 htmlFor={emailId}
-                                className="font-medium text-sm text-gray-900 dark:text-slate-400"
+                                className="font-medium text-sm uppercase tracking-wide text-gray-900 dark:text-slate-400"
                             >
-                                EMAIL
+                                Email
                             </label>
                             <motion.input
                                 whileFocus={{ scale: 1.01 }}
@@ -152,13 +161,14 @@ const MessageComponent = () => {
                         <div className="space-y-1">
                             <label
                                 htmlFor={messageId}
-                                className="font-medium text-sm text-gray-900 dark:text-slate-400"
+                                className="font-medium text-sm uppercase tracking-wide text-gray-900 dark:text-slate-400"
                             >
-                                MESSAGE
+                                Message
                             </label>
                             <motion.textarea
                                 whileFocus={{ scale: 1.01 }}
                                 id={messageId}
+                                maxLength={1000}
                                 placeholder="Hi Berry, let's collaborate!"
                                 value={formState.message}
                                 onChange={e => {
