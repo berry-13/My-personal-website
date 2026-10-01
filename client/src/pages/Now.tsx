@@ -78,18 +78,6 @@ const Now = () => {
                             </a>
                             , an MCP server that lets AI assistants manage Portainer.
                         </li>
-                        <li>
-                            Created the{" "}
-                            <a
-                                href="https://breezy14.com"
-                                target="_blank"
-                                rel="noreferrer"
-                                className="underline decoration-violet-500/40 hover:decoration-violet-500"
-                            >
-                                Breezy14.com
-                            </a>{" "}
-                            website.
-                        </li>
                     </ul>
                 </div>
 
