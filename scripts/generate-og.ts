@@ -50,7 +50,7 @@ const svg = await satori(
                                     },
                                 },
                             },
-                            "marcoberetta.com",
+                            "me.berry13.com",
                         ],
                     },
                 },
