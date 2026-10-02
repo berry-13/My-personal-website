@@ -66,9 +66,10 @@ const app = new Elysia()
         if (relativePath && filePath.startsWith(DIST_DIR + sep) && !filePath.endsWith(".html")) {
             const file = Bun.file(filePath);
             if (await file.exists()) {
+                // Hashed build assets never change; everything else must be revalidated so a deploy is seen at once
                 set.headers["Cache-Control"] = relativePath.startsWith("assets/")
                     ? "public, max-age=31536000, immutable"
-                    : "public, max-age=3600";
+                    : "public, no-cache";
                 return file;
             }
         }
