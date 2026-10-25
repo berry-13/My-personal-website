@@ -95,11 +95,16 @@ export function getClientIP(request: Request, directIp?: string | null): string 
         return /^[0-9a-fA-F:.]+$/.test(candidate) ? candidate : null;
     };
 
-    if (process.env.TRUSTED_PROXY === "true") {
-        // Cloudflare overwrites CF-Connecting-IP at the edge, so the client cannot forge it.
+    const trustedProxy = process.env.TRUSTED_PROXY;
+
+    // Only Cloudflare guarantees CF-Connecting-IP is overwritten at the edge. Behind any other
+    // proxy a client could send it themselves, so it is trusted only with TRUSTED_PROXY=cloudflare.
+    if (trustedProxy === "cloudflare") {
         const cfIp = parseIp(request.headers.get("cf-connecting-ip"));
         if (cfIp) return cfIp;
+    }
 
+    if (trustedProxy === "true" || trustedProxy === "cloudflare") {
         // X-Forwarded-For is client-controlled except for the entry our proxy appends: the last one.
         const forwarded = request.headers.get("x-forwarded-for")?.split(",");
         const forwardedIp = parseIp(forwarded?.[forwarded.length - 1]);
