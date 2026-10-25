@@ -89,18 +89,21 @@ export function getClientIP(request: Request, directIp?: string | null): string 
     const parseIp = (value: string | null | undefined): string | null => {
         if (!value) return null;
 
-        const candidate = value.split(",")[0].trim();
+        const candidate = value.trim();
         if (!candidate || candidate.length > 64) return null;
 
         return /^[0-9a-fA-F:.]+$/.test(candidate) ? candidate : null;
     };
 
     if (process.env.TRUSTED_PROXY === "true") {
-        const forwardedIp = parseIp(request.headers.get("x-forwarded-for"));
-        if (forwardedIp) return forwardedIp;
-
+        // Cloudflare overwrites CF-Connecting-IP at the edge, so the client cannot forge it.
         const cfIp = parseIp(request.headers.get("cf-connecting-ip"));
         if (cfIp) return cfIp;
+
+        // X-Forwarded-For is client-controlled except for the entry our proxy appends: the last one.
+        const forwarded = request.headers.get("x-forwarded-for")?.split(",");
+        const forwardedIp = parseIp(forwarded?.[forwarded.length - 1]);
+        if (forwardedIp) return forwardedIp;
 
         const realIp = parseIp(request.headers.get("x-real-ip"));
         if (realIp) return realIp;
