@@ -15,13 +15,32 @@ describe("RateLimiter", () => {
 });
 
 describe("getClientIP", () => {
-    it("uses trusted proxy headers only when TRUSTED_PROXY=true", () => {
+    it("uses the proxy-appended (last) X-Forwarded-For entry when TRUSTED_PROXY=true", () => {
         process.env.TRUSTED_PROXY = "true";
         const request = new Request("https://example.com", {
-            headers: { "x-forwarded-for": "203.0.113.10, 10.0.0.1" },
+            // first entry is whatever the client sent; the proxy appends the real peer last
+            headers: { "x-forwarded-for": "198.51.100.66, 203.0.113.10" },
         });
 
         expect(getClientIP(request)).toBe("203.0.113.10");
+    });
+
+    it("prefers CF-Connecting-IP when TRUSTED_PROXY=cloudflare", () => {
+        process.env.TRUSTED_PROXY = "cloudflare";
+        const request = new Request("https://example.com", {
+            headers: { "cf-connecting-ip": "203.0.113.20", "x-forwarded-for": "198.51.100.66, 203.0.113.20" },
+        });
+
+        expect(getClientIP(request)).toBe("203.0.113.20");
+    });
+
+    it("ignores client-supplied CF-Connecting-IP behind a generic proxy (TRUSTED_PROXY=true)", () => {
+        process.env.TRUSTED_PROXY = "true";
+        const request = new Request("https://example.com", {
+            headers: { "cf-connecting-ip": "198.51.100.99", "x-forwarded-for": "203.0.113.30" },
+        });
+
+        expect(getClientIP(request)).toBe("203.0.113.30");
     });
 
     it("ignores spoofable proxy headers when not trusted", () => {
