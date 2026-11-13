@@ -9,7 +9,10 @@ const GLOBAL_KEY = "__global__";
 export const awakeRoute = new Elysia({ prefix: "/api" }).get(
     "/awake",
     async ({ request, set, server }) => {
-        const { AWAKE_BASE_URL, AWAKE_TOKEN, DEVICE, SENSOR_AWAKE } = process.env;
+        const { AWAKE_BASE_URL, AWAKE_TOKEN } = process.env;
+        // AWAKE_ENTITY / DND_ENTITY take precedence over the legacy names.
+        const SENSOR_AWAKE = process.env.AWAKE_ENTITY || process.env.SENSOR_AWAKE;
+        const DEVICE = process.env.DND_ENTITY || process.env.DEVICE;
         if (!AWAKE_BASE_URL || !AWAKE_TOKEN || !DEVICE || !SENSOR_AWAKE) {
             console.error("Missing required environment variables for awake API");
             set.status = 500;
@@ -41,6 +44,9 @@ export const awakeRoute = new Elysia({ prefix: "/api" }).get(
             ]);
 
             if (!responseDoNotDisturb.ok || !responseAwake.ok) {
+                console.error(
+                    `Awake API: Home Assistant returned ${responseDoNotDisturb.status} for ${DEVICE}, ${responseAwake.status} for ${SENSOR_AWAKE}`,
+                );
                 set.status = 500;
                 return { result: "API_ERROR" };
             }
@@ -55,8 +61,16 @@ export const awakeRoute = new Elysia({ prefix: "/api" }).get(
                 return { result: "API_ERROR" };
             }
 
-            const isDoNotDisturb = dndData.state !== "off" && dndData.state !== "undefined";
-            const isAwake = awakeData.state === "True";
+            const isDoNotDisturb = DEVICE.startsWith("binary_sensor.")
+                ? dndData.state === "on"
+                : dndData.state !== "off" && dndData.state !== "undefined";
+            // binary_sensor.*sleep*: "on" means asleep. Other binary sensors: "on" means awake.
+            // Legacy text sensor: "True" means awake.
+            const isAwake = SENSOR_AWAKE.startsWith("binary_sensor.")
+                ? /sleep/i.test(SENSOR_AWAKE)
+                    ? awakeData.state === "off"
+                    : awakeData.state === "on"
+                : awakeData.state === "True";
 
             return { result: "Success", isDoNotDisturb, isAwake };
         } catch (error) {
