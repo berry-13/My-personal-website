@@ -48,22 +48,20 @@ export const reposRoute = new Elysia({ prefix: "/api" }).get(
             };
         }
 
-        if (!process.env.GITHUB_TOKEN) {
-            console.error("GITHUB_TOKEN environment variable is not set");
-            set.status = 500;
-            return {
-                error: "SERVER_CONFIGURATION_ERROR",
-                libreChatRepos: [],
-                berryRepos: [],
-            };
-        }
-
-        const fetchOptions = {
-            headers: {
-                Authorization: `token ${process.env.GITHUB_TOKEN}`,
-                Accept: "application/vnd.github.v3+json",
-            },
+        // LibreChat-AI enforces SAML SSO: sending a PAT that is not
+        // SSO-authorized turns this public repo into a 403. Public repo data
+        // needs no auth, so the token is only sent for berry-13's own listing.
+        const publicOptions = {
+            headers: { Accept: "application/vnd.github.v3+json" },
         };
+        const authOptions = process.env.GITHUB_TOKEN
+            ? {
+                  headers: {
+                      Authorization: `token ${process.env.GITHUB_TOKEN}`,
+                      Accept: "application/vnd.github.v3+json",
+                  },
+              }
+            : publicOptions;
 
         if (cache && cache.expires > Date.now()) {
             set.headers["Cache-Control"] = "public, max-age=300";
@@ -72,8 +70,8 @@ export const reposRoute = new Elysia({ prefix: "/api" }).get(
 
         try {
             const [libreChatRes, berryRepos] = await Promise.all([
-                fetchWithTimeout("https://api.github.com/repos/LibreChat-AI/LibreChat", fetchOptions),
-                fetchWithTimeout("https://api.github.com/users/berry-13/repos?type=owner&per_page=100", fetchOptions),
+                fetchWithTimeout("https://api.github.com/repos/LibreChat-AI/LibreChat", publicOptions),
+                fetchWithTimeout("https://api.github.com/users/berry-13/repos?type=owner&per_page=100", authOptions),
             ]);
 
             if (!libreChatRes.ok || !berryRepos.ok) {
